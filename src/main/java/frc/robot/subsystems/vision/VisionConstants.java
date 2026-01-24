@@ -74,7 +74,7 @@ public final class VisionConstants{
       new Rotation3d(
         0.0,
         Math.toRadians(-15.0), 
-        25.0));
+        Math.toRadians(25.0)));
     public static Transform3d robotToCamera1 = new Transform3d(
       -0.30, 
       -0.28, 

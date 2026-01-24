@@ -155,8 +155,18 @@ public class RobotContainer {
                     new ModuleIO() {},
                     new ModuleIO() {},
                     (pose) -> {});
-                this.vision = new Vision(drive, new VisionIO() {}, new VisionIO() {});
-            break;
+                //this.vision = new Vision(drive, new VisionIO() {}, new VisionIO() {});
+                this.vision = new Vision(
+                    drive,
+                    new VisionIOPhotonVisionSim(
+                        camera0Name, robotToCamera0,
+                        driveSimulation::getSimulatedDriveTrainPose),
+                    new VisionIOPhotonVisionSim(
+                        camera1Name, robotToCamera1,
+                        driveSimulation::getSimulatedDriveTrainPose)
+);
+
+                break;
         }
 
 
@@ -298,6 +308,7 @@ public class RobotContainer {
     }
 
     public void setNamedCommands() {
+/* 
         NamedCommands.registerCommand(
         "AimAndShoot",
         hubLock.withTimeout(1.0)
@@ -307,7 +318,7 @@ public class RobotContainer {
                 transfer.runPercent(0.6)
             ).withTimeout(1.0))
         );
-
+*/
         NamedCommands.registerCommand("Align Center", new AlignToReef(drive, reefSide.CENTER).withTimeout(2));
         NamedCommands.registerCommand("Align Left", new AlignToReef(drive, reefSide.LEFT).withTimeout(2));
         NamedCommands.registerCommand("Align Right", new AlignToReef(drive, reefSide.RIGHT).withTimeout(2));

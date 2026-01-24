@@ -31,7 +31,8 @@ public class DriveConstants {
     public static final double maxSpeedMetersPerSec = Units.feetToMeters(12/*15.1*/);
     public static final double odometryFrequency = 100.0; 
     public static final double trackWidth = Units.inchesToMeters(22);
-    public static final double wheelBase = Units.inchesToMeters(26.5);
+    public static final double wheelBase = Units.inchesToMeters(22.5);
+    //idk if the math is right for wheelBase
     public static final double driveBaseRadius = Math.hypot(trackWidth / 2.0, wheelBase / 2.0);
     public static final Translation2d[] moduleTranslations = new Translation2d[] {
         new Translation2d(trackWidth / 2.0, wheelBase / 2.0),

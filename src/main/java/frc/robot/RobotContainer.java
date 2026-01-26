@@ -60,6 +60,7 @@ import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Transfer.Transfer;
 import frc.robot.subsystems.LED.LED;
 import frc.robot.commands.SetLED;
+import frc.robot.subsystems.Intake.Intake;
 
 
 
@@ -75,6 +76,7 @@ public class RobotContainer {
     private Transfer transfer;
     private LED led;
     private Command SetLED;
+    private Intake intake;
 
 
     // Controller
@@ -106,6 +108,7 @@ public class RobotContainer {
                 indexer = new Indexer();
                 transfer = new Transfer();
                 led = new LED();
+                intake = new Intake();
                 
                 this.vision = new Vision(
                     drive,
@@ -132,6 +135,7 @@ public class RobotContainer {
                 turret = new Turret();
                 indexer = new Indexer();
                 transfer = new Transfer();
+                intake = new Intake();
 
 
                 this.vision = new Vision(
@@ -272,20 +276,42 @@ public class RobotContainer {
             //.onTrue(new AlignToReef(drive, reefSide.LEFT).withTimeout(1.2));
             
             /* Operator - Turret Manual Control */
-            if (turret != null) {
-                operator.leftBumper().whileTrue(
-                    Commands.run(() -> turret.setDutyCycle(0.2), turret)
-                )
-                .onFalse(
-                    Commands.runOnce(turret::stop, turret)
-                );
-            }
+            //if (turret != null) {
+            //    operator.leftBumper().whileTrue(
+            //        Commands.run(() -> turret.setDutyCycle(0.2), turret)
+            //    )
+            //    .onFalse(
+            //        Commands.runOnce(turret::stop, turret)
+            //    );
+            //}
 
             /* Operator – Turret Hub Lock */
-            if (turret != null) {
-                operator.rightBumper().whileTrue(hubLock);
-                operator.rightTrigger().whileTrue(turret.runShooterPercent((0.8)));
-            }
+            //if (turret != null) {
+            //    operator.rightBumper().whileTrue(hubLock);
+            //    operator.rightTrigger().whileTrue(turret.runShooterPercent((0.8)));
+            //}
+
+
+            operator.y().whileTrue(transfer.runPercent(0.6));
+            operator.x().whileTrue(Commands.parallel(transfer.runPercent(0.6), intake.rollersIn(0.6)));
+
+            operator.b().whileTrue(Commands.parallel(transfer.runPercent(-0.6), indexer.runPercent(-0.6)));
+            operator.a().whileTrue(Commands.parallel(transfer.runPercent(-0.6), intake.rollersOut(0.6)));
+
+            operator.povUp().whileTrue(hubLock);
+            operator.povRight().whileTrue(intake.deployIn(0.6));
+            operator.povLeft().whileTrue(intake.deployOut(0.6));
+            operator.rightStick().whileTrue(climber.runTeleop(() -> -MathUtil.applyDeadband(operator.getLeftY(), 0.12)));
+
+            operator.rightBumper().whileTrue(Commands.runEnd(() -> turret.setDutyCycle(+0.25), turret::stop, turret));
+            operator.leftBumper().whileTrue(Commands.runEnd(() -> turret.setDutyCycle(-0.25), turret::stop, turret));
+            operator.rightTrigger().whileTrue(turret.runShooterPercent(0.9));
+            operator.leftTrigger().whileTrue(Commands.parallel(transfer.runPercent(0.6), indexer.runPercent(0.6)));
+
+
+
+        
+
 
             /* Climbing Controls */
             climberController.axisMagnitudeGreaterThan(Joystick.AxisType.kY.value, 0.2)

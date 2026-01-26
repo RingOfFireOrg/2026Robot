@@ -176,13 +176,13 @@ public class RobotContainer {
         autoChooser = new LoggedDashboardChooser<>("Auto Choices");
         autoChooser.addDefaultOption("do nothing", Commands.none());
         
-        autoChooser.addOption("MECK) Align Right",
+        //autoChooser.addOption("MECK) Align Right",
 
-        new PathPlannerAuto("range into reef", false) // Get in Vision Range of the reef & prep L2
-            .andThen( new AlignToReef(drive, reefSide.RIGHT).withTimeout(3)) // Align using LL
-            .andThen( new PathPlannerAuto("range & station", false)) //Resetting Odo, run up on the reef and drop, and then back out and go to feeder station
-            .andThen( new PathPlannerAuto("range & score", false)) //Resetting Odo, run up on the reef and drop, and then back out and go to feeder station
-        );
+//        new PathPlannerAuto("range into reef", false) // Get in Vision Range of the reef & prep L2
+ //           .andThen( new AlignToReef(drive, reefSide.RIGHT).withTimeout(3)) // Align using LL
+  //          .andThen( new PathPlannerAuto("range & station", false)) //Resetting Odo, run up on the reef and drop, and then back out and go to feeder station
+   //         .andThen( new PathPlannerAuto("range & score", false)) //Resetting Odo, run up on the reef and drop, and then back out and go to feeder station
+    //    );
 
         // Set up SysId routines
         autoChooser.addOption("Drive Wheel Radius Characterization",
@@ -200,10 +200,10 @@ public class RobotContainer {
                     transfer.runPercent(0.6)
                 ).withTimeout(0.9),
                 Commands.waitSeconds(0.2),
-                new PathPlannerAuto("Mid Climb"),
-                climber.runPercent(0.4).withTimeout(2.0)
-                )
-            );
+                new PathPlannerAuto("Mid Climb")
+                //climber.runPercent(0.4).withTimeout(2.0)
+                //)
+        ));
         configureButtonBindings();
     }
 
@@ -333,9 +333,9 @@ public class RobotContainer {
             ).withTimeout(1.0))
         );
 */
-        NamedCommands.registerCommand("Align Center", new AlignToReef(drive, reefSide.CENTER).withTimeout(2));
-        NamedCommands.registerCommand("Align Left", new AlignToReef(drive, reefSide.LEFT).withTimeout(2));
-        NamedCommands.registerCommand("Align Right", new AlignToReef(drive, reefSide.RIGHT).withTimeout(2));
+        //NamedCommands.registerCommand("Align Center", new AlignToReef(drive, reefSide.CENTER).withTimeout(2));
+        //NamedCommands.registerCommand("Align Left", new AlignToReef(drive, reefSide.LEFT).withTimeout(2));
+        //NamedCommands.registerCommand("Align Right", new AlignToReef(drive, reefSide.RIGHT).withTimeout(2));
 
 
     }

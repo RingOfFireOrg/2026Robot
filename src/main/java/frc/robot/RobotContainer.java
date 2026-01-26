@@ -173,9 +173,11 @@ public class RobotContainer {
         setNamedCommands();
 
         // Set up auto routines
-        autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+        autoChooser = new LoggedDashboardChooser<>("Auto Choices");
+        autoChooser.addDefaultOption("do nothing", Commands.none());
         
         autoChooser.addOption("MECK) Align Right",
+
         new PathPlannerAuto("range into reef", false) // Get in Vision Range of the reef & prep L2
             .andThen( new AlignToReef(drive, reefSide.RIGHT).withTimeout(3)) // Align using LL
             .andThen( new PathPlannerAuto("range & station", false)) //Resetting Odo, run up on the reef and drop, and then back out and go to feeder station
@@ -189,7 +191,19 @@ public class RobotContainer {
         autoChooser.addOption("Drive Simple FF Characterization",
             DriveCommands.feedforwardCharacterization(drive)
         );
-
+        autoChooser.addOption("Mid Climb", 
+            Commands.sequence(
+                hubLock.withTimeout(1.0),
+                turret.runShooterPercent(0.85).withTimeout(1.5),
+                Commands.parallel(
+                    indexer.runPercent(0.6),
+                    transfer.runPercent(0.6)
+                ).withTimeout(0.9),
+                Commands.waitSeconds(0.2),
+                new PathPlannerAuto("Mid Climb"),
+                climber.runPercent(0.4).withTimeout(2.0)
+                )
+            );
         configureButtonBindings();
     }
 

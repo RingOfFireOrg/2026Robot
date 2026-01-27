@@ -304,14 +304,19 @@ public class RobotContainer {
             operator.povLeft().whileTrue(intake.deployOut(0.6));//intake goes out
             operator.povDown().whileTrue(Commands.run(() -> {}, turret));//offs hublock
 
-            operator.rightStick().whileTrue(climber.runTeleop(() -> -MathUtil.applyDeadband(operator.getLeftY(), 0.12)));//climber
+            //operator.leftStick().whileTrue(climber.runTeleop(() -> -MathUtil.applyDeadband(operator.getLeftY(), 0.12)));//climber
+            operator.leftStick().whileTrue(Commands.parallel(
+                climber.runTeleop(() -> -MathUtil.applyDeadband(operator.getLeftY(), 0.12)),
+                Commands.runOnce(() -> led.setSolid(255,0,0)).repeatedly()))
+            .onFalse(Commands.runOnce(led::restoreAlliance));
 
             operator.rightBumper().whileTrue(Commands.runEnd(() -> turret.setDutyCycle(+0.25), turret::stop, turret));//manual turret turning
             operator.leftBumper().whileTrue(Commands.runEnd(() -> turret.setDutyCycle(-0.25), turret::stop, turret));
-
-            operator.rightTrigger().whileTrue(turret.runShooterPercent(0.9));//shooter
+            //operator.rightTrigger().whileTrue(turret.runShooterPercent(0.9));
+            operator.rightTrigger().whileTrue(Commands.parallel(turret.runShooterPercent(0.9), 
+            Commands.waitSeconds(1.0).andThen(Commands.runOnce(() -> led.setSolid(0, 255, 0)).repeatedly())))//shooter
+            .onFalse(Commands.runOnce(led::restoreAlliance));
             operator.leftTrigger().whileTrue(Commands.parallel(transfer.runPercent(0.6), indexer.runPercent(0.6)));//transfer and indexer up
-
 
 
         

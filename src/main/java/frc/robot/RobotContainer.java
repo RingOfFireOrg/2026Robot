@@ -118,6 +118,7 @@ public class RobotContainer {
                 );
                
                 hubLock = new HubLock(turret, this.vision, 0);
+                turret.setDefaultCommand(hubLock);
                 SetLED = new SetLED(led, 0, 0, 0, false);
 
                 break;
@@ -148,6 +149,7 @@ public class RobotContainer {
                         driveSimulation::getSimulatedDriveTrainPose)
                 );
                 hubLock = new HubLock(turret, this.vision, 0);
+                turret.setDefaultCommand(hubLock);
 
                 break;
             default:
@@ -292,21 +294,23 @@ public class RobotContainer {
             //}
 
 
-            operator.y().whileTrue(transfer.runPercent(0.6));
-            operator.x().whileTrue(Commands.parallel(transfer.runPercent(0.6), intake.rollersIn(0.6)));
+            operator.y().whileTrue(transfer.runPercent(0.6)); //Transfer
+            operator.x().whileTrue(Commands.parallel(transfer.runPercent(0.6), intake.rollersIn(0.6))); //Transfer and Intake
+            operator.b().whileTrue(Commands.parallel(transfer.runPercent(-0.6), indexer.runPercent(-0.6))); //Transfer and indexer out
+            operator.a().whileTrue(Commands.parallel(transfer.runPercent(-0.6), intake.rollersOut(0.6))); //transfer and outtake 
 
-            operator.b().whileTrue(Commands.parallel(transfer.runPercent(-0.6), indexer.runPercent(-0.6)));
-            operator.a().whileTrue(Commands.parallel(transfer.runPercent(-0.6), intake.rollersOut(0.6)));
+            operator.povUp().onTrue(hubLock); // reapplys hublock if switched off
+            operator.povRight().whileTrue(intake.deployIn(0.6));//intake comes in
+            operator.povLeft().whileTrue(intake.deployOut(0.6));//intake goes out
+            operator.povDown().whileTrue(Commands.run(() -> {}, turret));//offs hublock
 
-            operator.povUp().whileTrue(hubLock);
-            operator.povRight().whileTrue(intake.deployIn(0.6));
-            operator.povLeft().whileTrue(intake.deployOut(0.6));
-            operator.rightStick().whileTrue(climber.runTeleop(() -> -MathUtil.applyDeadband(operator.getLeftY(), 0.12)));
+            operator.rightStick().whileTrue(climber.runTeleop(() -> -MathUtil.applyDeadband(operator.getLeftY(), 0.12)));//climber
 
-            operator.rightBumper().whileTrue(Commands.runEnd(() -> turret.setDutyCycle(+0.25), turret::stop, turret));
+            operator.rightBumper().whileTrue(Commands.runEnd(() -> turret.setDutyCycle(+0.25), turret::stop, turret));//manual turret turning
             operator.leftBumper().whileTrue(Commands.runEnd(() -> turret.setDutyCycle(-0.25), turret::stop, turret));
-            operator.rightTrigger().whileTrue(turret.runShooterPercent(0.9));
-            operator.leftTrigger().whileTrue(Commands.parallel(transfer.runPercent(0.6), indexer.runPercent(0.6)));
+
+            operator.rightTrigger().whileTrue(turret.runShooterPercent(0.9));//shooter
+            operator.leftTrigger().whileTrue(Commands.parallel(transfer.runPercent(0.6), indexer.runPercent(0.6)));//transfer and indexer up
 
 
 

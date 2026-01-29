@@ -61,6 +61,9 @@ import frc.robot.subsystems.Transfer.Transfer;
 import frc.robot.subsystems.LED.LED;
 import frc.robot.commands.SetLED;
 import frc.robot.subsystems.Intake.Intake;
+import frc.robot.subsystems.LED.LedManager;
+import frc.robot.subsystems.LED.LedModeBus;
+
 
 
 
@@ -77,6 +80,9 @@ public class RobotContainer {
     private LED led;
     private Command SetLED;
     private Intake intake;
+    private LedManager dioLed;
+
+
 
 
     // Controller
@@ -108,6 +114,7 @@ public class RobotContainer {
                 indexer = new Indexer();
                 transfer = new Transfer();
                 led = new LED();
+                dioLed = new LedManager(new LedModeBus(0, 1, 2, 3));
                 intake = new Intake();
                 
                 this.vision = new Vision(
@@ -305,17 +312,38 @@ public class RobotContainer {
             operator.povDown().whileTrue(Commands.run(() -> {}, turret));//offs hublock
 
             //operator.leftStick().whileTrue(climber.runTeleop(() -> -MathUtil.applyDeadband(operator.getLeftY(), 0.12)));//climber
-            operator.leftStick().whileTrue(Commands.parallel(
-                climber.runTeleop(() -> -MathUtil.applyDeadband(operator.getLeftY(), 0.12)),
-                Commands.runOnce(() -> led.setSolid(255,0,0)).repeatedly()))
-            .onFalse(Commands.runOnce(led::restoreAlliance));
+            //operator.leftStick().whileTrue(Commands.parallel(
+                //climber.runTeleop(() -> -MathUtil.applyDeadband(operator.getLeftY(), 0.12)),
+                //Commands.runOnce(() -> led.setSolid(255,0,0)).repeatedly()))
+            //.onFalse(Commands.runOnce(led::restoreAlliance));
+            operator.leftStick()
+                .onTrue(Commands.runOnce(() -> dioLed.setClimberActive(true)))
+                .whileTrue(Commands.parallel(
+                    climber.runTeleop(() -> -MathUtil.applyDeadband(operator.getLeftY(), 0.12)),
+                    Commands.runOnce(() -> led.setSolid(255, 0, 0)).repeatedly()))
+                .onFalse(Commands.runOnce(() -> dioLed.setClimberActive(false)))
+                .onFalse(Commands.runOnce(led::restoreAlliance));
+
 
             operator.rightBumper().whileTrue(Commands.runEnd(() -> turret.setDutyCycle(+0.25), turret::stop, turret));//manual turret turning
             operator.leftBumper().whileTrue(Commands.runEnd(() -> turret.setDutyCycle(-0.25), turret::stop, turret));
             //operator.rightTrigger().whileTrue(turret.runShooterPercent(0.9));
-            operator.rightTrigger().whileTrue(Commands.parallel(turret.runShooterPercent(0.9), 
-            Commands.waitSeconds(1.0).andThen(Commands.runOnce(() -> led.setSolid(0, 255, 0)).repeatedly())))//shooter
-            .onFalse(Commands.runOnce(led::restoreAlliance));
+            
+            
+            operator.rightTrigger()
+                .onTrue(Commands.runOnce(() -> dioLed.setShooterActive(true)))
+                .whileTrue(Commands.parallel(
+                    turret.runShooterPercent(0.9),
+                    Commands.waitSeconds(1.0).andThen(
+                        Commands.runOnce(() -> led.setSolid(0, 255, 0)).repeatedly())))
+                .onFalse(Commands.runOnce(() -> dioLed.setShooterActive(false)))
+                .onFalse(Commands.runOnce(led::restoreAlliance));
+
+            //.whileTrue(Commands.parallel(turret.runShooterPercent(0.9), 
+            //Commands.waitSeconds(1.0).andThen(Commands.runOnce(() -> led.setSolid(0, 255, 0)).repeatedly())))//shooter
+            //.onFalse(Commands.runOnce(led::restoreAlliance));
+            
+            
             operator.leftTrigger().whileTrue(Commands.parallel(transfer.runPercent(0.6), indexer.runPercent(0.6)));//transfer and indexer up
 
 
@@ -378,6 +406,13 @@ public class RobotContainer {
     public Command getAutonomousCommand() {
         return autoChooser.get();
     }
+
+    public void ledPeriodic() {
+        if (dioLed != null) {
+            dioLed.periodic();
+  }
+}
+
 
 
 

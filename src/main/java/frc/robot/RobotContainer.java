@@ -74,7 +74,7 @@ public class RobotContainer {
     private Climber climber;
     private SwerveDriveSimulation driveSimulation = null;
     private Turret turret;
-    private Command hubLock;
+    //private Command hubLock;
     private Indexer indexer;
     private Transfer transfer;
     private LED led;
@@ -124,8 +124,9 @@ public class RobotContainer {
                     new VisionIOPhotonVision(camera1Name, robotToCamera1)
                 );
                
-                hubLock = new HubLock(turret, this.vision, 0);
-                turret.setDefaultCommand(hubLock);
+                //hubLock = new HubLock(turret, this.vision, 0);
+                //turret.setDefaultCommand(hubLock);
+                turret.setDefaultCommand(hubLock());
                 SetLED = new SetLED(led, 0, 0, 0, false);
 
                 break;
@@ -155,8 +156,10 @@ public class RobotContainer {
                         camera1Name, robotToCamera1,
                         driveSimulation::getSimulatedDriveTrainPose)
                 );
-                hubLock = new HubLock(turret, this.vision, 0);
-                turret.setDefaultCommand(hubLock);
+                //hubLock = new HubLock(turret, this.vision, 0);
+                //turret.setDefaultCommand(hubLock);
+                turret.setDefaultCommand(hubLock());
+
 
                 break;
             default:
@@ -206,14 +209,14 @@ public class RobotContainer {
         );
         autoChooser.addOption("Mid Climb", 
             Commands.sequence(
-                hubLock.withTimeout(1.0),
+                hubLock().withTimeout(1.0),
                 turret.runShooterPercent(0.85).withTimeout(1.5),
                 Commands.parallel(
                     indexer.runPercent(0.6),
                     transfer.runPercent(0.6)
-                ).withTimeout(0.9),
-                Commands.waitSeconds(0.2),
-                new PathPlannerAuto("Mid Climb")
+                ).withTimeout(0.9)
+                //Commands.waitSeconds(0.2),
+                //new PathPlannerAuto("Mid Climb")
                 //climber.runPercent(0.4).withTimeout(2.0)
                 //)
         ));
@@ -306,10 +309,14 @@ public class RobotContainer {
             operator.b().whileTrue(Commands.parallel(transfer.runPercent(-0.6), indexer.runPercent(-0.6))); //Transfer and indexer out
             operator.a().whileTrue(Commands.parallel(transfer.runPercent(-0.6), intake.rollersOut(0.6))); //transfer and outtake 
 
-            operator.povUp().onTrue(hubLock); // reapplys hublock if switched off
+            //operator.povUp().onTrue(hubLock); // reapplys hublock if switched off
+            operator.povUp().onTrue(Commands.runOnce(() -> turret.setDefaultCommand(hubLock())));
+
             operator.povRight().whileTrue(intake.deployIn(0.6));//intake comes in
             operator.povLeft().whileTrue(intake.deployOut(0.6));//intake goes out
-            operator.povDown().whileTrue(Commands.run(() -> {}, turret));//offs hublock
+            //operator.povDown().whileTrue(Commands.run(() -> {}, turret));//offs hublock
+            operator.povDown().onTrue(Commands.runOnce(() ->turret.setDefaultCommand(Commands.run(() -> {}, turret))));
+
 
             //operator.leftStick().whileTrue(climber.runTeleop(() -> -MathUtil.applyDeadband(operator.getLeftY(), 0.12)));//climber
             //operator.leftStick().whileTrue(Commands.parallel(
@@ -406,6 +413,10 @@ public class RobotContainer {
     public Command getAutonomousCommand() {
         return autoChooser.get();
     }
+    private Command hubLock() {
+    return new HubLock(turret, vision, 0);
+}
+
 
     public void ledPeriodic() {
         if (dioLed != null) {

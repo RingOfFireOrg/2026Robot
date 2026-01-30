@@ -33,13 +33,6 @@ import frc.robot.Constants.PivotAngles;
 import frc.robot.commands.AlignToReef;
 import frc.robot.commands.AlignToReef.reefSide;
 import frc.robot.commands.DriveCommands;
-import frc.robot.subsystems.Climber.Climber;
-import frc.robot.subsystems.Climber.ClimberIOReal;
-
-import frc.robot.subsystems.EndEffector.EndEffector;
-import frc.robot.subsystems.EndEffector.EndEffectorIO;
-import frc.robot.subsystems.EndEffector.EndEffectorIOReal;
-import frc.robot.subsystems.EndEffector.EndEffectorIOSim;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.drive.GyroIO;
@@ -51,18 +44,9 @@ import frc.robot.subsystems.drive.ModuleIOSpark;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
-import frc.robot.commands.HubLock;
-import frc.robot.subsystems.Turret.Turret;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.commands.AlignToHub;
-import frc.robot.subsystems.Indexer.Indexer;
-import frc.robot.subsystems.Transfer.Transfer;
-import frc.robot.subsystems.LED.LED;
-import frc.robot.commands.SetLED;
-import frc.robot.subsystems.Intake.Intake;
-import frc.robot.subsystems.LED.LedManager;
-import frc.robot.subsystems.LED.LedModeBus;
 
 
 
@@ -71,16 +55,9 @@ import frc.robot.subsystems.LED.LedModeBus;
 public class RobotContainer {
     private final Drive drive;
     private Vision vision;
-    private Climber climber;
     private SwerveDriveSimulation driveSimulation = null;
-    private Turret turret;
     private Command hubLock;
-    private Indexer indexer;
-    private Transfer transfer;
-    private LED led;
     private Command SetLED;
-    private Intake intake;
-    private LedManager dioLed;
 
 
 
@@ -100,35 +77,6 @@ public class RobotContainer {
     public RobotContainer() {
 
         switch (Constants.currentMode) {
-            case REAL:
-                drive = new Drive(
-                    new GyroIONavX(),
-                    new ModuleIOSpark(0),
-                    new ModuleIOSpark(1),
-                    new ModuleIOSpark(2),
-                    new ModuleIOSpark(3),
-                    (pose) -> {
-                });
-                climber = new Climber(new ClimberIOReal());
-                turret = new Turret();
-                indexer = new Indexer();
-                transfer = new Transfer();
-                led = new LED();
-                dioLed = new LedManager(new LedModeBus(0, 1, 2, 3));
-                intake = new Intake();
-                
-                this.vision = new Vision(
-                    drive,
-                    new VisionIOLimelight("limelight-tag", drive::getRotation),
-                    new VisionIOPhotonVision(camera0Name, robotToCamera0),
-                    new VisionIOPhotonVision(camera1Name, robotToCamera1)
-                );
-               
-                hubLock = new HubLock(turret, this.vision, 0);
-                turret.setDefaultCommand(hubLock);
-                SetLED = new SetLED(led, 0, 0, 0, false);
-
-                break;
             case SIM:
                 this.driveSimulation = new SwerveDriveSimulation(DriveConstants.mapleSimConfig,
                     new Pose2d(3, 3, new Rotation2d()));
@@ -140,11 +88,6 @@ public class RobotContainer {
                     new ModuleIOSim(driveSimulation.getModules()[2]),
                     new ModuleIOSim(driveSimulation.getModules()[3]),
                     driveSimulation::setSimulationWorldPose);
-                turret = new Turret();
-                indexer = new Indexer();
-                transfer = new Transfer();
-                intake = new Intake();
-
 
                 this.vision = new Vision(
                     drive,
@@ -155,8 +98,7 @@ public class RobotContainer {
                         camera1Name, robotToCamera1,
                         driveSimulation::getSimulatedDriveTrainPose)
                 );
-                hubLock = new HubLock(turret, this.vision, 0);
-                turret.setDefaultCommand(hubLock);
+
 
                 break;
             default:
@@ -204,19 +146,6 @@ public class RobotContainer {
         autoChooser.addOption("Drive Simple FF Characterization",
             DriveCommands.feedforwardCharacterization(drive)
         );
-        autoChooser.addOption("Mid Climb", 
-            Commands.sequence(
-                hubLock.withTimeout(1.0),
-                turret.runShooterPercent(0.85).withTimeout(1.5),
-                Commands.parallel(
-                    indexer.runPercent(0.6),
-                    transfer.runPercent(0.6)
-                ).withTimeout(0.9),
-                Commands.waitSeconds(0.2),
-                new PathPlannerAuto("Mid Climb")
-                //climber.runPercent(0.4).withTimeout(2.0)
-                //)
-        ));
         configureButtonBindings();
     }
 
@@ -301,7 +230,7 @@ public class RobotContainer {
             //}
 
 
-            operator.y().whileTrue(transfer.runPercent(0.6)); //Transfer
+            /*operator.y().whileTrue(transfer.runPercent(0.6)); //Transfer
             operator.x().whileTrue(Commands.parallel(transfer.runPercent(0.6), intake.rollersIn(0.6))); //Transfer and Intake
             operator.b().whileTrue(Commands.parallel(transfer.runPercent(-0.6), indexer.runPercent(-0.6))); //Transfer and indexer out
             operator.a().whileTrue(Commands.parallel(transfer.runPercent(-0.6), intake.rollersOut(0.6))); //transfer and outtake 
@@ -345,21 +274,22 @@ public class RobotContainer {
             
             
             operator.leftTrigger().whileTrue(Commands.parallel(transfer.runPercent(0.6), indexer.runPercent(0.6)));//transfer and indexer up
-
+            */
 
         
 
 
             /* Climbing Controls */
-            climberController.axisMagnitudeGreaterThan(Joystick.AxisType.kY.value, 0.2)
+            /*climberController.axisMagnitudeGreaterThan(Joystick.AxisType.kY.value, 0.2)
             .and(climberController.button(1))
             .and(climberController.povCenter())
             .whileTrue(climber.runTeleop(() -> -climberController.getY()))
             .onFalse(climber.runTeleop(() -> 0));
+            */
             /*
              * EXAMPLE FROM 2025 ^
              */
-
+            
         }         
         else if (Constants.currentMode == Constants.Mode.SIM) {
 
@@ -407,11 +337,11 @@ public class RobotContainer {
         return autoChooser.get();
     }
 
-    public void ledPeriodic() {
+    /*public void ledPeriodic() {
         if (dioLed != null) {
             dioLed.periodic();
-  }
-}
+        }
+    }*/
 
 
 

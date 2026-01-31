@@ -214,12 +214,12 @@ public class RobotContainer {
                 Commands.parallel(
                     indexer.runPercent(0.6),
                     transfer.runPercent(0.6)
-                ).withTimeout(0.9)
-                //Commands.waitSeconds(0.2),
-                //new PathPlannerAuto("Mid Climb")
+                ).withTimeout(0.9),
+                Commands.waitSeconds(0.2),
+                new PathPlannerAuto("Mid Climb")
                 //climber.runPercent(0.4).withTimeout(2.0)
-                //)
-        ));
+                )
+        );
         configureButtonBindings();
     }
 

@@ -28,7 +28,8 @@ public class Turret extends SubsystemBase {
   private static int hello = 1;
   private static final int kMotorCanId = 41;
   private static final int kShooterCanId = 40;
-  private static final int kShooterNeoCanId = 42;
+  //private static final int kShooterNeoCanId = 42;
+  private static final int kShooter2CanId = 42;
   private static final int kAnglerCanId = 43;
 
 
@@ -40,8 +41,12 @@ public class Turret extends SubsystemBase {
   private final VoltageOut shooterVoltsReq = new VoltageOut(0.0);
   private static final double kShooterMaxVolts = 12.0;
 
-  private final SparkMax shooterNeo = new SparkMax(kShooterNeoCanId, MotorType.kBrushless);
-  private static final int kShooterNeoCurrentLimit = 40;
+  private final TalonFX shooterMotor2 = new TalonFX(kShooter2CanId);
+  private final VoltageOut shooter2VoltsReq = new VoltageOut(0.0);
+  private static final double kShooter2MaxVolts = 12.0;
+
+  //private final SparkMax shooterNeo = new SparkMax(kShooterNeoCanId, MotorType.kBrushless);
+  //private static final int kShooterNeoCurrentLimit = 40;
 
   private final SparkMax angler = new SparkMax(kAnglerCanId, MotorType.kBrushless);
   private final RelativeEncoder eRelativeEncoder = angler.getEncoder();
@@ -83,16 +88,17 @@ public class Turret extends SubsystemBase {
     System.out.println("[Turret] init: CAN=" + kMotorCanId + " inverted=false brake=true");
 
     TalonFXConfiguration shooterCfg = new TalonFXConfiguration();
+    TalonFXConfiguration shooter2Cfg = new TalonFXConfiguration();
     
-    SparkMaxConfig shooterNeoCfg = new SparkMaxConfig();
-    shooterNeoCfg.idleMode(IdleMode.kCoast);
-    shooterNeoCfg.inverted(true);
-    shooterNeoCfg.smartCurrentLimit(kShooterNeoCurrentLimit);
+    //SparkMaxConfig shooterNeoCfg = new SparkMaxConfig();
+    //shooterNeoCfg.idleMode(IdleMode.kCoast);
+    //shooterNeoCfg.inverted(true);
+    //shooterNeoCfg.smartCurrentLimit(kShooterNeoCurrentLimit);
 
-    shooterNeo.configure(
-      shooterNeoCfg,
-      SparkBase.ResetMode.kResetSafeParameters,
-      SparkBase.PersistMode.kPersistParameters);
+    //shooterNeo.configure(
+      //shooterNeoCfg,
+      //SparkBase.ResetMode.kResetSafeParameters,
+      //SparkBase.PersistMode.kPersistParameters);
 
     SparkMaxConfig anglerCfg = new SparkMaxConfig();
     anglerCfg.idleMode(IdleMode.kBrake);
@@ -113,6 +119,11 @@ public class Turret extends SubsystemBase {
     shooterOut.Inverted = InvertedValue.CounterClockwise_Positive;
     shooterCfg.MotorOutput = shooterOut;
 
+    MotorOutputConfigs shooterOut2 = new MotorOutputConfigs();
+    shooterOut2.NeutralMode = NeutralModeValue.Coast;
+    shooterOut2.Inverted = InvertedValue.Clockwise_Positive;
+    shooter2Cfg.MotorOutput = shooterOut2;
+
     CurrentLimitsConfigs shooterLimits = new CurrentLimitsConfigs();
     shooterLimits.SupplyCurrentLimitEnable = true;
     shooterLimits.SupplyCurrentLimit = 60.0;
@@ -122,8 +133,11 @@ public class Turret extends SubsystemBase {
     shooterRamps.VoltageOpenLoopRampPeriod = 0.10;
     shooterCfg.OpenLoopRamps = shooterRamps;
 
-    shooterMotor.getConfigurator().apply(shooterCfg);
+    shooter2Cfg.CurrentLimits = shooterLimits;
+    shooter2Cfg.OpenLoopRamps = shooterRamps;
 
+    shooterMotor.getConfigurator().apply(shooterCfg);
+    shooterMotor2.getConfigurator().apply(shooter2Cfg);
   }
 
   public double getMotorRotations() {
@@ -189,12 +203,16 @@ public class Turret extends SubsystemBase {
 public void setShooterVolts(double volts) {
   double cmd = MathUtil.clamp(volts, -kShooterMaxVolts, kShooterMaxVolts);
   shooterMotor.setControl(shooterVoltsReq.withOutput(cmd));//kraken
-  shooterNeo.setVoltage(cmd);                               //neo
+  //shooterNeo.setVoltage(cmd);                               //neo
+  shooterMotor2.setControl(shooter2VoltsReq.withOutput(cmd));
+
 }
 
 public void stopShooter() {
   shooterMotor.setControl(shooterVoltsReq.withOutput(0.0));//kraken
-  shooterNeo.setVoltage(0.0);
+  //shooterNeo.setVoltage(0.0);
+  shooterMotor2.setControl(shooter2VoltsReq.withOutput(0.0));
+
 }
 
 public Command runShooterPercent(double percent) {

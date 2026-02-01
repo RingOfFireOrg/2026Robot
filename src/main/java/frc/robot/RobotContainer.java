@@ -145,6 +145,7 @@ public class RobotContainer {
                 indexer = new Indexer();
                 transfer = new Transfer();
                 intake = new Intake();
+                climber = new Climber(new ClimberIOReal());
 
 
                 this.vision = new Vision(
@@ -215,9 +216,9 @@ public class RobotContainer {
                     indexer.runPercent(0.6),
                     transfer.runPercent(0.6)
                 ).withTimeout(0.9),
-                Commands.waitSeconds(0.2),
-                new PathPlannerAuto("Mid Climb")
-                //climber.runPercent(0.4).withTimeout(2.0)
+                Commands.waitSeconds(2.0),
+                //new PathPlannerAuto("Mid Climb"),
+                climber.runPercent(0.2).withTimeout(2.0)
                 )
         );
         configureButtonBindings();

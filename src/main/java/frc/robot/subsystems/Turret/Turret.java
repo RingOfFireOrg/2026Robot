@@ -20,14 +20,18 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.math.geometry.Pose3d;
 import frc.robot.util.LimelightHelpers;
+import java.util.function.DoubleSupplier;
+import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.configs.Slot0Configs;
+
 
 
 
 @SuppressWarnings({ "removal", "unused" })
 public class Turret extends SubsystemBase {
   private static int hello = 1;
-  private static final int kMotorCanId = 41;
-  private static final int kShooterCanId = 40;
+  private static final int kMotorCanId = 40;
+  private static final int kShooterCanId = 41;
   //private static final int kShooterNeoCanId = 42;
   private static final int kShooter2CanId = 42;
   private static final int kAnglerCanId = 43;
@@ -44,6 +48,10 @@ public class Turret extends SubsystemBase {
   private final TalonFX shooterMotor2 = new TalonFX(kShooter2CanId);
   private final VoltageOut shooter2VoltsReq = new VoltageOut(0.0);
   private static final double kShooter2MaxVolts = 12.0;
+
+  private final VelocityVoltage shooterVelReq = new VelocityVoltage(0.0);
+  private final VelocityVoltage shooter2VelReq = new VelocityVoltage(0.0);
+
 
   //private final SparkMax shooterNeo = new SparkMax(kShooterNeoCanId, MotorType.kBrushless);
   //private static final int kShooterNeoCurrentLimit = 40;
@@ -89,6 +97,15 @@ public class Turret extends SubsystemBase {
 
     TalonFXConfiguration shooterCfg = new TalonFXConfiguration();
     TalonFXConfiguration shooter2Cfg = new TalonFXConfiguration();
+
+    Slot0Configs slot0 = new Slot0Configs();
+    slot0.kP = 0.12;
+    slot0.kI = 0.0;
+    slot0.kD = 0.0;
+    slot0.kV = 0.12;
+
+    shooterCfg.Slot0 = slot0;
+    shooter2Cfg.Slot0 = slot0;
     
     //SparkMaxConfig shooterNeoCfg = new SparkMaxConfig();
     //shooterNeoCfg.idleMode(IdleMode.kCoast);
@@ -218,6 +235,22 @@ public void stopShooter() {
 public Command runShooterPercent(double percent) {
   return runEnd(() -> setShooterVolts(percent * 12.0), this::stopShooter);
 }
+
+public void setShooterRPM(double topRPM, double bottomRPM) {
+  double topRps = topRPM / 60.0;
+  double bottomRps = bottomRPM / 60.0;
+
+  shooterMotor.setControl(shooterVelReq.withVelocity(topRps));
+  shooterMotor2.setControl(shooter2VelReq.withVelocity(bottomRps));
+}
+
+public Command runShooterRPM(DoubleSupplier topRPM, DoubleSupplier bottomRPM) {
+  return runEnd(
+    () -> setShooterRPM(topRPM.getAsDouble(), bottomRPM.getAsDouble()),
+    this::stopShooter
+  );
+}
+
 public double getAnglerRotations() {
   return eRelativeEncoder.getPosition();
 }

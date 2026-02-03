@@ -64,6 +64,10 @@ import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.LED.LedManager;
 import frc.robot.subsystems.LED.LedModeBus;
 
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.networktables.GenericEntry;
+
 
 
 
@@ -89,6 +93,9 @@ public class RobotContainer {
     private final CommandXboxController driver = new CommandXboxController(0);
     private final CommandXboxController operator = new CommandXboxController(1);
     private final CommandJoystick climberController = new CommandJoystick(2);
+    private final ShuffleboardTab shooterTab = Shuffleboard.getTab("Shooter");
+    private final GenericEntry topRpmEntry = shooterTab.add("Top RPM", 4500.0).getEntry();
+    private final GenericEntry bottomRpmEntry = shooterTab.add("Bottom RPM", 4500.0).getEntry();
 
     // Dashboard inputs
     private final LoggedDashboardChooser<Command> autoChooser;
@@ -338,14 +345,18 @@ public class RobotContainer {
             //operator.rightTrigger().whileTrue(turret.runShooterPercent(0.9));
             
             
-            operator.rightTrigger()
-                .onTrue(Commands.runOnce(() -> dioLed.setShooterActive(true)))
-                .whileTrue(Commands.parallel(
-                    turret.runShooterPercent(0.9),
-                    Commands.waitSeconds(1.0).andThen(
-                        Commands.runOnce(() -> led.setSolid(0, 255, 0)).repeatedly())))
-                .onFalse(Commands.runOnce(() -> dioLed.setShooterActive(false)))
-                .onFalse(Commands.runOnce(led::restoreAlliance));
+            operator.rightTrigger().whileTrue(turret.runShooterRPM(
+            () -> topRpmEntry.getDouble(4500.0),
+            () -> bottomRpmEntry.getDouble(4500.0)));
+            
+            //(turret.runShooterPercent(0.9));
+                //.onTrue(Commands.runOnce(() -> dioLed.setShooterActive(true)))
+                //.whileTrue(Commands.parallel(
+                    //turret.runShooterPercent(0.9);
+                    //Commands.waitSeconds(1.0).andThen(
+                        //Commands.runOnce(() -> led.setSolid(0, 255, 0)).repeatedly())))
+               //.onFalse(Commands.runOnce(() -> dioLed.setShooterActive(false)))
+                //.onFalse(Commands.runOnce(led::restoreAlliance));
 
             //.whileTrue(Commands.parallel(turret.runShooterPercent(0.9), 
             //Commands.waitSeconds(1.0).andThen(Commands.runOnce(() -> led.setSolid(0, 255, 0)).repeatedly())))//shooter

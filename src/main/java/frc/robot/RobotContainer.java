@@ -56,6 +56,7 @@ import frc.robot.subsystems.Turret.Turret;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.commands.AlignToHub;
+import frc.robot.commands.PhotonAlign;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Transfer.Transfer;
 import frc.robot.subsystems.LED.LED;
@@ -291,8 +292,9 @@ public class RobotContainer {
         if (Constants.currentMode == Constants.Mode.REAL) {
 
             /* Driver - Align to the Hub */
-            driver.x()
-            .whileTrue(new AlignToHub(drive, vision, 0));
+            driver.x().whileTrue(new AlignToHub(drive, vision, 0));
+            driver.y().whileTrue(new PhotonAlign(drive, vision, 1));
+            driver.a().whileTrue(new PhotonAlign(drive, vision, 2));
             //.onTrue(new AlignToReef(drive, reefSide.LEFT).withTimeout(1.2));
             
             /* Operator - Turret Manual Control */
@@ -345,9 +347,11 @@ public class RobotContainer {
             //operator.rightTrigger().whileTrue(turret.runShooterPercent(0.9));
             
             
-            operator.rightTrigger().whileTrue(turret.runShooterRPM(
-            () -> topRpmEntry.getDouble(4500.0),
-            () -> bottomRpmEntry.getDouble(4500.0)));
+            operator.rightTrigger().whileTrue
+            //(turret.runShooterPercent(0.9));
+            (turret.runShooterRPM(
+            () -> topRpmEntry.getDouble(5000.0),
+            () -> bottomRpmEntry.getDouble(5000.0)));
             
             //(turret.runShooterPercent(0.9));
                 //.onTrue(Commands.runOnce(() -> dioLed.setShooterActive(true)))

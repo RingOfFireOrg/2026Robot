@@ -9,15 +9,10 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 public class ClimberIOReal implements ClimberIO {
-  private static final int kLeftCanId = 50;
-  private static final int kRightCanId = 51;
+  private static final int kClimberCanId = 50;
+  private static final boolean kInverted = false;
 
-  private static final boolean kLeftInverted = false;
-  private static final boolean kRightInverted = true;
-
-  private final TalonFX left = new TalonFX(kLeftCanId);
-  private final TalonFX right = new TalonFX(kRightCanId);
-
+  private final TalonFX motor = new TalonFX(kClimberCanId);
   private final VoltageOut voltsReq = new VoltageOut(0.0);
 
   public ClimberIOReal() {
@@ -28,38 +23,29 @@ public class ClimberIOReal implements ClimberIO {
     limits.SupplyCurrentLimit = 40.0;
     cfg.CurrentLimits = limits;
 
-    MotorOutputConfigs outLeft = new MotorOutputConfigs();
-    outLeft.NeutralMode = NeutralModeValue.Brake;
-    outLeft.Inverted = kLeftInverted
+    MotorOutputConfigs out = new MotorOutputConfigs();
+    out.NeutralMode = NeutralModeValue.Brake;
+    out.Inverted = kInverted
         ? InvertedValue.Clockwise_Positive
         : InvertedValue.CounterClockwise_Positive;
-    cfg.MotorOutput = outLeft;
-    left.getConfigurator().apply(cfg);
+    cfg.MotorOutput = out;
 
-    MotorOutputConfigs outRight = new MotorOutputConfigs();
-    outRight.NeutralMode = NeutralModeValue.Brake;
-    outRight.Inverted = kRightInverted
-        ? InvertedValue.Clockwise_Positive
-        : InvertedValue.CounterClockwise_Positive;
-    cfg.MotorOutput = outRight;
-    right.getConfigurator().apply(cfg);
+    motor.getConfigurator().apply(cfg);
   }
 
   @Override
   public void updateInputs(ClimberIOInputs inputs) {
     inputs.connected = true;
 
-    inputs.positionRot = left.getPosition().getValueAsDouble();
-    inputs.velocityRps = left.getVelocity().getValueAsDouble();
+    inputs.positionRot = motor.getPosition().getValueAsDouble();
+    inputs.velocityRps = motor.getVelocity().getValueAsDouble();
 
-    inputs.appliedVolts = left.getMotorVoltage().getValueAsDouble();
-    inputs.currentAmps =
-        left.getSupplyCurrent().getValueAsDouble() + right.getSupplyCurrent().getValueAsDouble();
+    inputs.appliedVolts = motor.getMotorVoltage().getValueAsDouble();
+    inputs.currentAmps = motor.getSupplyCurrent().getValueAsDouble();
   }
 
   @Override
   public void setVoltage(double volts) {
-    left.setControl(voltsReq.withOutput(volts));
-    right.setControl(voltsReq.withOutput(volts));
+    motor.setControl(voltsReq.withOutput(volts));
   }
 }

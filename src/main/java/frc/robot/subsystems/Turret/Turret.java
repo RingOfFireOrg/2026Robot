@@ -30,10 +30,9 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 @SuppressWarnings({ "removal", "unused" })
 public class Turret extends SubsystemBase {
   private static int hello = 1;
-  private static final int kMotorCanId = 40;
-  private static final int kShooterCanId = 41;
-  //private static final int kShooterNeoCanId = 42;
-  private static final int kShooter2CanId = 42;
+  private static final int kMotorCanId = 40; //turret
+  private static final int kShooterCanId = 41;//bottom
+  private static final int kShooter2CanId = 42;//top
   private static final int kAnglerCanId = 43;
 
 

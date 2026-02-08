@@ -9,35 +9,24 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
 @SuppressWarnings("removal")
-
 public class Transfer extends SubsystemBase {
-  private static final int kBottomMotorCanId = 30;
-  private static final int kTopMotorCanId = 31;
+  private static final int kMotorCanId = 30;//spindexer
 
-  private final SparkMax leftMotor = new SparkMax(kBottomMotorCanId, MotorType.kBrushless);
-  private final SparkMax rightMotor = new SparkMax(kTopMotorCanId, MotorType.kBrushless);
+  private final SparkMax motor = new SparkMax(kMotorCanId, MotorType.kBrushless);
 
   private static final double kDeadband = 0.02;
-  private static final double kMaxVolts = 8.0;
+  private static final double kMaxVolts = 12.0;
   private static final double kMinVoltsToMove = 1.5;
 
-public Transfer() {
+  public Transfer() {
     SparkMaxConfig config = new SparkMaxConfig();
     config.idleMode(IdleMode.kCoast);
-    config.smartCurrentLimit(30);
+    config.smartCurrentLimit(40);
 
-    leftMotor.configure(
+    motor.configure(
         config,
-        SparkBase.ResetMode.kResetSafeParameters,
-        SparkBase.PersistMode.kPersistParameters);
-
-    SparkMaxConfig invertedConfig = new SparkMaxConfig();
-    invertedConfig.apply(config);
-    invertedConfig.inverted(true);
-
-    rightMotor.configure(
-        invertedConfig,
         SparkBase.ResetMode.kResetSafeParameters,
         SparkBase.PersistMode.kPersistParameters);
   }
@@ -50,13 +39,11 @@ public Transfer() {
       cmd = Math.copySign(Math.max(Math.abs(cmd), kMinVoltsToMove), cmd);
     }
 
-    leftMotor.setVoltage(cmd);
-    rightMotor.setVoltage(cmd);
+    motor.setVoltage(cmd);
   }
 
   public void stop() {
-    leftMotor.setVoltage(0.0);
-    rightMotor.setVoltage(0.0);
+    motor.setVoltage(0.0);
   }
 
   public Command runVolts(double volts) {

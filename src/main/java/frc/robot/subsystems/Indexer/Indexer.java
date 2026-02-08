@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 @SuppressWarnings("removal")
 
 public class Indexer extends SubsystemBase {
-  private static final int kMotorCanId = 32;
+  private static final int kMotorCanId = 32;//indexer
 
   private final SparkMax motor = new SparkMax(kMotorCanId, MotorType.kBrushless);
   private final RelativeEncoder encoder = motor.getEncoder();

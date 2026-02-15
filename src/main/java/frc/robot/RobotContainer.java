@@ -315,15 +315,15 @@ public class RobotContainer {
 
 
             operator.y().whileTrue(transfer.runPercent(0.6)); //Transfer
-            operator.x().whileTrue(Commands.parallel(transfer.runPercent(0.6), intake.rollersIn(0.6))); //Transfer and Intake
+            operator.x().whileTrue(Commands.parallel(transfer.runPercent(0.6), intake.rollersIn())); //Transfer and Intake
             operator.b().whileTrue(Commands.parallel(transfer.runPercent(-0.6), indexer.runPercent(-0.6))); //Transfer and indexer out
-            operator.a().whileTrue(Commands.parallel(transfer.runPercent(-0.6), intake.rollersOut(0.6))); //transfer and outtake 
+            operator.a().whileTrue(Commands.parallel(transfer.runPercent(-0.6), intake.rollersOut())); //transfer and outtake 
 
             //operator.povUp().onTrue(hubLock); // reapplys hublock if switched off
             operator.povUp().onTrue(Commands.runOnce(() -> turret.setDefaultCommand(hubLock())));
 
-            operator.povRight().whileTrue(intake.deployIn(0.6));//intake comes in
-            operator.povLeft().whileTrue(intake.deployOut(0.6));//intake goes out
+            operator.povRight().whileTrue(intake.retractIn());//intake comes in
+            operator.povLeft().whileTrue(intake.deployOut());//intake goes out
             //operator.povDown().whileTrue(Commands.run(() -> {}, turret));//offs hublock
             operator.povDown().onTrue(Commands.runOnce(() ->turret.setDefaultCommand(Commands.run(() -> {}, turret))));
 

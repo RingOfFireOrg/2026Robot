@@ -1,0 +1,17 @@
+{
+    "name": "PT2026",
+
+    "rotations": [
+        {
+            "axis": "x",
+            "degrees": 90
+        },
+        {
+            "axis": "y",
+            "degrees": 0
+        }
+    ],
+    "position": [
+        0,0,0
+    ]
+}

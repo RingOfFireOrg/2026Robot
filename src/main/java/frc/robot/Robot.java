@@ -1,10 +1,24 @@
+// Copyright 2021-2025 FRC 6328
+// http://github.com/Mechanical-Advantage
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// version 3 as published by the Free Software Foundation or
+// available in the root directory of this project.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+
 package frc.robot;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.util.LimelightHelpers;
-
+import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralOnFly;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -12,6 +26,7 @@ import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 import org.littletonrobotics.urcl.URCL;
+
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to each mode, as
@@ -23,6 +38,24 @@ public class Robot extends LoggedRobot {
     private RobotContainer robotContainer;
 
     public Robot() {
+        // Record metadata
+        /*Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
+        Logger.recordMetadata("BuildDate", BuildConstants.BUILD_DATE);
+        Logger.recordMetadata("GitSHA", BuildConstants.GIT_SHA);
+        Logger.recordMetadata("GitDate", BuildConstants.GIT_DATE);
+        Logger.recordMetadata("GitBranch", BuildConstants.GIT_BRANCH);
+        switch (BuildConstants.DIRTY) {
+            case 0:
+                Logger.recordMetadata("GitDirty", "All changes committed");
+                break;
+            case 1:
+                Logger.recordMetadata("GitDirty", "Uncomitted changes");
+                break;
+            default:
+                Logger.recordMetadata("GitDirty", "Unknown");
+                break;
+        }*/
+
         // Set up data receivers & replay source
         switch (Constants.currentMode) {
             case REAL:
@@ -54,7 +87,6 @@ public class Robot extends LoggedRobot {
         // Instantiate our RobotContainer. This will perform all our button bindings,
         // and put our autonomous chooser on the dashboard.
         robotContainer = new RobotContainer();
-        LimelightHelpers.setLEDMode_ForceOff("limelight-tag");
     }
 
     /** This function is called periodically during all modes. */
@@ -62,7 +94,6 @@ public class Robot extends LoggedRobot {
     public void robotPeriodic() {
         // Switch thread to high priority to improve loop timing
         Threads.setCurrentThreadPriority(true, 99);
-  
 
         // Runs the Scheduler. This is responsible for polling buttons, adding
         // newly-scheduled commands, running already-scheduled commands, removing
@@ -70,21 +101,15 @@ public class Robot extends LoggedRobot {
         // This must be called from the robot's periodic block in order for anything in
         // the Command-based framework to work.
         CommandScheduler.getInstance().run();
-        
 
         // Return to normal thread priority
-
-
         Threads.setCurrentThreadPriority(false, 10);
-
-
     }
 
     /** This function is called once when the robot is disabled. */
     @Override
     public void disabledInit() {
-        //robotContainer.resetSimulationField();
-        LimelightHelpers.setLEDMode_ForceOff("limelight-tag");
+        robotContainer.resetSimulationField();
     }
 
     /** This function is called periodically when disabled. */
@@ -98,8 +123,7 @@ public class Robot extends LoggedRobot {
 
         // schedule the autonomous command (example)
         if (autonomousCommand != null) {
-            CommandScheduler.getInstance().schedule(autonomousCommand);
-
+            autonomousCommand.schedule();
         }
     }
 
@@ -117,33 +141,20 @@ public class Robot extends LoggedRobot {
         if (autonomousCommand != null) {
             autonomousCommand.cancel();
         }
-        // //Commands.runOnce(, EndEffector);
-        // robotContainer.getEffector()
-        // robotContainer.getEffector().runOnce(robotContainer.getEffector().)
-
-        
-        
     }
 
     /** This function is called periodically during operator control. */
     @Override
-    public void teleopPeriodic() {
-        if (Constants.currentMode == Constants.Mode.REAL) {
-            double fiducialID = LimelightHelpers.getFiducialID("limelight-tag");
-            if (fiducialID > 0) {
-                LimelightHelpers.setLEDMode_ForceOn("limelight-tag");
-            } else {
-                LimelightHelpers.setLEDMode_ForceOff("limelight-tag");
-            }
-        }
-        
-    }
+    public void teleopPeriodic() {}
 
     /** This function is called once when test mode is enabled. */
     @Override
     public void testInit() {
         // Cancels all running commands at the start of test mode.
         CommandScheduler.getInstance().cancelAll();
+        SimulatedArena.getInstance()
+                .addGamePieceProjectile(ReefscapeCoralOnFly.DropFromCoralStation(
+                        ReefscapeCoralOnFly.CoralStationsSide.LEFT_STATION, DriverStation.Alliance.Red, true));
     }
 
     /** This function is called periodically during test mode. */

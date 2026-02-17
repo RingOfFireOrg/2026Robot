@@ -18,7 +18,6 @@ import static frc.robot.subsystems.drive.DriveConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
-import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.PathPlannerLogging;
@@ -72,12 +71,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
                 new SwerveModulePosition()
             };
     private final SwerveDrivePoseEstimator poseEstimator =
-        new SwerveDrivePoseEstimator(
-            kinematics, 
-            rawGyroRotation, 
-            lastModulePositions, 
-            new Pose2d()
-        );
+            new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
     private final Consumer<Pose2d> resetSimulationPoseCallBack;
 
     public Drive(
@@ -99,25 +93,15 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
 
         // Start odometry thread
         SparkOdometryThread.getInstance().start();
-        RobotConfig config;
-        try{
-           // config = RobotConfig.fromGUISettings();
-           config = ppConfig;
-        } catch (Exception e) {
-            // Handle exception as needed
-            config = ppConfig;
-            e.printStackTrace();
-        }
+
         // Configure AutoBuilder for PathPlanner
         AutoBuilder.configure(
                 this::getPose,
                 this::resetOdometry,
                 this::getChassisSpeeds,
                 this::runVelocity,
-                new PPHolonomicDriveController(
-                new PIDConstants(3.0, 0.0, 0.01), 
-                new PIDConstants(2.8, 0.0, 0.01)),
-                config,
+                new PPHolonomicDriveController(new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
+                ppConfig,
                 () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
                 this);
         Pathfinding.setPathfinder(new LocalADStarAK());
@@ -313,11 +297,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     /** Adds a new timestamped vision measurement. */
     @Override
     public void accept(Pose2d visionRobotPoseMeters, double timestampSeconds, Matrix<N3, N1> visionMeasurementStdDevs) {
-        poseEstimator.addVisionMeasurement(
-            visionRobotPoseMeters, 
-            timestampSeconds, 
-            visionMeasurementStdDevs
-        );
+        poseEstimator.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
     }
 
     /** Returns the maximum linear speed in meters per sec. */
@@ -329,7 +309,4 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     public double getMaxAngularSpeedRadPerSec() {
         return maxSpeedMetersPerSec / driveBaseRadius;
     }
-
-
-
 }

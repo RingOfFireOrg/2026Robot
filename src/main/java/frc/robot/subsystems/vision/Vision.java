@@ -10,7 +10,6 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-//
 
 package frc.robot.subsystems.vision;
 
@@ -20,17 +19,15 @@ import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
-
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Supplier;
-
 import org.littletonrobotics.junction.Logger;
 
 public class Vision extends SubsystemBase {
@@ -38,10 +35,8 @@ public class Vision extends SubsystemBase {
     private final VisionIO[] io;
     private final VisionIOInputsAutoLogged[] inputs;
     private final Alert[] disconnectedAlerts;
-    double targetID = 110;
 
     public Vision(VisionConsumer consumer, VisionIO... io) {
-        
         this.consumer = consumer;
         this.io = io;
 
@@ -55,7 +50,7 @@ public class Vision extends SubsystemBase {
         this.disconnectedAlerts = new Alert[io.length];
         for (int i = 0; i < inputs.length; i++) {
             disconnectedAlerts[i] =
-                new Alert("Vision camera " + Integer.toString(i) + " is disconnected.", AlertType.kWarning);
+                    new Alert("Vision camera " + Integer.toString(i) + " is disconnected.", AlertType.kWarning);
         }
     }
 
@@ -64,79 +59,22 @@ public class Vision extends SubsystemBase {
      *
      * @param cameraIndex The index of the camera to use.
      */
-    /** Returns the horizontal angle (deg) to the best target for simple servoing. */
-    public Supplier<Double> getTargetX(int cameraIndex) {
-        return () -> getTxDeg(cameraIndex);
+    public Rotation2d getTargetX(int cameraIndex) {
+        return inputs[cameraIndex].latestTargetObservation.tx();
     }
-
-
-    public double getTargetID(int cameraIndex) {
-        return inputs[cameraIndex].latestTargetObservation.tagId();
-    }
-
-    /** True if the camera has a valid target in the latest observation. */
-    public boolean hasTarget(int cameraIndex) {
-    return inputs[cameraIndex].connected
-        && inputs[cameraIndex].latestTargetObservation.tagId() > 0.5;
-}
-
-
-/** Horizontal angle offset to best target (deg). Positive means target is to the right (Limelight convention). */
-    public double getTxDeg(int cameraIndex) {
-        return inputs[cameraIndex].latestTargetObservation.tx().getDegrees();
-    }
-
-/** Vertical angle offset (deg), optional. */
-    public double getTyDeg(int cameraIndex) {
-        return inputs[cameraIndex].latestTargetObservation.ty().getDegrees();
-    }
-
-
-
-    
-    
 
     @Override
     public void periodic() {
-
-        
-        @SuppressWarnings("unused")
-        double targetID = getTargetID(0);
-        
-
-        //Logger.recordOutput("Vision/Reef currentTag", targetID);
-        //Logger.recordOutput("Vision/Reef 1_Front Tag", (targetID == 18 || targetID == 7));
-        //Logger.recordOutput("Vision/Reef 2_LeftFront Tag", (targetID == 19 || targetID == 6));
-        //Logger.recordOutput("Vision/Reef 3_LeftBack Tag", (targetID == 20 || targetID == 11));
-        //Logger.recordOutput("Vision/Reef 4_Back Tag", (targetID == 21 || targetID == 10));
-        //Logger.recordOutput("Vision/Reef 5_RightBack Tag", (targetID == 22 || targetID == 9));
-        //Logger.recordOutput("Vision/Reef 6_RightFront Tag", (targetID == 17 || targetID == 8));
-
-
-
         for (int i = 0; i < io.length; i++) {
             io[i].updateInputs(inputs[i]);
             Logger.processInputs("Vision/Camera" + Integer.toString(i), inputs[i]);
         }
-        
-        Logger.recordOutput("Vision/Camera0/HasTarget", hasTarget(0));
-        Logger.recordOutput("Vision/Camera0/TxDeg", getTxDeg(0));
-        Logger.recordOutput("Vision/Camera0/TyDeg", getTyDeg(0));
-        Logger.recordOutput("Vision/Camera0/TagId", getTargetID(0));
-
-        if (aprilTagLayout == null) {
-            Logger.recordOutput("Vision/Error", "AprilTag layout is null");
-            return;
-}
-
 
         // Initialize logging values
         List<Pose3d> allTagPoses = new LinkedList<>();
         List<Pose3d> allRobotPoses = new LinkedList<>();
         List<Pose3d> allRobotPosesAccepted = new LinkedList<>();
         List<Pose3d> allRobotPosesRejected = new LinkedList<>();
-
-
 
         // Loop over cameras
         for (int cameraIndex = 0; cameraIndex < io.length; cameraIndex++) {
@@ -199,10 +137,9 @@ public class Vision extends SubsystemBase {
 
                 // Send vision observation
                 consumer.accept(
-                    observation.pose().toPose2d(),
-                    observation.timestamp(),
-                    VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev)
-                );
+                        observation.pose().toPose2d(),
+                        observation.timestamp(),
+                        VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev));
             }
 
             // Log camera datadata

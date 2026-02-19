@@ -23,6 +23,8 @@ import frc.robot.util.LimelightHelpers;
 import java.util.function.DoubleSupplier;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.configs.Slot0Configs;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+
 
 
 
@@ -34,6 +36,10 @@ public class Turret extends SubsystemBase {
   private static final int kShooterCanId = 41;//bottom
   private static final int kShooter2CanId = 42;//top
   private static final int kAnglerCanId = 43;
+  private final InterpolatingDoubleTreeMap shooterRpmMap = new InterpolatingDoubleTreeMap();
+  private static final double kMinShotDistM = 1.35;
+  private static final double kMaxShotDistM = 4.00;
+
 
 
 
@@ -154,6 +160,8 @@ public class Turret extends SubsystemBase {
 
     shooterMotor.getConfigurator().apply(shooterCfg);
     shooterMotor2.getConfigurator().apply(shooter2Cfg);
+    initShooterRpmMap();
+
   }
 
   public double getMotorRotations() {
@@ -249,6 +257,31 @@ public Command runShooterRPM(DoubleSupplier topRPM, DoubleSupplier bottomRPM) {
     this::stopShooter
   );
 }
+private void initShooterRpmMap() {
+  shooterRpmMap.put(1.35, 5200.0);
+  shooterRpmMap.put(1.50, 5000.0);
+  shooterRpmMap.put(2.00, 4850.0);
+  shooterRpmMap.put(2.25, 4900.0);
+  shooterRpmMap.put(3.00, 5200.0);
+  shooterRpmMap.put(3.50, 5450.0);
+  shooterRpmMap.put(4.00, 5700.0);
+}
+
+public double getShooterRpmForDistanceMeters(double distanceM) {
+  double d = MathUtil.clamp(distanceM, kMinShotDistM, kMaxShotDistM);
+  Double rpm = shooterRpmMap.get(d);
+  return (rpm != null) ? rpm : 5200.0;
+}
+
+
+public void setShooterFromDistanceMeters(double distanceM) {
+  double rpm = getShooterRpmForDistanceMeters(distanceM);
+  setShooterRPM(rpm, rpm);
+}
+
+
+
+
 
 public double getAnglerRotations() {
   return eRelativeEncoder.getPosition();
@@ -290,7 +323,7 @@ public double getDistanceToTagMeters(String limelightName) {
 }
 @Override
 public void periodic(){
-  updateAngler();
+  //updateAngler();
 }
 }
 

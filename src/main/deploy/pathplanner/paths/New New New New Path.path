@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.9799999999999995,
-        "y": 4.175
+        "x": 3.6120827389443653,
+        "y": 6.1375320970042795
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.304037667145358,
-        "y": 4.109898973103451
+        "x": 3.3382744638472843,
+        "y": 6.11120616003195
       },
       "isLocked": false,
-      "linkedName": "2_Hscore"
+      "linkedName": null
     },
     {
       "anchor": {
-        "x": 6.626327054794521,
-        "y": 4.017487157534247
+        "x": 3.0216292134831457,
+        "y": 5.064
       },
       "prevControl": {
-        "x": 6.381699161059823,
-        "y": 4.069035131373431
+        "x": 3.7857981708965225,
+        "y": 6.021429268680331
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "2_GH_Algae LineUp"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
@@ -41,14 +41,14 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0,
-    "rotation": 180.0
+    "velocity": 0.0,
+    "rotation": 139.399
   },
   "reversed": false,
-  "folder": "CenterIntakeCenter",
+  "folder": "2026Auto",
   "idealStartingState": {
-    "velocity": 0,
-    "rotation": 180.0
+    "velocity": 0.0,
+    "rotation": -179.824
   },
   "useDefaultConstraints": true
 }

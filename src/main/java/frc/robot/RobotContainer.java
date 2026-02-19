@@ -17,6 +17,8 @@ import static edu.wpi.first.units.Units.*;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -160,10 +162,20 @@ public class RobotContainer {
                 drive, () -> controller.getLeftY(), () -> controller.getLeftX(), () -> -controller.getRightX()));
 
         // Lock to 0° when A button is held
-        controller
-                .a()
-                .whileTrue(DriveCommands.joystickDriveAtAngle(
-                        drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> new Rotation2d()       ));
+        if(controller.getLeftTriggerAxis() > 0.3) {
+                SimulatedArena.getInstance()
+                        .addGamePieceProjectile(new RebuiltFuelOnFly(
+                        driveSimulation.getSimulatedDriveTrainPose().getTranslation(),
+                        new Translation2d(), // shooter offet from center
+                        driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
+                        driveSimulation.getSimulatedDriveTrainPose().getRotation(),
+                        Units.Meters.of(0.4), // initial height of the ball, in meters
+                        Units.MetersPerSecond.of(8), // initial velocity, in m/s
+                        Units.Degrees.of(60)) // shooter angle
+                        .withProjectileTrajectoryDisplayCallBack(
+                                (poses) -> Logger.recordOutput("successfulShotsTrajectory", poses.toArray(Pose3d[]::new)),
+                                (poses) -> Logger.recordOutput("missedShotsTrajectory", poses.toArray(Pose3d[]::new))));
+        }
 
         // Switch to X pattern when X button is pressed
         controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
@@ -209,7 +221,7 @@ public class RobotContainer {
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
-        return autoChooser.get();
+        return new PathPlannerAuto("New Auto", false);
     }
 
     public void resetSimulationField() {

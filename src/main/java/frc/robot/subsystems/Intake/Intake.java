@@ -41,25 +41,30 @@ public class Intake extends SubsystemBase {
     SparkFlexConfig deployCfg = new SparkFlexConfig();
     deployCfg.idleMode(IdleMode.kCoast);
     deployCfg.inverted(false);
-    deployCfg.smartCurrentLimit(40);
+    deployCfg.smartCurrentLimit(60);
 
     deployMotor.configure(
         deployCfg,
         SparkBase.ResetMode.kResetSafeParameters,
         SparkBase.PersistMode.kPersistParameters);
 
-    SparkFlexConfig rollerCfg = new SparkFlexConfig();
-    rollerCfg.idleMode(IdleMode.kCoast);
-    rollerCfg.inverted(false);
-    rollerCfg.smartCurrentLimit(60);
+    SparkFlexConfig rollerCfg1 = new SparkFlexConfig();
+    rollerCfg1.idleMode(IdleMode.kCoast);
+    rollerCfg1.inverted(false);
+    rollerCfg1.smartCurrentLimit(60);
 
     roller1Motor.configure(
-        rollerCfg,
+        rollerCfg1,
         SparkBase.ResetMode.kResetSafeParameters,
         SparkBase.PersistMode.kPersistParameters);
 
+    SparkFlexConfig rollerCfg2 = new SparkFlexConfig();
+    rollerCfg2.idleMode(IdleMode.kCoast);
+    rollerCfg2.inverted(true);
+    rollerCfg2.smartCurrentLimit(60);
+
     roller2Motor.configure(
-        rollerCfg,
+        rollerCfg2,
         SparkBase.ResetMode.kResetSafeParameters,
         SparkBase.PersistMode.kPersistParameters);
 
@@ -108,7 +113,7 @@ public class Intake extends SubsystemBase {
 
   public Command retractIn() {
     return runEnd(
-        () -> setDeployVolts(-Math.abs(sbDeployInVolts.getDouble(6.0))),
+        () -> setDeployVolts(-Math.abs(sbDeployInVolts.getDouble(6.0))), 
         this::stopDeploy
     );
   }

@@ -1,68 +1,136 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.commands;
 
+import static frc.robot.subsystems.vision.VisionConstants.aprilTagLayout;
+
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants;
-import frc.robot.subsystems.drive.Drive;
-import frc.robot.util.LoggedTunableNumber;
 
-/* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-@SuppressWarnings("unused")
+import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.vision.Vision;
+
 public class AlignToHub extends Command {
-  private PIDController xController,yController,rotController;
-  private Timer dontSeeTagTimer, stopTimer;
-  private Drive drive;
-  private double blueTagID = 9;
-  private double redTagID = 25;
-  private LoggedTunableNumber xP = new LoggedTunableNumber("Align/xP", Constants.HUB_ALIGNMENT_P);
-  private LoggedTunableNumber yP = new LoggedTunableNumber("Align/yP", Constants.Y_HUB_ALIGNMENT_P);
-  private LoggedTunableNumber zP = new LoggedTunableNumber("Align/zP", Constants.ROT_HUB_ALIGNMENT_P);
-  public AlignToHub(Drive drive) {
-    xController = new PIDController(xP.getAsDouble(), 0, 0);
-    yController = new PIDController(yP.getAsDouble(), 0, 0);
-    rotController = new PIDController(zP.getAsDouble(), 0, 0);
+  private final Drive drive;
+  private final Vision vision;
+  private final int cameraIndex;
+
+  private final PIDController xPid;
+  private final PIDController yPid;
+  private final ProfiledPIDController thetaPid;
+  private final HolonomicDriveController controller;
+
+  // how far away from april tag
+  private static final double kStandoffMeters = 1.00;
+
+  private static final double kMaxV = 1.5;     // m/s
+  private static final double kMaxOmega = 2.5; // rad/s
+
+  private double lastPrint = 0.0;
+
+  public AlignToHub(Drive drive, Vision vision, int cameraIndex) {
     this.drive = drive;
+    this.vision = vision;
+    this.cameraIndex = cameraIndex;
     addRequirements(drive);
+
+    xPid = new PIDController(2.5, 0.0, 0.0);
+    yPid = new PIDController(2.5, 0.0, 0.0);
+
+    thetaPid =
+        new ProfiledPIDController(
+            5.0, 0.0, 0.15,
+            new TrapezoidProfile.Constraints(6.0, 10.0));
+    thetaPid.enableContinuousInput(-Math.PI, Math.PI);
+
+    controller = new HolonomicDriveController(xPid, yPid, thetaPid);
   }
 
-  // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    this.stopTimer = new Timer();
-    this.stopTimer.start();
-    this.dontSeeTagTimer = new Timer();
-    this.dontSeeTagTimer.start();
-    xController = new PIDController(xP.getAsDouble(), 0, 0);
-    yController = new PIDController(yP.getAsDouble(), 0, 0);
-    rotController = new PIDController(zP.getAsDouble(), 0, 0);
-
-    rotController.setSetpoint(0);
-    rotController.setTolerance(1.2);
-
-    xController.setSetpoint(0.14);
-    xController.setTolerance(0.02);
-    yController.setSetpoint(0);
-
-    yController.setTolerance(0.04);
-    
+    xPid.reset();
+    yPid.reset();
+    thetaPid.reset(drive.getRotation().getRadians());
+    lastPrint = 0.0;
+    System.out.println("[AlignToHub] init cam=" + cameraIndex);
   }
 
-  // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {}
+  public void execute() {
+    if (!vision.hasTarget(cameraIndex)) {
+      drive.stop();
+      ratePrint("[AlignToHub] no target");
+      return;
+    }
 
-  // Called once the command ends or is interrupted.
+    int tagId = (int) Math.round(vision.getTargetID(cameraIndex));
+    if(tagId != 26) return;
+    var tagPoseOpt = aprilTagLayout.getTagPose(tagId);
+    if (tagPoseOpt.isEmpty()) {
+      drive.stop();
+      ratePrint("[AlignToHub] unknown tag id=" + tagId);
+      return;
+    }
+
+    Pose2d tagPose = tagPoseOpt.get().toPose2d();
+
+    Pose2d goal =
+        tagPose.transformBy(new Transform2d(-kStandoffMeters, 0.0, Rotation2d.fromDegrees(180.0)));
+
+    Pose2d current = drive.getPose();
+
+    ChassisSpeeds fieldRelative =
+        controller.calculate(current, goal, 0.0, goal.getRotation());
+
+    double vx = 0; //MathUtil.clamp(fieldRelative.vxMetersPerSecond, -kMaxV, kMaxV);
+    double vy = MathUtil.clamp(fieldRelative.vyMetersPerSecond, -kMaxV, kMaxV);
+    double omega = MathUtil.clamp(fieldRelative.omegaRadiansPerSecond, -kMaxOmega, kMaxOmega);
+    
+    
+    drive.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, drive.getRotation()));
+
+    ratePrint(
+        "[AlignToHub] id=" + tagId
+            + " hasTarget=true"
+            + " tx=" + String.format("%.2f", vision.getTxDeg(cameraIndex))
+            + " cur=(" + fmt(current.getX()) + "," + fmt(current.getY()) + "," + fmtDeg(current.getRotation().getDegrees()) + ")"
+            + " goal=(" + fmt(goal.getX()) + "," + fmt(goal.getY()) + "," + fmtDeg(goal.getRotation().getDegrees()) + ")"
+            + " v=(" + fmt(vx) + "," + fmt(vy) + "," + fmt(omega) + ")"
+    );
+  }
+
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+    drive.stop();
+    System.out.println("[AlignToHub] end interrupted=" + interrupted);
+  }
 
-  // Returns true when the command should end.
   @Override
   public boolean isFinished() {
     return false;
+  }
+
+  private void ratePrint(String msg) {
+    double now = Timer.getFPGATimestamp();
+    if (now - lastPrint > 0.25) {
+      System.out.println(msg);
+      lastPrint = now;
+    }
+  }
+
+  private static String fmt(double v) {
+    return String.format("%.2f", v);
+  }
+
+  private static String fmtDeg(double v) {
+    return String.format("%.1f", v);
   }
 }

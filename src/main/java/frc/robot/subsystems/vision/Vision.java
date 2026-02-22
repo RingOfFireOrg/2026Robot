@@ -15,6 +15,7 @@ package frc.robot.subsystems.vision;
 
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -26,6 +27,8 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
+
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import org.littletonrobotics.junction.Logger;
@@ -52,6 +55,7 @@ public class Vision extends SubsystemBase {
             disconnectedAlerts[i] =
                     new Alert("Vision camera " + Integer.toString(i) + " is disconnected.", AlertType.kWarning);
         }
+
     }
 
     /**
@@ -62,6 +66,27 @@ public class Vision extends SubsystemBase {
     public Rotation2d getTargetX(int cameraIndex) {
         return inputs[cameraIndex].latestTargetObservation.tx();
     }
+    public double getTargetID(int cameraIndex) {
+        return inputs[cameraIndex].latestTargetObservation.tagId();
+    }
+
+    /** True if the camera has a valid target in the latest observation. */
+    public boolean hasTarget(int cameraIndex) {
+    return inputs[cameraIndex].connected
+        && inputs[cameraIndex].latestTargetObservation.tagId() > 0.5;
+    }
+
+
+/** Horizontal angle offset to best target (deg). Positive means target is to the right (Limelight convention). */
+    public double getTxDeg(int cameraIndex) {
+        return inputs[cameraIndex].latestTargetObservation.tx().getDegrees();
+    }
+
+/** Vertical angle offset (deg), optional. */
+    public double getTyDeg(int cameraIndex) {
+        return inputs[cameraIndex].latestTargetObservation.ty().getDegrees();
+    }
+
 
     @Override
     public void periodic() {

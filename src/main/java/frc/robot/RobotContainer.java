@@ -16,6 +16,8 @@ package frc.robot;
 import static edu.wpi.first.units.Units.*;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
+import java.io.IOException;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 
@@ -31,6 +33,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.commands.AlignToHub;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.vision.*;
@@ -115,9 +118,7 @@ public class RobotContainer {
                 vision = new Vision(
                         drive,
                         new VisionIOPhotonVisionSim(
-                                camera0Name, robotToCamera0, driveSimulation::getSimulatedDriveTrainPose),
-                        new VisionIOPhotonVisionSim(
-                                camera1Name, robotToCamera1, driveSimulation::getSimulatedDriveTrainPose));
+                                camera0Name, robotToCamera0, driveSimulation::getSimulatedDriveTrainPose));
                 SimulatedArena.getInstance().addGamePiece(new RebuiltFuelOnField(new Translation2d(2,2)));
                 break;
             default:
@@ -162,20 +163,7 @@ public class RobotContainer {
                 drive, () -> controller.getLeftY(), () -> controller.getLeftX(), () -> -controller.getRightX()));
 
         // Lock to 0° when A button is held
-        if(controller.getLeftTriggerAxis() > 0.3) {
-                SimulatedArena.getInstance()
-                        .addGamePieceProjectile(new RebuiltFuelOnFly(
-                        driveSimulation.getSimulatedDriveTrainPose().getTranslation(),
-                        new Translation2d(), // shooter offet from center
-                        driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
-                        driveSimulation.getSimulatedDriveTrainPose().getRotation(),
-                        Units.Meters.of(0.4), // initial height of the ball, in meters
-                        Units.MetersPerSecond.of(8), // initial velocity, in m/s
-                        Units.Degrees.of(60)) // shooter angle
-                        .withProjectileTrajectoryDisplayCallBack(
-                                (poses) -> Logger.recordOutput("successfulShotsTrajectory", poses.toArray(Pose3d[]::new)),
-                                (poses) -> Logger.recordOutput("missedShotsTrajectory", poses.toArray(Pose3d[]::new))));
-        }
+        controller.a().whileTrue(new AlignToHub(drive, vision, 0));
 
         // Switch to X pattern when X button is pressed
         controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));

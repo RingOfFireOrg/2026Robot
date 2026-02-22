@@ -1,7 +1,230 @@
 package frc.robot.subsystems.Intake;
 
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.SparkBase;
+import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkFlexConfig;
+
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+@SuppressWarnings("removal")
+public class Intake extends SubsystemBase {
+  private static final int kDeployCanId = 20;
+  private static final int kRoller1CanId = 21;
+  private static final int kRoller2CanId = 22;
+
+  private final SparkFlex deployMotor = new SparkFlex(kDeployCanId, MotorType.kBrushless);
+  private final SparkFlex roller1Motor = new SparkFlex(kRoller1CanId, MotorType.kBrushless);
+  private final SparkFlex roller2Motor = new SparkFlex(kRoller2CanId, MotorType.kBrushless);
+
+  private final RelativeEncoder deployEncoder = deployMotor.getEncoder();
+  private final SparkClosedLoopController deployController = deployMotor.getClosedLoopController();
+
+  private static final double kDeadband = 0.02;
+
+  private static final double kDeployMaxVolts = 8.0;
+  private static final double kDeployMinVoltsToMove = 1.5;
+
+  private static final double kRollerMaxVolts = 12.0;
+  private static final double kRollerMinVoltsToMove = 2.0;
+
+  // Your gearbox
+  private static final double kDeployGearRatio = 45.0; // motor rotations per output rotation
+
+  // Fixed PID (since your REV API doesn’t support hot-updating gains the way we tried)
+  private static final double kDeployP = 0.6;
+  private static final double kDeployI = 0.0;
+  private static final double kDeployD = 0.0;
+  private static final double kDeployFF = 0.0;
+
+  private final ShuffleboardTab tab = Shuffleboard.getTab("Intake");
+
+  // Manual volts (optional, for debugging)
+  private final GenericEntry sbDeployOutVolts = tab.add("Deploy Out Volts (manual)", 3.5).getEntry();
+  private final GenericEntry sbDeployInVolts = tab.add("Deploy In Volts (manual)", 6.0).getEntry();
+
+  private final GenericEntry sbRollersInVolts = tab.add("Rollers In Volts", 8.0).getEntry();
+  private final GenericEntry sbRollersOutVolts = tab.add("Rollers Out Volts", 8.0).getEntry();
+
+  // Setpoints in DEGREES (output)
+  private final GenericEntry sbDeployOutDeg = tab.add("Deploy Out (deg)", 90.0).getEntry();
+  private final GenericEntry sbDeployInDeg = tab.add("Deploy In (deg)", 0.0).getEntry();
+
+  // Readouts
+  private final GenericEntry sbDeployPosDeg = tab.add("Deploy Pos (deg)", 0.0).getEntry();
+  private final GenericEntry sbDeployPosMotorRot = tab.add("Deploy Pos (motor rot)", 0.0).getEntry();
+
+  public Intake() {
+    SparkFlexConfig deployCfg = new SparkFlexConfig();
+    deployCfg.idleMode(IdleMode.kCoast);
+    deployCfg.inverted(false);
+    deployCfg.smartCurrentLimit(60);
+
+    // Closed-loop using the motor's relative encoder
+    deployCfg.closedLoop
+        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+        .pidf(kDeployP, kDeployI, kDeployD, kDeployFF);
+
+    deployMotor.configure(
+        deployCfg,
+        SparkBase.ResetMode.kResetSafeParameters,
+        SparkBase.PersistMode.kPersistParameters);
+
+    // Zero relative encoder at startup (assumes you start retracted/home)
+    deployEncoder.setPosition(0.0);
+
+    // Shuffleboard button to re-zero anytime
+    tab.add("Zero Deploy Encoder", new InstantCommand(this::zeroDeployEncoder, this));
+
+    SparkFlexConfig rollerCfg1 = new SparkFlexConfig();
+    rollerCfg1.idleMode(IdleMode.kCoast);
+    rollerCfg1.inverted(false);
+    rollerCfg1.smartCurrentLimit(60);
+    roller1Motor.configure(
+        rollerCfg1,
+        SparkBase.ResetMode.kResetSafeParameters,
+        SparkBase.PersistMode.kPersistParameters);
+
+    SparkFlexConfig rollerCfg2 = new SparkFlexConfig();
+    rollerCfg2.idleMode(IdleMode.kCoast);
+    rollerCfg2.inverted(true);
+    rollerCfg2.smartCurrentLimit(60);
+    roller2Motor.configure(
+        rollerCfg2,
+        SparkBase.ResetMode.kResetSafeParameters,
+        SparkBase.PersistMode.kPersistParameters);
+
+    stopAll();
+  }
+
+  private void zeroDeployEncoder() {
+    deployEncoder.setPosition(0.0);
+  }
+
+  private static double clampVolts(double volts, double maxVolts, double minVoltsToMove) {
+    double cmd = MathUtil.applyDeadband(volts, kDeadband);
+    cmd = MathUtil.clamp(cmd, -maxVolts, maxVolts);
+    if (Math.abs(cmd) > 1e-6) {
+      cmd = Math.copySign(Math.max(Math.abs(cmd), minVoltsToMove), cmd);
+    }
+    return cmd;
+  }
+
+  private double motorRotToDeg(double motorRot) {
+    return motorRot * (360.0 / kDeployGearRatio);
+  }
+
+  private double degToMotorRot(double deg) {
+    return (deg / 360.0) * kDeployGearRatio;
+  }
+
+  // Manual voltage (debug)
+  public void setDeployVolts(double volts) {
+    deployMotor.setVoltage(clampVolts(volts, kDeployMaxVolts, kDeployMinVoltsToMove));
+  }
+
+  public void setRollerVolts(double volts) {
+    double cmd = clampVolts(volts, kRollerMaxVolts, kRollerMinVoltsToMove);
+    roller1Motor.setVoltage(cmd);
+    roller2Motor.setVoltage(cmd);
+  }
+
+  // Position control (degrees -> motor rotations)
+  public void setDeployPositionDeg(double targetDeg) {
+    double targetMotorRot = degToMotorRot(targetDeg);
+    deployController.setReference(targetMotorRot, ControlType.kPosition);
+  }
+
+  public void stopDeploy() {
+    deployMotor.setVoltage(0.0);
+  }
+
+  public void stopRollers() {
+    roller1Motor.setVoltage(0.0);
+    roller2Motor.setVoltage(0.0);
+  }
+
+  public void stopAll() {
+    stopDeploy();
+    stopRollers();
+  }
+
+  // Tap button -> goes to a spot (NOT while-held)
+  public Command deployOut() {
+    return runOnce(() -> setDeployPositionDeg(sbDeployOutDeg.getDouble(90.0)));
+  }
+
+  public Command retractIn() {
+    return runOnce(() -> setDeployPositionDeg(sbDeployInDeg.getDouble(0.0)));
+  }
+
+  // Optional manual jog commands (while held)
+  public Command deployOutManual() {
+    return runEnd(
+        () -> setDeployVolts(Math.abs(sbDeployOutVolts.getDouble(3.5))),
+        this::stopDeploy
+    );
+  }
+
+  public Command retractInManual() {
+    return runEnd(
+        () -> setDeployVolts(-Math.abs(sbDeployInVolts.getDouble(6.0))),
+        this::stopDeploy
+    );
+  }
+
+  public Command rollersIn() {
+    return runEnd(
+        () -> setRollerVolts(Math.abs(sbRollersInVolts.getDouble(8.0))),
+        this::stopRollers
+    );
+  }
+
+  public Command rollersOut() {
+    return runEnd(
+        () -> setRollerVolts(-Math.abs(sbRollersOutVolts.getDouble(8.0))),
+        this::stopRollers
+    );
+  }
+
+  @Override
+  public void periodic() {
+    double motorRot = deployEncoder.getPosition();
+    sbDeployPosMotorRot.setDouble(motorRot);
+    sbDeployPosDeg.setDouble(motorRotToDeg(motorRot));
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
@@ -132,144 +355,12 @@ public class Intake extends SubsystemBase {
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-/* 
-package frc.robot.subsystems.Intake;
-
-import com.revrobotics.spark.SparkBase;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkMaxConfig;
-
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
-@SuppressWarnings("removal")
-public class Intake extends SubsystemBase {
-  private static final int kDeployCanId = 20;
-  private static final int kRoller1CanId = 21;
-  private static final int kRoller2CanId = 22;
-
-  private final SparkMax deployMotor = new SparkMax(kDeployCanId, MotorType.kBrushless);
-  private final SparkMax roller1Motor = new SparkMax(kRoller1CanId, MotorType.kBrushless);
-  private final SparkMax roller2Motor = new SparkMax(kRoller2CanId, MotorType.kBrushless);
-
-  private static final double kDeadband = 0.02;
-
-  private static final double kDeployMaxVolts = 8.0;
-  private static final double kDeployMinVoltsToMove = 1.5;
-
-  private static final double kRollerMaxVolts = 12.0;
-  private static final double kRollerMinVoltsToMove = 2.0;
-
-  public Intake() {
-    SparkMaxConfig deployCfg = new SparkMaxConfig();
-    deployCfg.idleMode(IdleMode.kCoast);
-    deployCfg.inverted(false);
-    deployCfg.smartCurrentLimit(30);
-
-    deployMotor.configure(
-        deployCfg,
-        SparkBase.ResetMode.kResetSafeParameters,
-        SparkBase.PersistMode.kPersistParameters);
-
-    SparkMaxConfig rollerCfg = new SparkMaxConfig();
-    rollerCfg.idleMode(IdleMode.kCoast);
-    rollerCfg.inverted(false);
-    rollerCfg.smartCurrentLimit(40);
-
-    roller1Motor.configure(
-        rollerCfg,
-        SparkBase.ResetMode.kResetSafeParameters,
-        SparkBase.PersistMode.kPersistParameters);
-
-    roller2Motor.configure(
-        rollerCfg,
-        SparkBase.ResetMode.kResetSafeParameters,
-        SparkBase.PersistMode.kPersistParameters);
-
-    stopAll();
-  }
-
-  private static double clampVolts(double volts, double maxVolts, double minVoltsToMove) {
-    double cmd = MathUtil.applyDeadband(volts, kDeadband);
-    cmd = MathUtil.clamp(cmd, -maxVolts, maxVolts);
-    if (Math.abs(cmd) > 1e-6) {
-      cmd = Math.copySign(Math.max(Math.abs(cmd), minVoltsToMove), cmd);
-    }
-    return cmd;
-  }
-
-  public void setDeployVolts(double volts) {
-    deployMotor.setVoltage(clampVolts(volts, kDeployMaxVolts, kDeployMinVoltsToMove));
-  }
-
-  public void setRollerVolts(double volts) {
-    double cmd = clampVolts(volts, kRollerMaxVolts, kRollerMinVoltsToMove);
-    roller1Motor.setVoltage(cmd);
-    roller2Motor.setVoltage(cmd);
-  }
-
-  public void stopDeploy() {
-    deployMotor.setVoltage(0.0);
-  }
-
-  public void stopRollers() {
-    roller1Motor.setVoltage(0.0);
-    roller2Motor.setVoltage(0.0);
-  }
-
-  public void stopAll() {
-    stopDeploy();
-    stopRollers();
-  }
-
-  public Command deployOut(double volts) {
-    return runEnd(() -> setDeployVolts(volts), this::stopDeploy);
-  }
-
-  public Command deployIn(double volts) {
-    return runEnd(() -> setDeployVolts(-Math.abs(volts)), this::stopDeploy);
-  }
-
-  public Command rollersIn(double volts) {
-    return runEnd(() -> setRollerVolts(Math.abs(volts)), this::stopRollers);
-  }
-
-  public Command rollersOut(double volts) {
-    return runEnd(() -> setRollerVolts(-Math.abs(volts)), this::stopRollers);
-  }
-
-  public Command intake(double deployVolts, double rollerVolts) {
-    return runEnd(
-        () -> {
-          setDeployVolts(deployVolts);
-          setRollerVolts(rollerVolts);
-        },
-        this::stopAll
-    );
-  }
-
-  public Command outtake(double deployVolts, double rollerVolts) {
-    return runEnd(
-        () -> {
-          setDeployVolts(-Math.abs(deployVolts));
-          setRollerVolts(-Math.abs(rollerVolts));
-        },
-        this::stopAll
-    );
-  }
-}
 */
+
+
+
+
+
+
+
+

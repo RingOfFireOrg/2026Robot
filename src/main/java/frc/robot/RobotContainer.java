@@ -322,8 +322,8 @@ public class RobotContainer {
             //operator.povUp().onTrue(hubLock); // reapplys hublock if switched off
             operator.povUp().onTrue(Commands.runOnce(() -> turret.setDefaultCommand(hubLock())));
 
-            operator.povRight().whileTrue(intake.retractIn());//intake comes in
-            operator.povLeft().whileTrue(intake.deployOut());//intake goes out
+            operator.povRight().onTrue(intake.retractIn());//intake comes in
+            operator.povLeft().onTrue(intake.deployOut());//intake goes out
             //operator.povDown().whileTrue(Commands.run(() -> {}, turret));//offs hublock
             operator.povDown().onTrue(Commands.runOnce(() ->turret.setDefaultCommand(Commands.run(() -> {}, turret))));
 
@@ -367,7 +367,9 @@ public class RobotContainer {
             //.onFalse(Commands.runOnce(led::restoreAlliance));
             
             
-            operator.leftTrigger().whileTrue(Commands.parallel(transfer.runPercent(0.6), indexer.runPercent(0.6)));//transfer and indexer up
+            operator.leftTrigger().whileTrue(indexer.runPercent(0.6));
+                
+                //Commands.parallel(transfer.runPercent(0.6), indexer.runPercent(0.6)));//transfer and indexer up
 
 
         

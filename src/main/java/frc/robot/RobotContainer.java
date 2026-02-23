@@ -314,7 +314,8 @@ public class RobotContainer {
             //}
 
 
-            operator.y().whileTrue(transfer.runPercent(0.6)); //Transfer
+            //operator.y().whileTrue(transfer.runPercent(0.6)); //Transfer
+            operator.y().whileTrue(indexer.runPercent(0.8));
             operator.x().whileTrue(Commands.parallel(transfer.runPercent(0.6), intake.rollersIn())); //Transfer and Intake
             operator.b().whileTrue(Commands.parallel(transfer.runPercent(-0.6), indexer.runPercent(-0.6))); //Transfer and indexer out
             operator.a().whileTrue(Commands.parallel(transfer.runPercent(-0.6), intake.rollersOut())); //transfer and outtake 
@@ -333,6 +334,9 @@ public class RobotContainer {
                 //climber.runTeleop(() -> -MathUtil.applyDeadband(operator.getLeftY(), 0.12)),
                 //Commands.runOnce(() -> led.setSolid(255,0,0)).repeatedly()))
             //.onFalse(Commands.runOnce(led::restoreAlliance));
+            //operator.leftStick().whileTrue(indexer.runPercent(() -> -MathUtil.applyDeadband(operator.getLeftY(), 0.12)));
+
+
             operator.leftStick()
                 .onTrue(Commands.runOnce(() -> dioLed.setClimberActive(true)))
                 .whileTrue(Commands.parallel(

@@ -51,8 +51,8 @@ public class Intake extends SubsystemBase {
   private final GenericEntry sbDeployOutVolts = tab.add("Deploy Out Volts (manual)", 3.5).getEntry();
   private final GenericEntry sbDeployInVolts = tab.add("Deploy In Volts (manual)", 6.0).getEntry();
 
-  private final GenericEntry sbRollersInVolts = tab.add("Rollers In Volts", 3.0).getEntry();
-  private final GenericEntry sbRollersOutVolts = tab.add("Rollers Out Volts", 3.0).getEntry();
+//private final GenericEntry sbRollersInVolts = tab.add("Rollers In Volts", 3.0).getEntry();
+//private final GenericEntry sbRollersOutVolts = tab.add("Rollers Out Volts", 3.0).getEntry();
 
   private final GenericEntry sbDeployOutDeg = tab.add("Deploy Out (deg)", 75.0).getEntry();
   private final GenericEntry sbDeployInDeg = tab.add("Deploy In (deg)", 3.0).getEntry();
@@ -60,7 +60,10 @@ public class Intake extends SubsystemBase {
   private final GenericEntry sbDeployPosDeg = tab.add("Deploy Pos (deg)", 0.0).getEntry();
   private final GenericEntry sbDeployPosMotorRot = tab.add("Deploy Pos (motor rot)", 0.0).getEntry();
 
-  private final GenericEntry sbDeploySpeedDegPerSec = tab.add("Sped", 5.0).getEntry();
+  private final GenericEntry sbDeploySpeedDegPerSec = tab.add("Sped(deg/s)", 300.0).getEntry();
+
+  private final GenericEntry sbRollersInPercent = tab.add("Rollers In %", 0.35).getEntry();
+  private final GenericEntry sbRollersOutPercent = tab.add("Rollers Out %", 0.35).getEntry();
 
   private double goalMotorRot = 0.0;
   private boolean goalActive = false;
@@ -144,6 +147,15 @@ public class Intake extends SubsystemBase {
     roller2Motor.setVoltage(cmd);
   }
 
+  public void setRollerPercent(double percent) {
+    double cmd = MathUtil.applyDeadband(percent, kDeadband);
+    cmd = MathUtil.clamp(cmd, -1.0, 1.0);
+
+    roller1Motor.set(cmd);
+    roller2Motor.set(cmd);
+  }
+  
+
   public void setDeployPositionDeg(double targetDeg) {
     goalMotorRot = degToMotorRot(targetDeg);
     goalActive = true;
@@ -154,9 +166,14 @@ public class Intake extends SubsystemBase {
     deployMotor.setVoltage(0.0);
   }
 
+  //blic void stopRollers() {
+ // roller1Motor.setVoltage(0.0);
+//  roller2Motor.setVoltage(0.0);
+//}
+
   public void stopRollers() {
-    roller1Motor.setVoltage(0.0);
-    roller2Motor.setVoltage(0.0);
+    roller1Motor.set(0.0);
+    roller2Motor.set(0.0);
   }
 
   public void stopAll() {
@@ -188,16 +205,16 @@ public class Intake extends SubsystemBase {
 
   public Command rollersIn() {
     return runEnd(
-        () -> setRollerVolts(Math.abs(sbRollersInVolts.getDouble(3.0))),
-        this::stopRollers
-    );
+      () -> setRollerPercent(Math.abs(sbRollersInPercent.getDouble(0.35))),
+      this::stopRollers
+   );
   }
 
-  public Command rollersOut() {
-    return runEnd(
-        () -> setRollerVolts(-Math.abs(sbRollersOutVolts.getDouble(3.0))),
-        this::stopRollers
-    );
+public Command rollersOut() {
+  return runEnd(
+      () -> setRollerPercent(-Math.abs(sbRollersOutPercent.getDouble(0.35))),
+      this::stopRollers
+   );
   }
 
   @Override

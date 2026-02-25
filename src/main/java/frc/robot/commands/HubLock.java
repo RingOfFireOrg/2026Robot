@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Turret.Turret;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.util.LimelightHelpers;
+import edu.wpi.first.math.controller.PIDController;
 
 public class HubLock extends Command {
   private final Turret turret;
@@ -38,7 +39,7 @@ public class HubLock extends Command {
 
   @Override
   public void execute() {
-    double turretRot = turret.getMotorRotations();
+    double turretRot = turret.getTurretRotations();
 
     if (wrapping) {
       double err = wrapTargetRot - turretRot;
@@ -47,14 +48,14 @@ public class HubLock extends Command {
 
       if (Math.abs(err) <= WRAP_DONE_TOL_ROT) {
         wrapping = false;
-        turret.stop();
+        turret.stopTurret();
       }
       return;
     }
 
     boolean hasTarget = vision.hasTarget(cameraIndex);
     if (!hasTarget) {
-      turret.stop();
+      turret.stopTurret();
       //turret.stopShooter();
       return;
     }
@@ -105,7 +106,7 @@ public class HubLock extends Command {
 
   @Override
   public void end(boolean interrupted) {
-    turret.stop();
+    turret.stopTurret();
     //turret.stopShooter();
     System.out.println("[HubLock] end interrupted=" + interrupted);
   }

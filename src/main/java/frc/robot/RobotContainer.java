@@ -342,8 +342,8 @@ public class RobotContainer {
                 .onFalse(Commands.runOnce(led::restoreAlliance));
 
 
-            operator.rightBumper().whileTrue(Commands.runEnd(() -> turret.setDutyCycle(+0.25), turret::stop, turret));//manual turret turning
-            operator.leftBumper().whileTrue(Commands.runEnd(() -> turret.setDutyCycle(-0.25), turret::stop, turret));
+            operator.rightBumper().whileTrue(Commands.runEnd(() -> turret.setDutyCycle(+0.25), turret::stopTurret, turret));//manual turret turning
+            operator.leftBumper().whileTrue(Commands.runEnd(() -> turret.setDutyCycle(-0.25), turret::stopTurret, turret));
             //operator.rightTrigger().whileTrue(turret.runShooterPercent(0.9));
             
             

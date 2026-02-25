@@ -12,7 +12,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 @SuppressWarnings("removal")
 public class Transfer extends SubsystemBase {
-  private static final int kMotorCanId = 30;//spindexer
+  private static final int kMotorCanId = 31;//spindexer
 
   private final SparkMax motor = new SparkMax(kMotorCanId, MotorType.kBrushless);
 

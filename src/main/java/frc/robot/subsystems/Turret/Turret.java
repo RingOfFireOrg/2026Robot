@@ -1,4 +1,5 @@
 package frc.robot.subsystems.Turret;
+import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -39,12 +40,22 @@ public class Turret extends SubsystemBase {
   private final InterpolatingDoubleTreeMap shooterRpmMap = new InterpolatingDoubleTreeMap();
   private static final double kMinShotDistM = 1.35;
   private static final double kMaxShotDistM = 4.00;
+  private static final int kAnglerCurrentLimit = 30;
+  private static final boolean kAnglerInverted = false;
+  private static final double kAnglerKpVoltsPerRot = 6.0;
+  private static final double kAnglerMaxVolts = 4.0;
+  private static final double kAnglerTolRot = 0.01;
+  private static final double kDistMinM = 0.75;
+  private static final double kDistMaxM = 4.00;
+  private static final double kAnglerMinRot = 0.00;
+  private static final double kAnglerMaxRot = 0.80;
+  private double anglerSetpointRot = 0.0;
+  private boolean anglerEnabled = false;  
 
 
 
-
-  private final SparkMax motor = new SparkMax(kMotorCanId, MotorType.kBrushless);
-  private final RelativeEncoder encoder = motor.getEncoder();
+  private final SparkMax rotMotor = new SparkMax(kMotorCanId, MotorType.kBrushless);
+  private final RelativeEncoder rotEncoder = rotMotor.getEncoder();
 
   private final TalonFX shooterMotor = new TalonFX(kShooterCanId);
   private final VoltageOut shooterVoltsReq = new VoltageOut(0.0);
@@ -57,23 +68,9 @@ public class Turret extends SubsystemBase {
   private final VelocityVoltage shooterVelReq = new VelocityVoltage(0.0);
   private final VelocityVoltage shooter2VelReq = new VelocityVoltage(0.0);
 
-
-  //private final SparkMax shooterNeo = new SparkMax(kShooterNeoCanId, MotorType.kBrushless);
-  //private static final int kShooterNeoCurrentLimit = 40;
-
-  private final SparkMax angler = new SparkMax(kAnglerCanId, MotorType.kBrushless);
-  private final RelativeEncoder eRelativeEncoder = angler.getEncoder();
-  private static final int kAnglerCurrentLimit = 30;
-  private static final boolean kAnglerInverted = false;
-  private static final double kAnglerKpVoltsPerRot = 6.0;
-  private static final double kAnglerMaxVolts = 4.0;
-  private static final double kAnglerTolRot = 0.01;
-  private static final double kDistMinM = 0.75;
-  private static final double kDistMaxM = 4.00;
-  private static final double kAnglerMinRot = 0.00;
-  private static final double kAnglerMaxRot = 0.80;
-  private double anglerSetpointRot = 0.0;
-  private boolean anglerEnabled = false;  
+  private final SparkMax anglerMotor = new SparkMax(kAnglerCanId, MotorType.kBrushless);
+  private final RelativeEncoder eRelativeEncoder = anglerMotor.getEncoder();
+  
 
   private static final double kMinRot = -1.0;
   private static final double kMaxRot =  1.0;
@@ -87,19 +84,21 @@ public class Turret extends SubsystemBase {
   private double lastCmdDuty = 0.0;
 
   public Turret() {
-    SparkMaxConfig config = new SparkMaxConfig();
-    config.idleMode(IdleMode.kBrake);
-    config.inverted(false);
-    config.smartCurrentLimit(30);
+    //rotation motor config
+    SparkMaxConfig rotConfig = new SparkMaxConfig();
+    rotConfig.idleMode(IdleMode.kBrake);
+    rotConfig.inverted(false);
+    rotConfig.smartCurrentLimit(30);
 
-    motor.configure(
-        config,
+    rotMotor.configure(
+        rotConfig,
         SparkBase.ResetMode.kResetSafeParameters,
         SparkBase.PersistMode.kPersistParameters);
 
-    encoder.setPosition(0.0);
+    rotEncoder.setPosition(0.0);
     System.out.println("[Turret] init: CAN=" + kMotorCanId + " inverted=false brake=true");
 
+    // shooter motor configs
     TalonFXConfiguration shooterCfg = new TalonFXConfiguration();
     TalonFXConfiguration shooter2Cfg = new TalonFXConfiguration();
 
@@ -111,70 +110,59 @@ public class Turret extends SubsystemBase {
 
     shooterCfg.Slot0 = slot0;
     shooter2Cfg.Slot0 = slot0;
-    
-    //SparkMaxConfig shooterNeoCfg = new SparkMaxConfig();
-    //shooterNeoCfg.idleMode(IdleMode.kCoast);
-    //shooterNeoCfg.inverted(true);
-    //shooterNeoCfg.smartCurrentLimit(kShooterNeoCurrentLimit);
 
-    //shooterNeo.configure(
-      //shooterNeoCfg,
-      //SparkBase.ResetMode.kResetSafeParameters,
-      //SparkBase.PersistMode.kPersistParameters);
-
+    //Angler motor rotConfig
     SparkMaxConfig anglerCfg = new SparkMaxConfig();
     anglerCfg.idleMode(IdleMode.kBrake);
     anglerCfg.inverted(false);
     anglerCfg.smartCurrentLimit(kAnglerCurrentLimit);
 
-    angler.configure(
+    anglerMotor.configure(
       anglerCfg,
       SparkBase.ResetMode.kResetSafeParameters,
       SparkBase.PersistMode.kPersistParameters);
     
-      eRelativeEncoder.setPosition(0.0);
+    eRelativeEncoder.setPosition(0.0);
    
-
-
+    //Shooter motor 1 output configs
     MotorOutputConfigs shooterOut = new MotorOutputConfigs();
     shooterOut.NeutralMode = NeutralModeValue.Coast;
     shooterOut.Inverted = InvertedValue.CounterClockwise_Positive;
     shooterCfg.MotorOutput = shooterOut;
 
+    //Shooter motor 2 output configs
     MotorOutputConfigs shooterOut2 = new MotorOutputConfigs();
     shooterOut2.NeutralMode = NeutralModeValue.Coast;
     shooterOut2.Inverted = InvertedValue.Clockwise_Positive;
     shooter2Cfg.MotorOutput = shooterOut2;
 
+    //limits for both shooter motors
     CurrentLimitsConfigs shooterLimits = new CurrentLimitsConfigs();
     shooterLimits.SupplyCurrentLimitEnable = true;
     shooterLimits.SupplyCurrentLimit = 60.0;
     shooterCfg.CurrentLimits = shooterLimits;
+    shooter2Cfg.CurrentLimits = shooterLimits;
 
     OpenLoopRampsConfigs shooterRamps = new OpenLoopRampsConfigs();
     shooterRamps.VoltageOpenLoopRampPeriod = 0.10;
     shooterCfg.OpenLoopRamps = shooterRamps;
-
-    shooter2Cfg.CurrentLimits = shooterLimits;
     shooter2Cfg.OpenLoopRamps = shooterRamps;
 
     shooterMotor.getConfigurator().apply(shooterCfg);
     shooterMotor2.getConfigurator().apply(shooter2Cfg);
     initShooterRpmMap();
-
   }
 
-  public double getMotorRotations() {
-    return encoder.getPosition();
+  public double getTurretRotations() {
+    return rotEncoder.getPosition();
   }
 
-  public double getMotorRpm() {
-    return encoder.getVelocity();
+  public double getTurretRPM() {
+    return rotEncoder.getVelocity();
   }
-
-
+  
   public void setDutyCycle(double duty) {
-    final double posRot = getMotorRotations();
+    final double posRot = getTurretRotations();
 
     double cmd = MathUtil.applyDeadband(duty, kDeadband);
     cmd = MathUtil.clamp(cmd, -kMaxDuty, kMaxDuty);
@@ -187,7 +175,7 @@ public class Turret extends SubsystemBase {
       boolean hitMin = posRot <= kMinRot && cmd < 0;
       boolean hitMax = posRot >= kMaxRot && cmd > 0;
       if (hitMin || hitMax) {
-        motor.set(0.0);
+        rotMotor.set(0.0);
         rateLimitedPrint(
             "[Turret] SOFT LIMIT hit (posRot=" + fmt(posRot) + ") cmd=" + fmt(cmd) +
                 " min=" + fmt(kMinRot) + " max=" + fmt(kMaxRot));
@@ -196,20 +184,20 @@ public class Turret extends SubsystemBase {
       }
     }
 
-    motor.set(cmd);
+    rotMotor.set(cmd);
     lastCmdDuty = cmd;
 
     rateLimitedPrint(
         "[Turret] cmd=" + fmt(cmd) +
             " in=" + fmt(duty) +
             " posRot=" + fmt(posRot) +
-            " rpm=" + fmt(getMotorRpm()));
+            " rpm=" + fmt(getTurretRPM()));
   }
 
-  public void stop() {
-    motor.set(0.0);
+  public void stopTurret() {
+    rotMotor.set(0.0);
     lastCmdDuty = 0.0;
-    rateLimitedPrint("[Turret] stop");
+    rateLimitedPrint("[Turret] stopTurret");
   }
 
   private void rateLimitedPrint(String msg) {
@@ -279,10 +267,6 @@ public void setShooterFromDistanceMeters(double distanceM) {
   setShooterRPM(rpm, rpm);
 }
 
-
-
-
-
 public double getAnglerRotations() {
   return eRelativeEncoder.getPosition();
 }
@@ -290,7 +274,7 @@ public double getAnglerRotations() {
 public void enableAngler(boolean enabled) {
   anglerEnabled = enabled;
   if (!enabled) {
-    angler.setVoltage(0.0);
+    anglerMotor.setVoltage(0.0);
   }
 }
 
@@ -307,12 +291,12 @@ public void updateAngler() {
 
   double err = anglerSetpointRot - getAnglerRotations();
   if (Math.abs(err) <= kAnglerTolRot) {
-    angler.setVoltage(0.0);
+    anglerMotor.setVoltage(0.0);
     return;
   }
 
   double volts = MathUtil.clamp(err * kAnglerKpVoltsPerRot, -kAnglerMaxVolts, kAnglerMaxVolts);
-  angler.setVoltage(volts);
+  anglerMotor.setVoltage(volts);
 }
 
 public double getDistanceToTagMeters(String limelightName) {
@@ -337,8 +321,8 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.RelativeEncoder;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import com.revrobotics.spark.config.SparkMaxConfig;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.rotConfig.SparkMaxConfig;
+import com.revrobotics.spark.rotConfig.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.SparkBase;
 
 @SuppressWarnings("removal")
@@ -346,49 +330,49 @@ import com.revrobotics.spark.SparkBase;
 
 
 public class Turret extends SubsystemBase {
-  private final SparkMax motor = new SparkMax(41, MotorType.kBrushless); // CAN ID 20
-  private final RelativeEncoder encoder = motor.getEncoder();
+  private final SparkMax rotMotor = new SparkMax(41, MotorType.kBrushless); // CAN ID 20
+  private final RelativeEncoder rotEncoder = rotMotor.getEncoder();
 
   private static final double kMinRot = -1.0;  
   private static final double kMaxRot =  1.0;  
-  private static final boolean kEnableSoftLimits = false; // TEMP: disable until abs encoder
+  private static final boolean kEnableSoftLimits = false; // TEMP: disable until abs rotEncoder
 
 
 public Turret() {
-  SparkMaxConfig config = new SparkMaxConfig();
-  config.idleMode(IdleMode.kBrake);
-  config.inverted(false);
+  SparkMaxConfig rotConfig = new SparkMaxConfig();
+  rotConfig.idleMode(IdleMode.kBrake);
+  rotConfig.inverted(false);
 
-  motor.configure(
-      config,
+  rotMotor.configure(
+      rotConfig,
       SparkBase.ResetMode.kResetSafeParameters,
       SparkBase.PersistMode.kPersistParameters
   );
 
-  encoder.setPosition(0.0);
+  rotEncoder.setPosition(0.0);
 }
 
 
-  public double getMotorRotations() {
-    return encoder.getPosition();
+  public double getTurretRotations() {
+    return rotEncoder.getPosition();
   }
 
 public void setDutyCycle(double output) {
-  double pos = getMotorRotations();
+  double pos = getTurretRotations();
 
   if (kEnableSoftLimits) {
     if ((pos <= kMinRot && output < 0) || (pos >= kMaxRot && output > 0)) {
-      motor.set(0.0);
+      rotMotor.set(0.0);
       return;
     }
   }
 
-  motor.set(MathUtil.clamp(output, -0.05, 0.05));
+  rotMotor.set(MathUtil.clamp(output, -0.05, 0.05));
 }
 
 
-  public void stop() {
-    motor.set(0.0);
+  public void stopT() {
+    rotMotor.set(0.0);
   }
 }
 */

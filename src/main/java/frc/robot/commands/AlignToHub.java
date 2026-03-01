@@ -79,8 +79,6 @@ public class AlignToHub extends Command {
     }
 
     Pose2d tagPose = tagPoseOpt.get().toPose2d();
-
-
     Pose2d goal =
         tagPose.transformBy(new Transform2d(-kStandoffMeters, 0.0, Rotation2d.fromDegrees(180.0)));
 

@@ -51,6 +51,7 @@ import frc.robot.subsystems.drive.ModuleIOSpark;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
+import frc.robot.util.LimelightHelpers;
 import frc.robot.commands.HubLock;
 import frc.robot.subsystems.Turret.Turret;
 import frc.robot.subsystems.vision.VisionIOLimelight;
@@ -86,6 +87,9 @@ public class RobotContainer {
     private Command SetLED;
     private Intake intake;
     private LedManager dioLed;
+    private double lastValidDistanceM = 2.0;
+    private double lastSeenTimeSec = 0.0;
+    private static final double kTargetHoldTimeSec = 0.25;
 
 
 
@@ -315,7 +319,7 @@ public class RobotContainer {
 
 
             //operator.y().whileTrue(transfer.runPercent(0.6)); //Transfer
-            operator.y().whileTrue(Commands.parallel(indexer.runPercent(0.8), transfer.runPercent(0.8))); //indexer and transfer up
+            operator.y().whileTrue(Commands.parallel(indexer.runPercent(0.8), transfer.runPercent(-0.8))); //indexer and transfer up
             operator.x().whileTrue(Commands.parallel(transfer.runPercent(-0.6), intake.rollersIn())); //Transfer and Intake
             operator.b().whileTrue(Commands.parallel(transfer.runPercent(0.6), indexer.runPercent(-0.6))); //Transfer and indexer out
             operator.a().whileTrue(intake.rollersOut()); //outtake 
@@ -368,7 +372,32 @@ public class RobotContainer {
             //.onFalse(Commands.runOnce(led::restoreAlliance));
             
             
-            operator.leftTrigger().whileTrue(indexer.runPercent(0.8));
+           
+
+
+
+            operator.leftTrigger(0.15).whileTrue(
+                turret.runEnd(
+                    () -> {
+                        String ll = "limelight-tag";
+
+                        boolean hasTarget = LimelightHelpers.getTV(ll);
+                        double now = edu.wpi.first.wpilibj.Timer.getFPGATimestamp();
+
+                        if (hasTarget) {
+                            lastValidDistanceM = turret.getDistanceToTagMeters(ll);
+                            lastSeenTimeSec = now;
+                        }
+
+                        if (now - lastSeenTimeSec <= kTargetHoldTimeSec) {
+                            turret.setShooterFromDistanceMeters(lastValidDistanceM);
+                        } else {
+                            turret.stopShooter();
+                        }
+                    },
+                    turret::stopShooter
+  )
+);
                 
                 //Commands.parallel(transfer.runPercent(0.6), indexer.runPercent(0.6)));//transfer and indexer up
 

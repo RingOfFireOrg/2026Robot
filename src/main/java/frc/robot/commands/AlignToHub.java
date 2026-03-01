@@ -33,6 +33,7 @@ public class AlignToHub extends Command {
 
   private static final double kMaxV = 1.5;     // m/s
   private static final double kMaxOmega = 2.5; // rad/s
+  private static final double tag25Offset = -0.3;
 
   private double lastPrint = 0.0;
 
@@ -72,25 +73,27 @@ public class AlignToHub extends Command {
     }
 
     int tagId = (int) Math.round(vision.getTargetID(cameraIndex));
-    if(tagId != 26) return;
+    
     var tagPoseOpt = aprilTagLayout.getTagPose(tagId);
     if (tagPoseOpt.isEmpty()) {
       drive.stop();
       ratePrint("[AlignToHub] unknown tag id=" + tagId);
       return;
     }
-
-    Pose2d tagPose = tagPoseOpt.get().toPose2d();
-
-    Pose2d goal =
-        tagPose.transformBy(new Transform2d(-kStandoffMeters, 0.0, Rotation2d.fromDegrees(180.0)));
-
     Pose2d current = drive.getPose();
+    Pose2d goal = drive.getPose();
+    Pose2d tagPose = tagPoseOpt.get().toPose2d().transformBy(new Transform2d(-kStandoffMeters, 0.0, Rotation2d.fromDegrees(180.0)));
+
+    //find a better way to do ts
+    if(tagId == 26) goal = new Pose2d(tagPose.getX()-0.5, tagPose.getY(), tagPose.getRotation());
+    if(tagId == 25) goal = new Pose2d(tagPose.getX()-0.5, tagPose.getY()+tag25Offset, tagPose.getRotation());
+
+    
 
     ChassisSpeeds fieldRelative =
         controller.calculate(current, goal, 0.0, goal.getRotation());
 
-    double vx = 0; //MathUtil.clamp(fieldRelative.vxMetersPerSecond, -kMaxV, kMaxV);
+    double vx = MathUtil.clamp(fieldRelative.vxMetersPerSecond, -kMaxV, kMaxV);
     double vy = MathUtil.clamp(fieldRelative.vyMetersPerSecond, -kMaxV, kMaxV);
     double omega = MathUtil.clamp(fieldRelative.omegaRadiansPerSecond, -kMaxOmega, kMaxOmega);
     

@@ -73,6 +73,7 @@ import edu.wpi.first.networktables.GenericEntry;
 
 
 
+
 @SuppressWarnings("unused")
 public class RobotContainer {
     private final Drive drive;
@@ -90,6 +91,7 @@ public class RobotContainer {
     private double lastValidDistanceM = 2.0;
     private double lastSeenTimeSec = 0.0;
     private static final double kTargetHoldTimeSec = 0.25;
+    private double lastPrintTimeSec = 0.0;
 
 
 
@@ -374,8 +376,49 @@ public class RobotContainer {
             
            
 
+            operator.leftTrigger(0.15).whileTrue(
+                turret.runEnd(
+                    () -> {
+                        String ll = "limelight-tag";
 
+                        boolean hasTarget = LimelightHelpers.getTV(ll);
+                        double now = edu.wpi.first.wpilibj.Timer.getFPGATimestamp();
 
+                        if (hasTarget) {
+                            lastValidDistanceM = turret.getDistanceToTagMeters(ll);
+                            lastSeenTimeSec = now;
+                        }
+
+                        if (now - lastSeenTimeSec <= kTargetHoldTimeSec) {
+
+                            turret.setShooterFromDistanceMeters(lastValidDistanceM);
+
+                            if (now - lastPrintTimeSec > 0.25) {
+                                double top = turret.getTopRpmForDistanceMeters(lastValidDistanceM);
+                                double bottom = turret.getBottomRpmForDistanceMeters(lastValidDistanceM);
+
+                                double topMeas = turret.getShooterTopMeasuredRpm();
+                                double bottomMeas = turret.getShooterBottomMeasuredRpm();
+
+                                System.out.println(
+                                    "[LL AUTO RPM] dist=" + String.format("%.2f", lastValidDistanceM)
+                                    + " top=" + String.format("%.0f", top)
+                                    + " bottom=" + String.format("%.0f", bottom)
+                                    + " topMeas=" + String.format("%.0f", topMeas)
+                                    + " botMeas=" + String.format("%.0f", bottomMeas)
+                                );
+
+                                lastPrintTimeSec = now;
+                            }
+
+            } else {
+                turret.stopShooter();
+            }
+        },
+        turret::stopShooter
+    )
+);
+/* 
             operator.leftTrigger(0.15).whileTrue(
                 turret.runEnd(
                     () -> {
@@ -398,7 +441,7 @@ public class RobotContainer {
                     turret::stopShooter
   )
 );
-                
+ */                
                 //Commands.parallel(transfer.runPercent(0.6), indexer.runPercent(0.6)));//transfer and indexer up
 
 

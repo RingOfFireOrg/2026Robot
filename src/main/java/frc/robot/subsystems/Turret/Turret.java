@@ -38,7 +38,9 @@ public class Turret extends SubsystemBase {
   private static final int kShooterCanId = 41;//bottom
   private static final int kShooter2CanId = 42;//top
   private static final int kAnglerCanId = 43;
-  private final InterpolatingDoubleTreeMap shooterRpmMap = new InterpolatingDoubleTreeMap();
+  //private final InterpolatingDoubleTreeMap shooterRpmMap = new InterpolatingDoubleTreeMap();
+  private final InterpolatingDoubleTreeMap topRpmMap = new InterpolatingDoubleTreeMap();
+  private final InterpolatingDoubleTreeMap bottomRpmMap = new InterpolatingDoubleTreeMap();
   private static final double kMinShotDistM = 1.35;
   private static final double kMaxShotDistM = 4.00;
   private static final int kAnglerCurrentLimit = 30;
@@ -51,7 +53,8 @@ public class Turret extends SubsystemBase {
   private static final double kAnglerMinRot = 0.00;
   private static final double kAnglerMaxRot = 0.80;
   private double anglerSetpointRot = 0.0;
-  private boolean anglerEnabled = false;  
+  private boolean anglerEnabled = false; 
+  private static final double kSpinDeltaRpm = 250.0;
 
 
 
@@ -247,25 +250,41 @@ public Command runShooterRPM(DoubleSupplier topRPM, DoubleSupplier bottomRPM) {
   );
 }
 private void initShooterRpmMap() {
-  shooterRpmMap.put(1.35, 5200.0);
-  shooterRpmMap.put(1.50, 5000.0);
-  shooterRpmMap.put(2.00, 4850.0);
-  shooterRpmMap.put(2.25, 4900.0);
-  shooterRpmMap.put(3.00, 5200.0);
-  shooterRpmMap.put(3.50, 5450.0);
-  shooterRpmMap.put(4.00, 5700.0);
+  topRpmMap.put(1.35, 5450.0);
+  topRpmMap.put(1.50, 5250.0);
+  topRpmMap.put(2.00, 5100.0);
+  topRpmMap.put(2.25, 5150.0);
+  topRpmMap.put(3.00, 5450.0);
+  topRpmMap.put(3.50, 5700.0);
+  topRpmMap.put(4.00, 5950.0);
+
+  bottomRpmMap.put(1.35, 4950.0);
+  bottomRpmMap.put(1.50, 4750.0);
+  bottomRpmMap.put(2.00, 4600.0);
+  bottomRpmMap.put(2.25, 4650.0);
+  bottomRpmMap.put(3.00, 4950.0);
+  bottomRpmMap.put(3.50, 5200.0);
+  bottomRpmMap.put(4.00, 5450.0);
 }
 
-public double getShooterRpmForDistanceMeters(double distanceM) {
+
+public double getTopRpmForDistanceMeters(double distanceM) {
   double d = MathUtil.clamp(distanceM, kMinShotDistM, kMaxShotDistM);
-  Double rpm = shooterRpmMap.get(d);
+  Double rpm = topRpmMap.get(d);
+  return (rpm != null) ? rpm : 5200.0;
+}
+
+public double getBottomRpmForDistanceMeters(double distanceM) {
+  double d = MathUtil.clamp(distanceM, kMinShotDistM, kMaxShotDistM);
+  Double rpm = bottomRpmMap.get(d);
   return (rpm != null) ? rpm : 5200.0;
 }
 
 
 public void setShooterFromDistanceMeters(double distanceM) {
-  double rpm = getShooterRpmForDistanceMeters(distanceM);
-  setShooterRPM(rpm, rpm);
+  double topRpm = getTopRpmForDistanceMeters(distanceM);
+  double bottomRpm = getBottomRpmForDistanceMeters(distanceM);
+  setShooterRPM(topRpm, bottomRpm);
 }
 
 public double getAnglerRotations() {
@@ -298,6 +317,16 @@ public void updateAngler() {
 
   double volts = MathUtil.clamp(err * kAnglerKpVoltsPerRot, -kAnglerMaxVolts, kAnglerMaxVolts);
   anglerMotor.setVoltage(volts);
+}
+
+public double getShooterTopMeasuredRpm() {
+  //top
+  return shooterMotor2.getVelocity().getValueAsDouble() * 60.0;
+}
+
+public double getShooterBottomMeasuredRpm() {
+  //bottom
+  return shooterMotor.getVelocity().getValueAsDouble() * 60.0;
 }
 
 public double getDistanceToTagMeters(String limelightName) {

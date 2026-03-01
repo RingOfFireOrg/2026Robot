@@ -28,10 +28,11 @@ public class AutoRpm extends Command {
 
     double now = Timer.getFPGATimestamp();
     if (now - lastPrint > 0.25) {
-      double rpmSet = turret.getShooterRpmForDistanceMeters(distMeters);
-      System.out.println(
-          "[AutoRpm] dist=" + String.format("%.2f", distMeters)
-              + " rpmSet=" + String.format("%.0f", rpmSet));
+      double top = turret.getTopRpmForDistanceMeters(distMeters);
+      double bottom = turret.getBottomRpmForDistanceMeters(distMeters);
+      System.out.println("[AutoRpm] dist=" + String.format("%.2f", distMeters)
+        + " top=" + String.format("%.0f", top)
+        + " bottom=" + String.format("%.0f", bottom));
       lastPrint = now;
     }
   }

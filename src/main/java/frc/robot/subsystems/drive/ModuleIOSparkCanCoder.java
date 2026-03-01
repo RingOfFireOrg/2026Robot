@@ -39,6 +39,7 @@ public class ModuleIOSparkCanCoder implements ModuleIO {
 
   private final DoubleSupplier turnEncoderDS;
   private final CANcoder turnCAN;
+  private static final String CANBUS = "FRC-3459-PT-CANivore";
 
   // Closed loop controllers
   private final SparkClosedLoopController driveController;
@@ -99,12 +100,12 @@ public ModuleIOSparkCanCoder(int module) {
     turnCAN =
         new CANcoder(
             switch (module) {
-              case 0 -> 9;
-              case 1 -> 10;
-              case 2 -> 11;
-              case 3 -> 12;
+              case 0 -> frontLeftCancoderID;
+              case 1 -> frontRightCancoderID;
+              case 2 -> backLeftCancoderID;
+              case 3 -> backRightCancoderID;
               default -> 0;
-            });
+            }, CANBUS);
     turnEncoderDS = () -> ((turnCAN.getAbsolutePosition().getValueAsDouble() + .5) * 2 * 3.14159);
     driveEncoder = driveSpark.getEncoder();
     driveController = driveSpark.getClosedLoopController();

@@ -316,13 +316,14 @@ public class RobotContainer {
 
             //operator.y().whileTrue(transfer.runPercent(0.6)); //Transfer
             operator.y().whileTrue(Commands.parallel(indexer.runPercent(0.8), transfer.runPercent(0.8))); //indexer and transfer up
-            operator.x().whileTrue(Commands.parallel(transfer.runPercent(0.6), intake.rollersIn())); //Transfer and Intake
-            operator.b().whileTrue(Commands.parallel(transfer.runPercent(-0.6), indexer.runPercent(-0.6))); //Transfer and indexer out
+            operator.x().whileTrue(Commands.parallel(transfer.runPercent(-0.6), intake.rollersIn())); //Transfer and Intake
+            operator.b().whileTrue(Commands.parallel(transfer.runPercent(0.6), indexer.runPercent(-0.6))); //Transfer and indexer out
             operator.a().whileTrue(intake.rollersOut()); //outtake 
 
             //operator.povUp().onTrue(hubLock); // reapplys hublock if switched off
             //operator.povUp().onTrue(Commands.runOnce(() -> turret.setDefaultCommand(hubLock())));
             //operator.povUp().whileTrue
+            operator.povUp().whileTrue(Commands.parallel(indexer.runPercent(0.8),transfer.runPercent(-0.6),intake.rollersIn()));//intake and transfer in, indexer up
 
             operator.povRight().onTrue(intake.retractIn());//intake comes in
             operator.povLeft().onTrue(intake.deployOut());//intake goes out
@@ -367,7 +368,7 @@ public class RobotContainer {
             //.onFalse(Commands.runOnce(led::restoreAlliance));
             
             
-            operator.leftTrigger().whileTrue(Commands.parallel(indexer.runPercent(0.8), transfer.runPercent(0.8)));
+            operator.leftTrigger().whileTrue(indexer.runPercent(0.8));
                 
                 //Commands.parallel(transfer.runPercent(0.6), indexer.runPercent(0.6)));//transfer and indexer up
 

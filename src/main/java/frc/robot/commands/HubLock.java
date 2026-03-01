@@ -8,6 +8,7 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.util.LimelightHelpers;
 import edu.wpi.first.math.controller.PIDController;
 
+@SuppressWarnings("unused")
 public class HubLock extends Command {
   private final Turret turret;
   private final Vision vision;

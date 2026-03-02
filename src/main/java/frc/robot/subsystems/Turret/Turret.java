@@ -55,6 +55,10 @@ public class Turret extends SubsystemBase {
   private double anglerSetpointRot = 0.0;
   private boolean anglerEnabled = false; 
   private static final double kSpinDeltaRpm = 250.0;
+  private static final double kBoostStartRpmErr = 200.0;
+  private static final double kBoostFullRpmErr = 900.0;
+  private static final double kBoostMaxVolts = 2.5;
+  private double lastShooterPrintTime = 0.0;
 
 
 
@@ -143,7 +147,7 @@ public class Turret extends SubsystemBase {
     //limits for both shooter motors
     CurrentLimitsConfigs shooterLimits = new CurrentLimitsConfigs();
     shooterLimits.SupplyCurrentLimitEnable = true;
-    shooterLimits.SupplyCurrentLimit = 60.0;
+    shooterLimits.SupplyCurrentLimit = 70.0;
     shooterCfg.CurrentLimits = shooterLimits;
     shooter2Cfg.CurrentLimits = shooterLimits;
 
@@ -216,6 +220,14 @@ public class Turret extends SubsystemBase {
     return String.format("%.3f", v);
   }
 
+  private static double clamp(double x, double lo, double hi) {
+  return Math.max(lo, Math.min(hi, x));
+  }
+
+  private static double lerp(double a, double b, double t) {
+  return a + (b - a) * t;
+  }
+
 public void setShooterVolts(double volts) {
   double cmd = MathUtil.clamp(volts, -kShooterMaxVolts, kShooterMaxVolts);
   shooterMotor.setControl(shooterVoltsReq.withOutput(cmd));//kraken
@@ -234,13 +246,54 @@ public void stopShooter() {
 public Command runShooterPercent(double percent) {
   return runEnd(() -> setShooterVolts(percent * 12.0), this::stopShooter);
 }
-
+/* 
 public void setShooterRPM(double topRPM, double bottomRPM) {
   double topRps = topRPM / 60.0;
   double bottomRps = bottomRPM / 60.0;
 
-  shooterMotor.setControl(shooterVelReq.withVelocity(topRps));
-  shooterMotor2.setControl(shooter2VelReq.withVelocity(bottomRps));
+  shooterMotor.setControl(shooterVelReq.withVelocity(bottomRps));
+  shooterMotor2.setControl(shooter2VelReq.withVelocity(topRps));
+}
+*/
+public void setShooterRPM(double topRPM, double bottomRPM) {
+  double topMeas = getShooterTopMeasuredRpm();
+  double botMeas = getShooterBottomMeasuredRpm();
+
+  double topErr = topRPM - topMeas;
+  double botErr = bottomRPM - botMeas;
+
+  double topBoost = 0.0;
+  if (topErr > kBoostStartRpmErr) {
+    double t = clamp((topErr - kBoostStartRpmErr) / (kBoostFullRpmErr - kBoostStartRpmErr), 0.0, 1.0);
+    topBoost = lerp(0.0, kBoostMaxVolts, t);
+  }
+
+  double botBoost = 0.0;
+  if (botErr > kBoostStartRpmErr) {
+    double t = clamp((botErr - kBoostStartRpmErr) / (kBoostFullRpmErr - kBoostStartRpmErr), 0.0, 1.0);
+    botBoost = lerp(0.0, kBoostMaxVolts, t);
+  }
+
+  double topRps = topRPM / 60.0;
+  double botRps = bottomRPM / 60.0;
+
+  shooterMotor2.setControl(shooter2VelReq.withVelocity(topRps).withFeedForward(topBoost));
+  shooterMotor.setControl(shooterVelReq.withVelocity(botRps).withFeedForward(botBoost));
+
+  double now = Timer.getFPGATimestamp();
+  if (now - lastShooterPrintTime > 0.15) {
+    System.out.println(
+      "[SHOOT] " +
+      "Topset=" + String.format("%.0f", topRPM) +
+      " Topmeas=" + String.format("%.0f", topMeas) +
+      " Botset=" + String.format("%.0f", bottomRPM) +
+      " Botmeas=" + String.format("%.0f", botMeas) +
+      " Topboost=" + String.format("%.2f", topBoost) +
+      " Botboost=" + String.format("%.2f", botBoost) +
+      " Vbat=" + String.format("%.2f", edu.wpi.first.wpilibj.RobotController.getBatteryVoltage())
+    );
+    lastShooterPrintTime = now;
+  }
 }
 
 public Command runShooterRPM(DoubleSupplier topRPM, DoubleSupplier bottomRPM) {

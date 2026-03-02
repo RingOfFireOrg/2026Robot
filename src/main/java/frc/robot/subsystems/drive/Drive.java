@@ -186,8 +186,10 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
             }
             
             // Apply update
-            poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
-        }
+            poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions); }}
+        
+
+/* 
         LimelightHelpers.SetRobotOrientation("limelight", poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
         LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
 
@@ -209,9 +211,11 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
                 mt2.timestampSeconds);
         }
 
+        
+
         // Update gyro alert
         gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);
-    }
+    } */
 
     /**
      * Runs the drive at the desired velocity.

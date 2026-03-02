@@ -53,6 +53,7 @@ import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.LimelightHelpers;
 import frc.robot.commands.HubLock;
+import frc.robot.commands.HubTurn;
 import frc.robot.subsystems.Turret.Turret;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
@@ -65,6 +66,7 @@ import frc.robot.commands.SetLED;
 import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.LED.LedManager;
 import frc.robot.subsystems.LED.LedModeBus;
+import frc.robot.commands.HubTurn;
 
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -92,6 +94,7 @@ public class RobotContainer {
     private double lastSeenTimeSec = 0.0;
     private static final double kTargetHoldTimeSec = 0.25;
     private double lastPrintTimeSec = 0.0;
+    private Command HubTurn;
 
 
 
@@ -140,8 +143,11 @@ public class RobotContainer {
                
                 //hubLock = new HubLock(turret, this.vision, 0);
                 //turret.setDefaultCommand(hubLock);
-                turret.setDefaultCommand(hubLock());
+
+                //turret.setDefaultCommand(hubLock());
                 SetLED = new SetLED(led, 0, 0, 0, false);
+                HubTurn = new HubTurn(drive, "limelight-tag");
+
 
                 break;
             case SIM:
@@ -174,6 +180,7 @@ public class RobotContainer {
                 //hubLock = new HubLock(turret, this.vision, 0);
                 //turret.setDefaultCommand(hubLock);
                 turret.setDefaultCommand(hubLock());
+
 
 
                 break;
@@ -350,9 +357,13 @@ public class RobotContainer {
             operator.leftStick()
                 .whileTrue(climber.runTeleop(() -> -MathUtil.applyDeadband(operator.getLeftY(), 0.12)));
 
+                //idk if gonna use turret
+            //operator.rightBumper().whileTrue(Commands.runEnd(() -> turret.setDutyCycle(+0.25), turret::stopTurret, turret));//manual turret turning
+            //operator.leftBumper().whileTrue(Commands.runEnd(() -> turret.setDutyCycle(-0.25), turret::stopTurret, turret));
+            operator.rightBumper().onTrue(HubTurn);
 
-            operator.rightBumper().whileTrue(Commands.runEnd(() -> turret.setDutyCycle(+0.25), turret::stopTurret, turret));//manual turret turning
-            operator.leftBumper().whileTrue(Commands.runEnd(() -> turret.setDutyCycle(-0.25), turret::stopTurret, turret));
+
+
             //operator.rightTrigger().whileTrue(turret.runShooterPercent(0.9));
             
             

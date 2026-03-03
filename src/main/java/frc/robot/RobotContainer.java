@@ -67,6 +67,7 @@ import frc.robot.subsystems.Intake.Intake;
 import frc.robot.subsystems.LED.LedManager;
 import frc.robot.subsystems.LED.LedModeBus;
 import frc.robot.commands.HubTurn;
+import frc.robot.commands.Ballin;
 
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -213,6 +214,8 @@ public class RobotContainer {
         // Set up auto routines
         autoChooser = new LoggedDashboardChooser<>("Auto Choices");
         autoChooser.addDefaultOption("do nothing", Commands.none());
+        autoChooser.addDefaultOption("Ballin",
+            Ballin.create(turret, indexer, transfer));
         
         //autoChooser.addOption("MECK) Align Right",
 
@@ -228,7 +231,8 @@ public class RobotContainer {
         );
         autoChooser.addOption("Drive Simple FF Characterization",
             DriveCommands.feedforwardCharacterization(drive)
-        );
+        );}
+        /* 
         autoChooser.addOption("Mid Climb", 
             Commands.sequence(
                 hubLock().withTimeout(1.0),
@@ -244,7 +248,7 @@ public class RobotContainer {
         );
         configureButtonBindings();
     }
-
+ */
     private void configureButtonBindings() {
 
         double standardSpeed = 0.8;
@@ -328,7 +332,7 @@ public class RobotContainer {
 
 
             //operator.y().whileTrue(transfer.runPercent(0.6)); //Transfer
-            operator.y().whileTrue(Commands.parallel(indexer.runPercent(0.8), transfer.runPercent(-0.8))); //indexer and spindexer up
+            operator.y().whileTrue(Commands.parallel(indexer.runPercent(0.8), transfer.runPercent(-0.6))); //indexer and spindexer up
             operator.x().whileTrue(Commands.parallel(transfer.runPercent(-0.6), intake.rollersIn())); //spindex and Intake
             operator.a().whileTrue(Commands.parallel(transfer.runPercent(0.6), indexer.runPercent(-0.6))); //Transfer and indexer out
             operator.b().whileTrue(intake.rollersOut()); //outtake 
@@ -336,9 +340,9 @@ public class RobotContainer {
             //operator.povUp().onTrue(hubLock); // reapplys hublock if switched off
             //operator.povUp().onTrue(Commands.runOnce(() -> turret.setDefaultCommand(hubLock())));
             //operator.povUp().whileTrue
-            operator.povUp().whileTrue(Commands.parallel(indexer.runPercent(0.8),transfer.runPercent(-0.8),intake.rollersIn()));
+            operator.povUp().whileTrue(Commands.parallel(indexer.runPercent(0.8),transfer.runPercent(0.8),intake.rollersIn()));
             //intake and transfer in, indexer up
-            operator.povDown().whileTrue(Commands.parallel(indexer.runPercent(0.8),transfer.runPercent(0.8),intake.rollersOut()));
+            operator.povDown().whileTrue(Commands.parallel(indexer.runPercent(0.8),transfer.runPercent(-0.8),intake.rollersOut()));
             //intake and transfer out, indexer down
             operator.povRight().onTrue(intake.retractIn());//intake comes in
             operator.povLeft().onTrue(intake.deployOut());//intake goes out

@@ -68,7 +68,7 @@ import frc.robot.subsystems.LED.LedManager;
 import frc.robot.subsystems.LED.LedModeBus;
 import frc.robot.commands.HubTurn;
 import frc.robot.commands.Ballin;
-
+import frc.robot.commands.DriveAim;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.networktables.GenericEntry;
@@ -214,7 +214,7 @@ public class RobotContainer {
         // Set up auto routines
         autoChooser = new LoggedDashboardChooser<>("Auto Choices");
         autoChooser.addDefaultOption("do nothing", Commands.none());
-        autoChooser.addDefaultOption("Ballin",
+        autoChooser.addOption("Ballin",
             Ballin.create(turret, indexer, transfer));
         
         //autoChooser.addOption("MECK) Align Right",
@@ -312,6 +312,10 @@ public class RobotContainer {
             driver.x().whileTrue(new AlignToHub(drive, vision, 0));
             driver.y().whileTrue(new PhotonAlign(drive, vision, 1));
             driver.a().whileTrue(new PhotonAlign(drive, vision, 2));
+            driver.b().whileTrue(
+                DriveAim.create(drive, "limelight-tag", () ->  -driver.getLeftY(), () ->  -driver.getLeftX()).onlyIf(() -> LimelightHelpers.getTV("limelight-tag")));
+
+   
             //.onTrue(new AlignToReef(drive, reefSide.LEFT).withTimeout(1.2));
             
             /* Operator - Turret Manual Control */

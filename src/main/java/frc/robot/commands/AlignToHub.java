@@ -85,10 +85,7 @@ public class AlignToHub extends Command {
     Pose2d tagPose = tagPoseOpt.get().toPose2d().transformBy(new Transform2d(-kStandoffMeters, 0.0, Rotation2d.fromDegrees(180.0)));
 
     //find a better way to do ts
-    if(tagId == 26) goal = new Pose2d(tagPose.getX()-0.5, tagPose.getY(), tagPose.getRotation());
-    if(tagId == 25) goal = new Pose2d(tagPose.getX()-0.5, tagPose.getY()+tag25Offset, tagPose.getRotation());
-
-    
+    if(tagId == 26) goal = new Pose2d(3.0, tagPose.getY(), tagPose.getRotation());
 
     ChassisSpeeds fieldRelative =
         controller.calculate(current, goal, 0.0, goal.getRotation());

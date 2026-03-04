@@ -68,6 +68,7 @@ import frc.robot.subsystems.LED.LedManager;
 import frc.robot.subsystems.LED.LedModeBus;
 import frc.robot.commands.HubTurn;
 import frc.robot.commands.Ballin;
+import frc.robot.commands.Rollin;
 import frc.robot.commands.DriveAim;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -216,6 +217,8 @@ public class RobotContainer {
         autoChooser.addDefaultOption("do nothing", Commands.none());
         autoChooser.addOption("Ballin",
             Ballin.create(turret, indexer, transfer));
+        autoChooser.addOption("Preload and Depot", new PathPlannerAuto("PreloadDepotv2", false));
+        
         
         //autoChooser.addOption("MECK) Align Right",
 
@@ -515,6 +518,8 @@ public class RobotContainer {
     }
 
     public void setNamedCommands() {
+        NamedCommands.registerCommand("Ballin", Ballin.create(turret, indexer, transfer));
+        NamedCommands.registerCommand("Rollin", Rollin.create(intake));
 /* 
         NamedCommands.registerCommand(
         "AimAndShoot",

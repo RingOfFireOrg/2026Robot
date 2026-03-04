@@ -303,7 +303,18 @@ public class RobotContainer {
                 : () -> drive.resetOdometry(
                     new Pose2d(drive.getPose().getTranslation(), new Rotation2d())); // zero gyro
         
-        driver.back().onTrue(Commands.runOnce(resetGyro, drive).ignoringDisable(true));
+        //driver.back().onTrue(Commands.runOnce(resetGyro, drive).ignoringDisable(true));
+
+        driver.back().onTrue(
+            Commands.runOnce(
+                () -> drive.resetOdometry(
+                    Constants.currentMode == Constants.Mode.SIM
+                        ? driveSimulation.getSimulatedDriveTrainPose()
+                        : new Pose2d(drive.getPose().getTranslation(), new Rotation2d())
+            ),
+            drive
+        ).ignoringDisable(true)
+    );
 
 
         if (Constants.currentMode == Constants.Mode.REAL) {

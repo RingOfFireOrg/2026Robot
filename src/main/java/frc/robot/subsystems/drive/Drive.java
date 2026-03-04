@@ -41,6 +41,8 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -63,9 +65,11 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     private final SysIdRoutine sysId;
     private final Alert gyroDisconnectedAlert =
             new Alert("Disconnected gyro, using kinematics as fallback.", AlertType.kError);
+    private final ShuffleboardTab driveTab = Shuffleboard.getTab("Drive");
 
     private final SwerveDriveKinematics kinematics = new SwerveDriveKinematics(moduleTranslations);
     private Rotation2d rawGyroRotation = new Rotation2d();
+    private Rotation2d headingOffset = new Rotation2d();
     private final SwerveModulePosition[] lastModulePositions = // For delta tracking
             new SwerveModulePosition[] {
                 new SwerveModulePosition(),
@@ -135,6 +139,10 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
                 new SysIdRoutine.Config(
                         null, null, null, (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
                 new SysIdRoutine.Mechanism((voltage) -> runCharacterization(voltage.in(Volts)), null, this));
+
+
+        driveTab.addNumber("Heading (deg)", () -> getRotation().getDegrees());
+        driveTab.addNumber("Raw Gyro (deg)", () -> rawGyroRotation.getDegrees());
     }
 
     @Override
@@ -187,6 +195,8 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
             
             // Apply update
             poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions); }}
+
+            
         
 
 /* 
@@ -326,16 +336,36 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     }
 
     /** Returns the current odometry rotation. */
+    /* 
     public Rotation2d getRotation() {
         return getPose().getRotation();
-    }
+    }*/
+    public Rotation2d getRotation() {
+        return rawGyroRotation.minus(headingOffset);
+        }
 
-    /** Resets the current odometry pose. */
+    public void zeroHeading() {
+        odometryLock.lock();
+        headingOffset = rawGyroRotation;
+        odometryLock.unlock();
+    }
+    
+
+    /** Resets the current odometry pose. *//* 
     public void resetOdometry(Pose2d pose) {
         resetSimulationPoseCallBack.accept(pose);
         poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
     }
+ */
+    public void resetOdometry(Pose2d pose) {
+    resetSimulationPoseCallBack.accept(pose);
+    odometryLock.lock();
+    headingOffset = rawGyroRotation.minus(pose.getRotation());
+    poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
+    odometryLock.unlock();
+}
 
+        
     /** Adds a new timestamped vision measurement. */
     @Override
     public void accept(Pose2d visionRobotPoseMeters, double timestampSeconds, Matrix<N3, N1> visionMeasurementStdDevs) {

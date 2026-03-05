@@ -147,7 +147,7 @@ public class RobotContainer {
 
                 //turret.setDefaultCommand(hubLock());
                 SetLED = new SetLED(led, 0, 0, 0, false);
-                HubTurn = new HubTurn(drive, "limelight-tag");
+                //HubTurn = new HubTurn(drive, "limelight-tag");
 
 
                 break;
@@ -233,7 +233,13 @@ public class RobotContainer {
         );
         autoChooser.addOption("Drive Simple FF Characterization",
             DriveCommands.feedforwardCharacterization(drive)
-        );}
+        );
+
+        configureButtonBindings();
+    
+    
+    
+    }
         /* 
         autoChooser.addOption("Mid Climb", 
             Commands.sequence(
@@ -244,7 +250,7 @@ public class RobotContainer {
                     transfer.runPercent(0.6)
                 ).withTimeout(0.9),
                 Commands.waitSeconds(2.0),
-                //new PathPlannerAuto("Mid Climb"),
+                //new PathPlannerAuto("Mid Climb")
                 climber.runPercent(0.2).withTimeout(2.0)
                 )
         );

@@ -34,7 +34,6 @@ import frc.robot.commands.AlignToReef;
 import frc.robot.commands.AlignToReef.reefSide;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.Climber.Climber;
-import frc.robot.subsystems.Climber.ClimberIOReal;
 
 import frc.robot.subsystems.EndEffector.EndEffector;
 import frc.robot.subsystems.EndEffector.EndEffectorIO;
@@ -68,6 +67,7 @@ import frc.robot.subsystems.LED.LedManager;
 import frc.robot.subsystems.LED.LedModeBus;
 import frc.robot.commands.HubTurn;
 import frc.robot.commands.Ballin;
+import frc.robot.commands.Rollin;
 import frc.robot.commands.DriveAim;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -127,7 +127,7 @@ public class RobotContainer {
                     new ModuleIOSpark(3),
                     (pose) -> {
                 });
-                climber = new Climber(new ClimberIOReal());
+                climber = new Climber();
                 turret = new Turret();
                 indexer = new Indexer();
                 transfer = new Transfer();
@@ -147,7 +147,7 @@ public class RobotContainer {
 
                 //turret.setDefaultCommand(hubLock());
                 SetLED = new SetLED(led, 0, 0, 0, false);
-                HubTurn = new HubTurn(drive, "limelight-tag");
+                //HubTurn = new HubTurn(drive, "limelight-tag");
 
 
                 break;
@@ -166,7 +166,7 @@ public class RobotContainer {
                 indexer = new Indexer();
                 transfer = new Transfer();
                 intake = new Intake();
-                climber = new Climber(new ClimberIOReal());
+                climber = new Climber();
 
 
                 this.vision = new Vision(
@@ -216,6 +216,8 @@ public class RobotContainer {
         autoChooser.addDefaultOption("do nothing", Commands.none());
         autoChooser.addOption("Ballin",
             Ballin.create(turret, indexer, transfer));
+        autoChooser.addOption("Preload and Depot", new PathPlannerAuto("PreloadDepotv2", false));
+        
         
         //autoChooser.addOption("MECK) Align Right",
 
@@ -233,6 +235,11 @@ public class RobotContainer {
             DriveCommands.feedforwardCharacterization(drive)
         );
         configureButtonBindings();}
+
+    
+    
+    
+    
         /* 
         autoChooser.addOption("Mid Climb", 
             Commands.sequence(
@@ -243,7 +250,7 @@ public class RobotContainer {
                     transfer.runPercent(0.6)
                 ).withTimeout(0.9),
                 Commands.waitSeconds(2.0),
-                //new PathPlannerAuto("Mid Climb"),
+                //new PathPlannerAuto("Mid Climb")
                 climber.runPercent(0.2).withTimeout(2.0)
                 )
         );
@@ -304,7 +311,18 @@ public class RobotContainer {
                 : () -> drive.resetOdometry(
                     new Pose2d(drive.getPose().getTranslation(), new Rotation2d())); // zero gyro
         
-        driver.back().onTrue(Commands.runOnce(resetGyro, drive).ignoringDisable(true));
+        //driver.back().onTrue(Commands.runOnce(resetGyro, drive).ignoringDisable(true));
+
+        driver.back().onTrue(
+            Commands.runOnce(
+                () -> drive.resetOdometry(
+                    Constants.currentMode == Constants.Mode.SIM
+                        ? driveSimulation.getSimulatedDriveTrainPose()
+                        : new Pose2d(drive.getPose().getTranslation(), new Rotation2d())
+            ),
+            drive
+        ).ignoringDisable(true)
+    );
 
 
         if (Constants.currentMode == Constants.Mode.REAL) {
@@ -505,6 +523,8 @@ public class RobotContainer {
     }
 
     public void setNamedCommands() {
+        NamedCommands.registerCommand("Ballin", Ballin.create(turret, indexer, transfer));
+        NamedCommands.registerCommand("Rollin", Rollin.create(intake));
 /* 
         NamedCommands.registerCommand(
         "AimAndShoot",

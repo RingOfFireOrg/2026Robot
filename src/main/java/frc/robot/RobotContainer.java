@@ -231,7 +231,8 @@ public class RobotContainer {
         );
         autoChooser.addOption("Drive Simple FF Characterization",
             DriveCommands.feedforwardCharacterization(drive)
-        );}
+        );
+        configureButtonBindings();}
         /* 
         autoChooser.addOption("Mid Climb", 
             Commands.sequence(
@@ -337,16 +338,16 @@ public class RobotContainer {
 
             //operator.y().whileTrue(transfer.runPercent(0.6)); //Transfer
             operator.y().whileTrue(Commands.parallel(indexer.runPercent(0.8), transfer.runPercent(-0.6))); //indexer and spindexer up
-            operator.x().whileTrue(Commands.parallel(transfer.runPercent(-0.6), intake.rollersIn())); //spindex and Intake
+            operator.x().whileTrue(Commands.parallel(transfer.runPercent(-0.6), intake.rollersOut())); //spindex and Intake
             operator.a().whileTrue(Commands.parallel(transfer.runPercent(0.6), indexer.runPercent(-0.6))); //Transfer and indexer out
-            operator.b().whileTrue(intake.rollersOut()); //outtake 
+            operator.b().whileTrue(intake.rollersIn()); //outtake 
 
             //operator.povUp().onTrue(hubLock); // reapplys hublock if switched off
             //operator.povUp().onTrue(Commands.runOnce(() -> turret.setDefaultCommand(hubLock())));
             //operator.povUp().whileTrue
-            operator.povUp().whileTrue(Commands.parallel(indexer.runPercent(0.8),transfer.runPercent(0.8),intake.rollersIn()));
+            operator.povUp().whileTrue(Commands.parallel(indexer.runPercent(0.8),transfer.runPercent(-0.8),intake.rollersOut()));
             //intake and transfer in, indexer up
-            operator.povDown().whileTrue(Commands.parallel(indexer.runPercent(0.8),transfer.runPercent(-0.8),intake.rollersOut()));
+            operator.povDown().whileTrue(Commands.parallel(indexer.runPercent(-0.8),transfer.runPercent(0.8),intake.rollersIn()));
             //intake and transfer out, indexer down
             operator.povRight().onTrue(intake.retractIn());//intake comes in
             operator.povLeft().onTrue(intake.deployOut());//intake goes out

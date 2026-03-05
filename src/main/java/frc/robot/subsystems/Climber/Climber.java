@@ -2,38 +2,73 @@ package frc.robot.subsystems.Climber;
 
 import java.util.function.DoubleSupplier;
 
-import org.littletonrobotics.junction.Logger;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.spark.SparkBase;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkMaxConfig;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+@SuppressWarnings("removal")
 
 public class Climber extends SubsystemBase {
-  private final ClimberIO io;
-  private final ClimberIOInputsAutoLogged inputs = new ClimberIOInputsAutoLogged();
+  private static final int kMotorCanId = 50;//indexer
 
-  public Climber(ClimberIO io) {
-    this.io = io;
+  private final SparkMax motor = new SparkMax(kMotorCanId, MotorType.kBrushless);
+  private final RelativeEncoder encoder = motor.getEncoder();
+
+  private static final double kDeadband = 0.02;
+  private static final double kMaxVolts = 8.0;
+  private static final double kMinVoltsToMove = 1.5;
+
+  public Climber() {
+    SparkMaxConfig config = new SparkMaxConfig();
+    config.idleMode(IdleMode.kCoast);
+    config.inverted(false);
+    config.smartCurrentLimit(30);
+
+    motor.configure(
+        config,
+        SparkBase.ResetMode.kResetSafeParameters,
+        SparkBase.PersistMode.kPersistParameters);
+
+    encoder.setPosition(0.0);
   }
 
-  @Override
-  public void periodic() {
-    io.updateInputs(inputs);
-    Logger.processInputs("Climber", inputs);
+  public double getMotorRotations() {
+    return encoder.getPosition();
   }
-  public Command runPercent(double percent) {
-  return runEnd(() -> io.setVoltage(percent * 12.0), io::stop);
-}
 
+  public double getMotorRpm() {
+    return encoder.getVelocity();
+  }
+
+  public void setVolts(double volts) {
+    double cmd = MathUtil.applyDeadband(volts, kDeadband);
+    cmd = MathUtil.clamp(cmd, -kMaxVolts, kMaxVolts);
+
+    if (Math.abs(cmd) > 1e-6) {
+      cmd = Math.copySign(Math.max(Math.abs(cmd), kMinVoltsToMove), cmd);
+    }
+
+    motor.setVoltage(cmd);
+  }
+
+  public void stop() {
+    motor.setVoltage(0.0);
+  }
 
   public Command runTeleop(DoubleSupplier percent) {
-    return runEnd(() -> io.setVoltage(percent.getAsDouble() * 12.0), io::stop);
+    return runEnd(() -> runVolts(percent.getAsDouble() * 12.0), ()->stop());
+  }
+  public Command runVolts(double volts) {
+    return runEnd(() -> setVolts(volts), this::stop);
   }
 
-  public Command runVolts(DoubleSupplier volts) {
-    return runEnd(() -> io.setVoltage(volts.getAsDouble()), io::stop);
-  }
-
-  public Command stopCommand() {
-    return runOnce(io::stop);
+  public Command runPercent(double percent) {
+    return runEnd(() -> setVolts(percent * 12.0), this::stop);
   }
 }

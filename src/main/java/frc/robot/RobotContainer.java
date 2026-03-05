@@ -34,7 +34,6 @@ import frc.robot.commands.AlignToReef;
 import frc.robot.commands.AlignToReef.reefSide;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.Climber.Climber;
-import frc.robot.subsystems.Climber.ClimberIOReal;
 
 import frc.robot.subsystems.EndEffector.EndEffector;
 import frc.robot.subsystems.EndEffector.EndEffectorIO;
@@ -128,7 +127,7 @@ public class RobotContainer {
                     new ModuleIOSpark(3),
                     (pose) -> {
                 });
-                climber = new Climber(new ClimberIOReal());
+                climber = new Climber();
                 turret = new Turret();
                 indexer = new Indexer();
                 transfer = new Transfer();
@@ -167,7 +166,7 @@ public class RobotContainer {
                 indexer = new Indexer();
                 transfer = new Transfer();
                 intake = new Intake();
-                climber = new Climber(new ClimberIOReal());
+                climber = new Climber();
 
 
                 this.vision = new Vision(

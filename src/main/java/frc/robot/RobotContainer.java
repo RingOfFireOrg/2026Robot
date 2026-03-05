@@ -217,6 +217,9 @@ public class RobotContainer {
         autoChooser.addOption("Ballin",
             Ballin.create(turret, indexer, transfer));
         autoChooser.addOption("Preload and Depot", new PathPlannerAuto("PreloadDepotv2", false));
+        autoChooser.addOption("Preload", new PathPlannerAuto("CenterPreloadAuto", false));
+        autoChooser.addOption("Preload and Depot V2(use this one)", new PathPlannerAuto("CenterPreloadDepotAuto", false));
+
         
         
         //autoChooser.addOption("MECK) Align Right",

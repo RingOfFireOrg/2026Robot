@@ -33,7 +33,7 @@ public class AimAndRange extends Command {
     if(!LimelightHelpers.getTV(camera)) end(true);
     double offBy = LimelightHelpers.getTX(camera);
     double offByDistance = LimelightHelpers.getTY(camera) + rangingDistance;
-    drive.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(new ChassisSpeeds(kp * offByDistance, 0, kp*offBy), drive.getRotation()));
+    drive.runVelocity(new ChassisSpeeds(kp * offByDistance, 0, kp*offBy));
   }
 
   // Called once the command ends or is interrupted.

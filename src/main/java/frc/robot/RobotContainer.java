@@ -238,11 +238,11 @@ public class RobotContainer {
             DriveCommands.feedforwardCharacterization(drive)
         );
 
-        configureButtonBindings();
+        //configureButtonBindings();
     
     
     
-    }
+    
         /* 
         autoChooser.addOption("Mid Climb", 
             Commands.sequence(
@@ -256,10 +256,10 @@ public class RobotContainer {
                 //new PathPlannerAuto("Mid Climb")
                 climber.runPercent(0.2).withTimeout(2.0)
                 )
-        );
+        );*/
         configureButtonBindings();
     }
- */
+ 
     private void configureButtonBindings() {
 
         double standardSpeed = 0.8;
@@ -390,7 +390,7 @@ public class RobotContainer {
                 //idk if gonna use turret
             //operator.rightBumper().whileTrue(Commands.runEnd(() -> turret.setDutyCycle(+0.25), turret::stopTurret, turret));//manual turret turning
             //operator.leftBumper().whileTrue(Commands.runEnd(() -> turret.setDutyCycle(-0.25), turret::stopTurret, turret));
-            operator.rightBumper().onTrue(HubTurn);
+            //operator.rightBumper().onTrue(HubTurn);
 
 
 

@@ -71,6 +71,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     private final SwerveDriveKinematics kinematics = new SwerveDriveKinematics(moduleTranslations);
     private Rotation2d rawGyroRotation = new Rotation2d();
     private Rotation2d headingOffset = new Rotation2d();
+    private Rotation2d cachedRotation = new Rotation2d(); // For caching gyro angle during odometry updates
     private final SwerveModulePosition[] lastModulePositions = // For delta tracking
             new SwerveModulePosition[] {
                 new SwerveModulePosition(),
@@ -195,7 +196,10 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
             }
             
             // Apply update
-            poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions); }}
+            //poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions); }}
+            poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions); }
+            cachedRotation = rawGyroRotation.minus(headingOffset);
+            }
 
             
         
@@ -342,7 +346,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         return getPose().getRotation();
     }*/
     public Rotation2d getRotation() {
-        return rawGyroRotation.minus(headingOffset);
+        return cachedRotation;
         }
 
     public void zeroHeading() {

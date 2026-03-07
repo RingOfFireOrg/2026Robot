@@ -224,6 +224,7 @@ public class RobotContainer {
         autoChooser.addOption("TrenchTest", new PathPlannerAuto("WakeTrenchTest", false));
         autoChooser.addOption("BallinTest", new PathPlannerAuto("New Auto", false));
         autoChooser.addOption("Preload,Depot,Trench", Rollin.create(intake));
+        autoChooser.addOption("test Preload", new PathPlannerAuto("PreloadTest", false));
         ////autoChooser.addOption("Limelight score(DONT USE)", new PathPlannerAuto().andThen());
         
         

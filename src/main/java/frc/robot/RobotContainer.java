@@ -138,12 +138,10 @@ public class RobotContainer {
                 //dioLed = new LedManager(new LedModeBus(0, 1, 2, 3));
                 intake = new Intake();
                 
-                //this.vision = new Vision(
-                  //  drive,
-                    //new VisionIOLimelight("limelight-tag", drive::getRotation)
-                    //new VisionIOPhotonVision(camera0Name, robotToCamera0),
-                    //new VisionIOPhotonVision(camera1Name, robotToCamera1)
-                //);
+                /*this.vision = new Vision(
+                   drive,
+                    new VisionIOLimelight("limelight-tag", drive::getRotation)
+                );*/
                
                 //hubLock = new HubLock(turret, this.vision, 0);
                 //turret.setDefaultCommand(hubLock);
@@ -310,6 +308,7 @@ public class RobotContainer {
             boolean isFlipped = DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red;
             return new Rotation2d(Math.toRadians(isFlipped ? 125 + 180 : 125));
         }));
+        driver.a().whileTrue(new AimAndRange(drive, LimelightFrontName));
 
 
         //Reset gyro / odometry

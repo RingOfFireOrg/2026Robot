@@ -81,8 +81,8 @@ public class AlignToHub extends Command {
     Pose2d tagPose = tagPoseOpt.get().toPose2d().transformBy(new Transform2d(-kStandoffMeters, 0.0, Rotation2d.fromDegrees(180.0)));
     Pose2d current = drive.getPose();
     Pose2d goal = current;
-    if(tagId == 25) goal = new Pose2d(tagPose.getX(), tagPose.getY()+1, tagPose.getRotation());
-    if(tagId == 26) goal = new Pose2d(tagPose.getX(), tagPose.getY(), tagPose.getRotation());
+    if(tagId == 25) goal = new Pose2d(tagPose.getX()-1.9, tagPose.getY()+1, tagPose.getRotation());
+    if(tagId == 26) goal = new Pose2d(tagPose.getX()-1.9, tagPose.getY(), tagPose.getRotation());
 
     
     ChassisSpeeds fieldRelative =

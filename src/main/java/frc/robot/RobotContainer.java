@@ -220,7 +220,7 @@ public class RobotContainer {
         autoChooser.addOption("Preload and Depot", new PathPlannerAuto("PreloadDepotv2", false));
         autoChooser.addOption("Preload", new PathPlannerAuto("CenterPreloadAuto", false));
         autoChooser.addOption("Preload and Depot V2(use this one)", new PathPlannerAuto("CenterPreloadDepotAuto", false));
-        autoChooser.addOption("Limelight score(DONT USE)", new PathPlannerAuto().andThen());
+        //autoChooser.addOption("Limelight score(DONT USE)", new PathPlannerAuto().andThen());
         
         
         //autoChooser.addOption("MECK) Align Right",
@@ -278,7 +278,7 @@ public class RobotContainer {
             },
             () -> {
                 double maxSpeedTheta = (1 - driver.getLeftTriggerAxis()) * (turnSpeed + (1-turnSpeed) * driver.getRightTriggerAxis());
-                return MathUtil.applyDeadband(MathUtil.clamp(-driver.getRightX(), -maxSpeedTheta, maxSpeedTheta), 0.1);
+                return MathUtil.applyDeadband(MathUtil.clamp(driver.getRightX(), -maxSpeedTheta, maxSpeedTheta), 0.1);
             }
         ));
 

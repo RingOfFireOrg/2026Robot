@@ -30,10 +30,10 @@ public class AimAndRange extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if(!LimelightHelpers.getTV(camera)) end(true);
+    if(!LimelightHelpers.getTV(camera)) return;
     double offBy = LimelightHelpers.getTX(camera);
     double offByDistance = LimelightHelpers.getTY(camera) + rangingDistance;
-    drive.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(new ChassisSpeeds(kp * offByDistance, 0, kp*offBy), drive.getRotation()));
+    drive.runVelocity(new ChassisSpeeds(kp * offByDistance, 0, kp*offBy));
   }
 
   // Called once the command ends or is interrupted.

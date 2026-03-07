@@ -219,7 +219,7 @@ public class RobotContainer {
         autoChooser.addOption("Ballin",
             Ballin.create(turret, indexer, transfer));
         autoChooser.addOption("Preload and Depot", new PathPlannerAuto("PreloadDepotv2", false));
-        autoChooser.addOption("Preload pls work", new PathPlannerAuto("PreloadTest"));
+        autoChooser.addOption("Preload pls work", new PathPlannerAuto("PreloadTest", true));
         /* 
         autoChooser.addOption("Preload", new PathPlannerAuto("CenterPreloadAuto", false));
         autoChooser.addOption("Preload and Depot V2(use this one)", new PathPlannerAuto("CenterPreloadDepotAuto", false));
@@ -312,7 +312,7 @@ public class RobotContainer {
             boolean isFlipped = DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red;
             return new Rotation2d(Math.toRadians(isFlipped ? 125 + 180 : 125));
         }));
-        //driver.a().whileTrue(new AimAndRange(drive, LimelightFrontName));
+        driver.a().whileTrue(new AimAndRange(drive, LimelightFrontName));
 
 
         //Reset gyro / odometry

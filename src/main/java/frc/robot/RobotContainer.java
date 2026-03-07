@@ -50,26 +50,27 @@ import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOSpark;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
-import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
+//import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.LimelightHelpers;
 import frc.robot.commands.HubLock;
 import frc.robot.commands.HubTurn;
 import frc.robot.subsystems.Turret.Turret;
 import frc.robot.subsystems.vision.VisionIOLimelight;
-import frc.robot.subsystems.vision.VisionIOPhotonVision;
+//import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.commands.AimAndRange;
 import frc.robot.commands.AlignToHub;
-import frc.robot.commands.PhotonAlign;
+//import frc.robot.commands.PhotonAlign;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Transfer.Transfer;
-import frc.robot.subsystems.LED.LED;
-import frc.robot.commands.SetLED;
+//import frc.robot.subsystems.LED.LED;
+//import frc.robot.commands.SetLED;
 import frc.robot.subsystems.Intake.Intake;
-import frc.robot.subsystems.LED.LedManager;
-import frc.robot.subsystems.LED.LedModeBus;
+//import frc.robot.subsystems.LED.LedManager;
+//import frc.robot.subsystems.LED.LedModeBus;
 import frc.robot.commands.HubTurn;
 import frc.robot.commands.Ballin;
 import frc.robot.commands.Rollin;
+import frc.robot.commands.BallinTest;
 import frc.robot.commands.DriveAim;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -89,10 +90,10 @@ public class RobotContainer {
     //private Command hubLock;
     private Indexer indexer;
     private Transfer transfer;
-    private LED led;
-    private Command SetLED;
+    //private LED led;
+    //private Command SetLED;
     private Intake intake;
-    private LedManager dioLed;
+    //private LedManager dioLed;
     private double lastValidDistanceM = 2.0;
     private double lastSeenTimeSec = 0.0;
     private static final double kTargetHoldTimeSec = 0.25;
@@ -133,26 +134,27 @@ public class RobotContainer {
                 turret = new Turret();
                 indexer = new Indexer();
                 transfer = new Transfer();
-                led = new LED();
-                dioLed = new LedManager(new LedModeBus(0, 1, 2, 3));
+                //led = new LED();
+                //dioLed = new LedManager(new LedModeBus(0, 1, 2, 3));
                 intake = new Intake();
                 
-                this.vision = new Vision(
-                    drive,
-                    new VisionIOLimelight("limelight-tag", drive::getRotation),
-                    new VisionIOPhotonVision(camera0Name, robotToCamera0),
-                    new VisionIOPhotonVision(camera1Name, robotToCamera1)
-                );
+                //this.vision = new Vision(
+                  //  drive,
+                    //new VisionIOLimelight("limelight-tag", drive::getRotation)
+                    //new VisionIOPhotonVision(camera0Name, robotToCamera0),
+                    //new VisionIOPhotonVision(camera1Name, robotToCamera1)
+                //);
                
                 //hubLock = new HubLock(turret, this.vision, 0);
                 //turret.setDefaultCommand(hubLock);
 
                 //turret.setDefaultCommand(hubLock());
-                SetLED = new SetLED(led, 0, 0, 0, false);
+                //SetLED = new SetLED(led, 0, 0, 0, false);
                 //HubTurn = new HubTurn(drive, "limelight-tag");
 
 
                 break;
+                /* 
             case SIM:
                 this.driveSimulation = new SwerveDriveSimulation(DriveConstants.mapleSimConfig,
                     new Pose2d(3, 3, new Rotation2d()));
@@ -168,25 +170,25 @@ public class RobotContainer {
                 indexer = new Indexer();
                 transfer = new Transfer();
                 intake = new Intake();
-                climber = new Climber();
+                climber = new Climber();*/
 
 
-                this.vision = new Vision(
-                    drive,
-                    new VisionIOPhotonVisionSim(
-                        camera0Name, robotToCamera0,
-                        driveSimulation::getSimulatedDriveTrainPose),
-                    new VisionIOPhotonVisionSim(
-                        camera1Name, robotToCamera1,
-                        driveSimulation::getSimulatedDriveTrainPose)
-                );
+                //this.vision = new Vision(s
+                  //  drive,
+                    //new VisionIOPhotonVisionSim(
+                      //  camera0Name, robotToCamera0,
+                        //driveSimulation::getSimulatedDriveTrainPose),
+                    //new VisionIOPhotonVisionSim(
+                      //  camera1Name, robotToCamera1,
+                       // driveSimulation::getSimulatedDriveTrainPose)
+                //);
                 //hubLock = new HubLock(turret, this.vision, 0);
                 //turret.setDefaultCommand(hubLock);
-                turret.setDefaultCommand(hubLock());
+                //turret.setDefaultCommand(hubLock());
 
 
 
-                break;
+                //break;
             default:
                 // Replayed robot, disable IO implementations
                 this.drive = new Drive(
@@ -197,15 +199,15 @@ public class RobotContainer {
                     new ModuleIO() {},
                     (pose) -> {});
                 //this.vision = new Vision(drive, new VisionIO() {}, new VisionIO() {});
-                this.vision = new Vision(
-                    drive,
-                    new VisionIOPhotonVisionSim(
-                        camera0Name, robotToCamera0,
-                        driveSimulation::getSimulatedDriveTrainPose),
-                    new VisionIOPhotonVisionSim(
-                        camera1Name, robotToCamera1,
-                        driveSimulation::getSimulatedDriveTrainPose)
-);
+                //this.vision = new Vision(
+                  //  drive
+                    //new VisionIOPhotonVisionSim(
+                      //  camera0Name, robotToCamera0,
+                        //driveSimulation::getSimulatedDriveTrainPose),
+                    //new VisionIOPhotonVisionSim(
+                      //  camera1Name, robotToCamera1,
+                        //driveSimulation::getSimulatedDriveTrainPose)
+                //);
 
                 break;
         }
@@ -221,7 +223,9 @@ public class RobotContainer {
         autoChooser.addOption("Preload and Depot", new PathPlannerAuto("PreloadDepotv2", false));
         autoChooser.addOption("Preload", new PathPlannerAuto("CenterPreloadAuto", false));
         autoChooser.addOption("Preload and Depot V2(use this one)", new PathPlannerAuto("CenterPreloadDepotAuto", false));
-        //autoChooser.addOption("Limelight score(DONT USE)", new PathPlannerAuto().andThen());
+        autoChooser.addOption("TrenchTest", new PathPlannerAuto("WakeTrenchTest", false));
+        autoChooser.addOption("BallinTest", new PathPlannerAuto("New Auto", false));
+        ////autoChooser.addOption("Limelight score(DONT USE)", new PathPlannerAuto().andThen());
         
         
         //autoChooser.addOption("MECK) Align Right",
@@ -279,7 +283,7 @@ public class RobotContainer {
             },
             () -> {
                 double maxSpeedTheta = (1 - driver.getLeftTriggerAxis()) * (turnSpeed + (1-turnSpeed) * driver.getRightTriggerAxis());
-                return MathUtil.applyDeadband(MathUtil.clamp(-driver.getRightX(), -maxSpeedTheta, maxSpeedTheta), 0.1);
+                return MathUtil.applyDeadband(MathUtil.clamp(driver.getRightX(), -maxSpeedTheta, maxSpeedTheta), 0.1);
             }
         ));
 
@@ -334,8 +338,8 @@ public class RobotContainer {
 
             /* Driver - Align to the Hub */
             driver.x().whileTrue(new AlignToHub(drive, vision, 0));
-            driver.y().whileTrue(new PhotonAlign(drive, vision, 1));
-            driver.a().whileTrue(new PhotonAlign(drive, vision, 2));
+            //driver.y().whileTrue(new PhotonAlign(drive, vision, 1));
+            //driver.a().whileTrue(new PhotonAlign(drive, vision, 2));
             driver.b().whileTrue(
                 DriveAim.create(drive, "limelight-tag", () ->  -driver.getLeftY(), () ->  -driver.getLeftX()).onlyIf(() -> LimelightHelpers.getTV("limelight-tag")));
 
@@ -394,6 +398,11 @@ public class RobotContainer {
             //operator.leftBumper().whileTrue(Commands.runEnd(() -> turret.setDutyCycle(-0.25), turret::stopTurret, turret));
             //operator.rightBumper().onTrue(HubTurn);
 
+            operator.rightBumper().whileTrue(turret.runShooterRPM( () -> 3500, () -> 2500));
+            operator.leftBumper().whileTrue(turret.runShooterRPM( () -> 4500, () -> 3500));
+
+             
+
 
 
             //operator.rightTrigger().whileTrue(turret.runShooterPercent(0.9));
@@ -402,8 +411,8 @@ public class RobotContainer {
             operator.rightTrigger().whileTrue
             //(turret.runShooterPercent(0.9));
             (turret.runShooterRPM(
-            () -> topRpmEntry.getDouble(5000.0),
-            () -> bottomRpmEntry.getDouble(5000.0)));
+            () -> topRpmEntry.getDouble(3000.0),
+            () -> bottomRpmEntry.getDouble(3000.0)));
             
             //(turret.runShooterPercent(0.9));
                 //.onTrue(Commands.runOnce(() -> dioLed.setShooterActive(true)))
@@ -504,7 +513,7 @@ public class RobotContainer {
              */
 
         }         
-        else if (Constants.currentMode == Constants.Mode.SIM) {
+        /*else if (Constants.currentMode == Constants.Mode.SIM) {
 
             // PathConstraints constraints = new PathConstraints(3.0, 4.0,
             //     Units.degreesToRadians(540), Units.degreesToRadians(720)
@@ -523,13 +532,14 @@ public class RobotContainer {
             
             // driver.leftTrigger().whileTrue(getAutonomousCommand());
     
-        }
+        }*/
 
     }
 
     public void setNamedCommands() {
         NamedCommands.registerCommand("Ballin", Ballin.create(turret, indexer, transfer));
         NamedCommands.registerCommand("Rollin", Rollin.create(intake));
+        NamedCommands.registerCommand("BallinTest", BallinTest.create(turret, indexer, transfer));
         NamedCommands.registerCommand("Aim And Range", new AimAndRange(drive, LimelightFrontName));
 /* 
         NamedCommands.registerCommand(
@@ -557,11 +567,11 @@ public class RobotContainer {
 }
 
 
-    public void ledPeriodic() {
-        if (dioLed != null) {
-            dioLed.periodic();
-  }
-}
+    //public void ledPeriodic() {
+      //  if (dioLed != null) {
+        //    dioLed.periodic();
+  //}
+//}
 
 
 

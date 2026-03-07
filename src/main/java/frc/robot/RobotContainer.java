@@ -108,8 +108,8 @@ public class RobotContainer {
     private final CommandXboxController operator = new CommandXboxController(1);
     private final CommandJoystick climberController = new CommandJoystick(2);
     private final ShuffleboardTab shooterTab = Shuffleboard.getTab("Shooter");
-    private final GenericEntry topRpmEntry = shooterTab.add("Top RPM", 4500.0).getEntry();
-    private final GenericEntry bottomRpmEntry = shooterTab.add("Bottom RPM", 4500.0).getEntry();
+    private final GenericEntry topRpmEntry = shooterTab.add("Top RPM", 3000.0).getEntry();
+    private final GenericEntry bottomRpmEntry = shooterTab.add("Bottom RPM", 2500.0).getEntry();
 
     // Dashboard inputs
     private final LoggedDashboardChooser<Command> autoChooser;
@@ -223,6 +223,7 @@ public class RobotContainer {
         autoChooser.addOption("Preload and Depot V2(use this one)", new PathPlannerAuto("CenterPreloadDepotAuto", false));
         autoChooser.addOption("TrenchTest", new PathPlannerAuto("WakeTrenchTest", false));
         autoChooser.addOption("BallinTest", new PathPlannerAuto("New Auto", false));
+        autoChooser.addOption("Preload,Depot,Trench", Rollin.create(intake));
         ////autoChooser.addOption("Limelight score(DONT USE)", new PathPlannerAuto().andThen());
         
         
@@ -273,11 +274,11 @@ public class RobotContainer {
          drive,
             () -> {
                 double maxSpeedX = (1 - driver.getLeftTriggerAxis()) * (standardSpeed + (1-standardSpeed) * driver.getRightTriggerAxis());
-                return MathUtil.applyDeadband(MathUtil.clamp(-driver.getLeftY(), -maxSpeedX, maxSpeedX), 0.1);
+                return -1*MathUtil.applyDeadband(MathUtil.clamp(driver.getLeftY(), -maxSpeedX, maxSpeedX), 0.1);
             },
             () -> {
                 double maxSpeedY = (1 - driver.getLeftTriggerAxis()) * (standardSpeed + (1-standardSpeed) * driver.getRightTriggerAxis());
-                return MathUtil.applyDeadband(MathUtil.clamp(-driver.getLeftX(), -maxSpeedY, maxSpeedY), 0.1);
+                return -1*MathUtil.applyDeadband(MathUtil.clamp(driver.getLeftX(), -maxSpeedY, maxSpeedY), 0.1);
             },
             () -> {
                 double maxSpeedTheta = (1 - driver.getLeftTriggerAxis()) * (turnSpeed + (1-turnSpeed) * driver.getRightTriggerAxis());
@@ -286,10 +287,10 @@ public class RobotContainer {
         ));
 
 
-        driver.povRight().whileTrue(DriveCommands.joystickDriveRobotOriented(drive, () -> 0, () -> -0.5 + -(driver.getRightTriggerAxis()/2), () -> 0));
-        driver.povLeft().whileTrue(DriveCommands.joystickDriveRobotOriented(drive, () -> 0, () -> 0.5 + (driver.getRightTriggerAxis()/2), () -> 0));
-        driver.povUp().whileTrue(DriveCommands.joystickDriveRobotOriented(drive, () -> 0.5 + (driver.getRightTriggerAxis()/2), () -> 0, () -> 0));
-        driver.povDown().whileTrue(DriveCommands.joystickDriveRobotOriented(drive, () -> -0.5 + -(driver.getRightTriggerAxis()/2), () -> 0, () -> 0));
+        driver.povLeft().whileTrue(DriveCommands.joystickDriveRobotOriented(drive, () -> 0, () -> -0.5 + -(driver.getRightTriggerAxis()/2), () -> 0));
+        driver.povRight().whileTrue(DriveCommands.joystickDriveRobotOriented(drive, () -> 0, () -> 0.5 + (driver.getRightTriggerAxis()/2), () -> 0));
+        driver.povDown().whileTrue(DriveCommands.joystickDriveRobotOriented(drive, () -> 0.5 + (driver.getRightTriggerAxis()/2), () -> 0, () -> 0));
+        driver.povUp().whileTrue(DriveCommands.joystickDriveRobotOriented(drive, () -> -0.5 + -(driver.getRightTriggerAxis()/2), () -> 0, () -> 0));
 
 
         
@@ -397,7 +398,7 @@ public class RobotContainer {
             //operator.leftBumper().whileTrue(Commands.runEnd(() -> turret.setDutyCycle(-0.25), turret::stopTurret, turret));
             //operator.rightBumper().onTrue(HubTurn);
 
-            operator.rightBumper().whileTrue(turret.runShooterRPM( () -> 3500, () -> 2500));
+            operator.rightBumper().whileTrue(turret.runShooterRPM( () -> 2500, () -> 2000));
             operator.leftBumper().whileTrue(turret.runShooterRPM( () -> 4500, () -> 3500));
 
              

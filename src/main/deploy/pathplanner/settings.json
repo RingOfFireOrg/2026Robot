@@ -1,27 +1,15 @@
 {
-  "robotWidth": 0.683,
-  "robotLength": 0.683,
+  "robotWidth": 0.781,
+  "robotLength": 0.806,
   "holonomicMode": true,
-  "pathFolders": [
-    "CenterIntakeCenter",
-    "Center_Left",
-    "LimelightScore",
-    "PathGen",
-    "_leftSideAuto",
-    "_middleSideAuto",
-    "_rightSideAuto"
-  ],
-  "autoFolders": [
-    "Center Auto",
-    "LimelightScore",
-    "Right"
-  ],
+  "pathFolders": [],
+  "autoFolders": [],
   "defaultMaxVel": 2.3,
   "defaultMaxAccel": 2.3,
   "defaultMaxAngVel": 540.0,
   "defaultMaxAngAccel": 720.0,
   "defaultNominalVoltage": 12.0,
-  "robotMass": 45.0,
+  "robotMass": 49.895,
   "robotMOI": 6.883,
   "robotTrackwidth": 0.546,
   "driveWheelRadius": 0.048,
@@ -40,9 +28,5 @@
   "brModuleY": -0.26,
   "bumperOffsetX": 0.0,
   "bumperOffsetY": 0.0,
-  "robotFeatures": [
-    "{\"name\":\"Elevator\",\"type\":\"rounded_rect\",\"data\":{\"center\":{\"x\":0.19,\"y\":0.0},\"size\":{\"width\":0.7,\"length\":0.14},\"borderRadius\":0.05,\"strokeWidth\":0.02,\"filled\":false}}",
-    "{\"name\":\"Chassis\",\"type\":\"rounded_rect\",\"data\":{\"center\":{\"x\":0.0,\"y\":0.0},\"size\":{\"width\":0.686,\"length\":0.8128},\"borderRadius\":0.01,\"strokeWidth\":0.02,\"filled\":false}}",
-    "{\"name\":\"Rectangle\",\"type\":\"rounded_rect\",\"data\":{\"center\":{\"x\":0.37,\"y\":0.0},\"size\":{\"width\":0.18,\"length\":0.38},\"borderRadius\":0.0,\"strokeWidth\":0.01,\"filled\":true}}"
-  ]
+  "robotFeatures": []
 }

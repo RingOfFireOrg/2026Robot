@@ -108,8 +108,8 @@ public class RobotContainer {
     private final CommandXboxController operator = new CommandXboxController(1);
     private final CommandJoystick climberController = new CommandJoystick(2);
     private final ShuffleboardTab shooterTab = Shuffleboard.getTab("Shooter");
-    private final GenericEntry topRpmEntry = shooterTab.add("Top RPM", 4500.0).getEntry();
-    private final GenericEntry bottomRpmEntry = shooterTab.add("Bottom RPM", 4500.0).getEntry();
+    private final GenericEntry topRpmEntry = shooterTab.add("Top RPM", 3000.0).getEntry();
+    private final GenericEntry bottomRpmEntry = shooterTab.add("Bottom RPM", 2500.0).getEntry();
 
     // Dashboard inputs
     private final LoggedDashboardChooser<Command> autoChooser;
@@ -219,10 +219,14 @@ public class RobotContainer {
         autoChooser.addOption("Ballin",
             Ballin.create(turret, indexer, transfer));
         autoChooser.addOption("Preload and Depot", new PathPlannerAuto("PreloadDepotv2", false));
+        autoChooser.addOption("Preload pls work", new PathPlannerAuto("PreloadTest"));
+        /* 
         autoChooser.addOption("Preload", new PathPlannerAuto("CenterPreloadAuto", false));
         autoChooser.addOption("Preload and Depot V2(use this one)", new PathPlannerAuto("CenterPreloadDepotAuto", false));
         autoChooser.addOption("TrenchTest", new PathPlannerAuto("WakeTrenchTest", false));
         autoChooser.addOption("BallinTest", new PathPlannerAuto("New Auto", false));
+        autoChooser.addOption("Preload,Depot,Trench", Rollin.create(intake));
+        autoChooser.addOption("test Preload", new PathPlannerAuto("PreloadTest", false));*/
         ////autoChooser.addOption("Limelight score(DONT USE)", new PathPlannerAuto().andThen());
         
         
@@ -273,11 +277,11 @@ public class RobotContainer {
          drive,
             () -> {
                 double maxSpeedX = (1 - driver.getLeftTriggerAxis()) * (standardSpeed + (1-standardSpeed) * driver.getRightTriggerAxis());
-                return MathUtil.applyDeadband(MathUtil.clamp(-driver.getLeftY(), -maxSpeedX, maxSpeedX), 0.1);
+                return -1*MathUtil.applyDeadband(MathUtil.clamp(driver.getLeftY(), -maxSpeedX, maxSpeedX), 0.1);
             },
             () -> {
                 double maxSpeedY = (1 - driver.getLeftTriggerAxis()) * (standardSpeed + (1-standardSpeed) * driver.getRightTriggerAxis());
-                return MathUtil.applyDeadband(MathUtil.clamp(-driver.getLeftX(), -maxSpeedY, maxSpeedY), 0.1);
+                return -1*MathUtil.applyDeadband(MathUtil.clamp(driver.getLeftX(), -maxSpeedY, maxSpeedY), 0.1);
             },
             () -> {
                 double maxSpeedTheta = (1 - driver.getLeftTriggerAxis()) * (turnSpeed + (1-turnSpeed) * driver.getRightTriggerAxis());
@@ -286,10 +290,10 @@ public class RobotContainer {
         ));
 
 
-        driver.povRight().whileTrue(DriveCommands.joystickDriveRobotOriented(drive, () -> 0, () -> -0.5 + -(driver.getRightTriggerAxis()/2), () -> 0));
-        driver.povLeft().whileTrue(DriveCommands.joystickDriveRobotOriented(drive, () -> 0, () -> 0.5 + (driver.getRightTriggerAxis()/2), () -> 0));
-        driver.povUp().whileTrue(DriveCommands.joystickDriveRobotOriented(drive, () -> 0.5 + (driver.getRightTriggerAxis()/2), () -> 0, () -> 0));
-        driver.povDown().whileTrue(DriveCommands.joystickDriveRobotOriented(drive, () -> -0.5 + -(driver.getRightTriggerAxis()/2), () -> 0, () -> 0));
+        driver.povLeft().whileTrue(DriveCommands.joystickDriveRobotOriented(drive, () -> 0, () -> -0.5 + -(driver.getRightTriggerAxis()/2), () -> 0));
+        driver.povRight().whileTrue(DriveCommands.joystickDriveRobotOriented(drive, () -> 0, () -> 0.5 + (driver.getRightTriggerAxis()/2), () -> 0));
+        driver.povDown().whileTrue(DriveCommands.joystickDriveRobotOriented(drive, () -> 0.5 + (driver.getRightTriggerAxis()/2), () -> 0, () -> 0));
+        driver.povUp().whileTrue(DriveCommands.joystickDriveRobotOriented(drive, () -> -0.5 + -(driver.getRightTriggerAxis()/2), () -> 0, () -> 0));
 
 
         
@@ -308,7 +312,7 @@ public class RobotContainer {
             boolean isFlipped = DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red;
             return new Rotation2d(Math.toRadians(isFlipped ? 125 + 180 : 125));
         }));
-        driver.a().whileTrue(new AimAndRange(drive, LimelightFrontName));
+        //driver.a().whileTrue(new AimAndRange(drive, LimelightFrontName));
 
 
         //Reset gyro / odometry
@@ -364,9 +368,9 @@ public class RobotContainer {
 
             //operator.y().whileTrue(transfer.runPercent(0.6)); //Transfer
             operator.y().whileTrue(Commands.parallel(indexer.runPercent(0.8), transfer.runPercent(-0.6))); //indexer and spindexer up
-            operator.x().whileTrue(Commands.parallel(transfer.runPercent(-0.6), intake.rollersIn())); //spindex and Intake
+            operator.x().whileTrue(Commands.parallel(transfer.runPercent(-0.6), intake.rollersOut())); //spindex and Intake
             operator.a().whileTrue(Commands.parallel(transfer.runPercent(0.6), indexer.runPercent(-0.6))); //Transfer and indexer out
-            operator.b().whileTrue(intake.rollersOut()); //outtake 
+            operator.b().whileTrue(intake.rollersIn()); //outtake 
 
             //operator.povUp().onTrue(hubLock); // reapplys hublock if switched off
             //operator.povUp().onTrue(Commands.runOnce(() -> turret.setDefaultCommand(hubLock())));
@@ -397,7 +401,7 @@ public class RobotContainer {
             //operator.leftBumper().whileTrue(Commands.runEnd(() -> turret.setDutyCycle(-0.25), turret::stopTurret, turret));
             //operator.rightBumper().onTrue(HubTurn);
 
-            operator.rightBumper().whileTrue(turret.runShooterRPM( () -> 3500, () -> 2500));
+            operator.rightBumper().whileTrue(turret.runShooterRPM( () -> 2500, () -> 2000));
             operator.leftBumper().whileTrue(turret.runShooterRPM( () -> 4500, () -> 3500));
 
              

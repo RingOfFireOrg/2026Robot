@@ -199,7 +199,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
             //poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions); }}
             poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions); }
             cachedRotation = rawGyroRotation.minus(headingOffset);
-            }
+            
 
             
         
@@ -225,12 +225,13 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
                 mt2.pose,
                 mt2.timestampSeconds);
         }
-
+*/
         
 
         // Update gyro alert
         gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);
-    } */
+        
+        }
 
     /**
      * Runs the drive at the desired velocity.

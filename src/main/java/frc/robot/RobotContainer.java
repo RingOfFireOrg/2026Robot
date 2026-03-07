@@ -60,11 +60,11 @@ import frc.robot.commands.AlignToHub;
 //import frc.robot.commands.PhotonAlign;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Transfer.Transfer;
-import frc.robot.subsystems.LED.LED;
-import frc.robot.commands.SetLED;
+//import frc.robot.subsystems.LED.LED;
+//import frc.robot.commands.SetLED;
 import frc.robot.subsystems.Intake.Intake;
-import frc.robot.subsystems.LED.LedManager;
-import frc.robot.subsystems.LED.LedModeBus;
+//import frc.robot.subsystems.LED.LedManager;
+//import frc.robot.subsystems.LED.LedModeBus;
 import frc.robot.commands.HubTurn;
 import frc.robot.commands.Ballin;
 import frc.robot.commands.Rollin;
@@ -88,10 +88,10 @@ public class RobotContainer {
     //private Command hubLock;
     private Indexer indexer;
     private Transfer transfer;
-    private LED led;
-    private Command SetLED;
+    //private LED led;
+    //private Command SetLED;
     private Intake intake;
-    private LedManager dioLed;
+    //private LedManager dioLed;
     private double lastValidDistanceM = 2.0;
     private double lastSeenTimeSec = 0.0;
     private static final double kTargetHoldTimeSec = 0.25;
@@ -132,22 +132,22 @@ public class RobotContainer {
                 turret = new Turret();
                 indexer = new Indexer();
                 transfer = new Transfer();
-                led = new LED();
-                dioLed = new LedManager(new LedModeBus(0, 1, 2, 3));
+                //led = new LED();
+                //dioLed = new LedManager(new LedModeBus(0, 1, 2, 3));
                 intake = new Intake();
                 
-                this.vision = new Vision(
-                    drive,
-                    new VisionIOLimelight("limelight-tag", drive::getRotation)
+                //this.vision = new Vision(
+                  //  drive,
+                    //new VisionIOLimelight("limelight-tag", drive::getRotation)
                     //new VisionIOPhotonVision(camera0Name, robotToCamera0),
                     //new VisionIOPhotonVision(camera1Name, robotToCamera1)
-                );
+                //);
                
                 //hubLock = new HubLock(turret, this.vision, 0);
                 //turret.setDefaultCommand(hubLock);
 
                 //turret.setDefaultCommand(hubLock());
-                SetLED = new SetLED(led, 0, 0, 0, false);
+                //SetLED = new SetLED(led, 0, 0, 0, false);
                 //HubTurn = new HubTurn(drive, "limelight-tag");
 
 
@@ -564,11 +564,11 @@ public class RobotContainer {
 }
 
 
-    public void ledPeriodic() {
-        if (dioLed != null) {
-            dioLed.periodic();
-  }
-}
+    //public void ledPeriodic() {
+      //  if (dioLed != null) {
+        //    dioLed.periodic();
+  //}
+//}
 
 
 

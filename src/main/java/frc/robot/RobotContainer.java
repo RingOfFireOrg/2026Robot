@@ -68,6 +68,7 @@ import frc.robot.subsystems.LED.LedModeBus;
 import frc.robot.commands.HubTurn;
 import frc.robot.commands.Ballin;
 import frc.robot.commands.Rollin;
+import frc.robot.commands.BallinTest;
 import frc.robot.commands.DriveAim;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -220,6 +221,8 @@ public class RobotContainer {
         autoChooser.addOption("Preload and Depot", new PathPlannerAuto("PreloadDepotv2", false));
         autoChooser.addOption("Preload", new PathPlannerAuto("CenterPreloadAuto", false));
         autoChooser.addOption("Preload and Depot V2(use this one)", new PathPlannerAuto("CenterPreloadDepotAuto", false));
+        autoChooser.addOption("TrenchTest", new PathPlannerAuto("WakeTrenchTest", false));
+        autoChooser.addOption("BallinTest", new PathPlannerAuto("New Auto", false));
         //autoChooser.addOption("Limelight score(DONT USE)", new PathPlannerAuto().andThen());
         
         
@@ -534,6 +537,7 @@ public class RobotContainer {
     public void setNamedCommands() {
         NamedCommands.registerCommand("Ballin", Ballin.create(turret, indexer, transfer));
         NamedCommands.registerCommand("Rollin", Rollin.create(intake));
+        NamedCommands.registerCommand("BallinTest", BallinTest.create(turret, indexer, transfer));
 /* 
         NamedCommands.registerCommand(
         "AimAndShoot",

@@ -308,7 +308,7 @@ public class RobotContainer {
             boolean isFlipped = DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red;
             return new Rotation2d(Math.toRadians(isFlipped ? 125 + 180 : 125));
         }));
-        driver.a().whileTrue(new AimAndRange(drive, LimelightFrontName));
+        //driver.a().whileTrue(new AimAndRange(drive, LimelightFrontName));
 
 
         //Reset gyro / odometry
@@ -364,9 +364,9 @@ public class RobotContainer {
 
             //operator.y().whileTrue(transfer.runPercent(0.6)); //Transfer
             operator.y().whileTrue(Commands.parallel(indexer.runPercent(0.8), transfer.runPercent(-0.6))); //indexer and spindexer up
-            operator.x().whileTrue(Commands.parallel(transfer.runPercent(-0.6), intake.rollersIn())); //spindex and Intake
+            operator.x().whileTrue(Commands.parallel(transfer.runPercent(-0.6), intake.rollersOut())); //spindex and Intake
             operator.a().whileTrue(Commands.parallel(transfer.runPercent(0.6), indexer.runPercent(-0.6))); //Transfer and indexer out
-            operator.b().whileTrue(intake.rollersOut()); //outtake 
+            operator.b().whileTrue(intake.rollersIn()); //outtake 
 
             //operator.povUp().onTrue(hubLock); // reapplys hublock if switched off
             //operator.povUp().onTrue(Commands.runOnce(() -> turret.setDefaultCommand(hubLock())));

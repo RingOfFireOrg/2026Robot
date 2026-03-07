@@ -3,7 +3,6 @@
   "robotLength": 0.683,
   "holonomicMode": true,
   "pathFolders": [
-    "Align_Right",
     "CenterIntakeCenter",
     "Center_Left",
     "LimelightScore",

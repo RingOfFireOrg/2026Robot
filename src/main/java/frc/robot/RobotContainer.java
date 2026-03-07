@@ -393,6 +393,11 @@ public class RobotContainer {
             //operator.leftBumper().whileTrue(Commands.runEnd(() -> turret.setDutyCycle(-0.25), turret::stopTurret, turret));
             //operator.rightBumper().onTrue(HubTurn);
 
+            operator.rightBumper().whileTrue(turret.runShooterRPM( () -> 3500, () -> 2500));
+            operator.leftBumper().whileTrue(turret.runShooterRPM( () -> 4500, () -> 3500));
+
+             
+
 
 
             //operator.rightTrigger().whileTrue(turret.runShooterPercent(0.9));
@@ -401,8 +406,8 @@ public class RobotContainer {
             operator.rightTrigger().whileTrue
             //(turret.runShooterPercent(0.9));
             (turret.runShooterRPM(
-            () -> topRpmEntry.getDouble(5000.0),
-            () -> bottomRpmEntry.getDouble(5000.0)));
+            () -> topRpmEntry.getDouble(3000.0),
+            () -> bottomRpmEntry.getDouble(3000.0)));
             
             //(turret.runShooterPercent(0.9));
                 //.onTrue(Commands.runOnce(() -> dioLed.setShooterActive(true)))

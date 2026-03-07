@@ -3,9 +3,10 @@
   "robotLength": 0.683,
   "holonomicMode": true,
   "pathFolders": [
+    "Align_Right",
     "CenterIntakeCenter",
     "Center_Left",
-    "Align_Right",
+    "LimelightScore",
     "PathGen",
     "_leftSideAuto",
     "_middleSideAuto",
@@ -13,6 +14,7 @@
   ],
   "autoFolders": [
     "Center Auto",
+    "LimelightScore",
     "Right"
   ],
   "defaultMaxVel": 2.3,

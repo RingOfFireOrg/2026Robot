@@ -1,5 +1,6 @@
 package frc.robot;
 
+import static frc.robot.subsystems.vision.VisionConstants.LimelightFrontName;
 import static frc.robot.subsystems.vision.VisionConstants.camera0Name;
 import static frc.robot.subsystems.vision.VisionConstants.camera1Name;
 import static frc.robot.subsystems.vision.VisionConstants.robotToCamera0;
@@ -56,6 +57,7 @@ import frc.robot.commands.HubTurn;
 import frc.robot.subsystems.Turret.Turret;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
+import frc.robot.commands.AimAndRange;
 import frc.robot.commands.AlignToHub;
 import frc.robot.commands.PhotonAlign;
 import frc.robot.subsystems.Indexer.Indexer;
@@ -219,7 +221,7 @@ public class RobotContainer {
         autoChooser.addOption("Preload and Depot", new PathPlannerAuto("PreloadDepotv2", false));
         autoChooser.addOption("Preload", new PathPlannerAuto("CenterPreloadAuto", false));
         autoChooser.addOption("Preload and Depot V2(use this one)", new PathPlannerAuto("CenterPreloadDepotAuto", false));
-        autoChooser.addOption("Limelight score(DONT USE)", new PathPlannerAuto().andThen());
+        //autoChooser.addOption("Limelight score(DONT USE)", new PathPlannerAuto().andThen());
         
         
         //autoChooser.addOption("MECK) Align Right",
@@ -528,6 +530,7 @@ public class RobotContainer {
     public void setNamedCommands() {
         NamedCommands.registerCommand("Ballin", Ballin.create(turret, indexer, transfer));
         NamedCommands.registerCommand("Rollin", Rollin.create(intake));
+        NamedCommands.registerCommand("Aim And Range", new AimAndRange(drive, LimelightFrontName));
 /* 
         NamedCommands.registerCommand(
         "AimAndShoot",

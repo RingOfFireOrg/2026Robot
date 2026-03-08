@@ -10,8 +10,8 @@ public class TrenchBaller {
 
   public static Command create(Turret turret, Indexer indexer, Transfer transfer) {
 
-    double topRPM = 3750;
-    double bottomRPM = 2750.0;
+    double topRPM = 3250;
+    double bottomRPM = 2250.0;
 
     return Commands.sequence(
 

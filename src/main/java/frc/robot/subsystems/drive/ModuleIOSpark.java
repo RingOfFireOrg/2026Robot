@@ -33,7 +33,7 @@ public class ModuleIOSpark implements ModuleIO {
     private final RelativeEncoder turnEncoder;
 
     private final CANcoder canCoder;
-    private static final String CANBUS = "FRC-3459-PT-CANivore";
+    //private static final String CANBUS = "FRC-3459-PT-CANivore";
 
     // Closed loop controllers
     private final SparkClosedLoopController driveController;
@@ -83,7 +83,7 @@ public class ModuleIOSpark implements ModuleIO {
                 default -> 0;
             },
             MotorType.kBrushless);
-        canCoder = new CANcoder(            
+        /*canCoder = new CANcoder(            
             switch (module) {
                 case 0 -> frontLeftCancoderID;
                 case 1 -> frontRightCancoderID;
@@ -91,7 +91,18 @@ public class ModuleIOSpark implements ModuleIO {
                 case 3 -> backRightCancoderID;
             default -> 0;
         }
-        , CANBUS);
+        , CANBUS);*/
+
+        canCoder = new CANcoder(            
+            switch (module) {
+                case 0 -> 9;
+                case 1 -> 10;
+                case 2 -> 11;
+                case 3 -> 12;
+            default -> 0;
+        });
+
+        
         driveEncoder = driveSpark.getEncoder();
         turnEncoder = turnSpark.getEncoder();
         driveController = driveSpark.getClosedLoopController();

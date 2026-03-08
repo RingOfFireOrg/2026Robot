@@ -225,6 +225,13 @@ public class RobotContainer {
         autoChooser.addOption("wake preload depot trench", new PathPlannerAuto("WakePreloadDepotTrenchAuto", false));
         autoChooser.addOption("Wake Trench Shuttle", new PathPlannerAuto("WakeTrenchShuttle", false));
         autoChooser.addOption("Wake Trench Preload", TrenchBaller.create(turret, indexer, transfer));
+
+
+
+
+
+
+
         
         /* 
         autoChooser.addOption("Preload", new PathPlannerAuto("CenterPreloadAuto", false));
@@ -582,6 +589,7 @@ public class RobotContainer {
         //    dioLed.periodic();
   //}
 //}
+
 
 
 

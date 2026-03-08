@@ -406,8 +406,8 @@ public class RobotContainer {
             //operator.leftStick().whileTrue(indexer.runPercent(() -> -MathUtil.applyDeadband(operator.getLeftY(), 0.12)));
 
 
-            //operator.leftStick()
-                //.whileTrue(climber.runTeleop(() -> -MathUtil.applyDeadband(operator.getLeftY(), 0.12)));
+            operator.leftStick()
+                .whileTrue(climber.runTeleop(() -> -MathUtil.applyDeadband(operator.getLeftY(), 0.12)));
 
                 //idk if gonna use turret
             //operator.rightBumper().whileTrue(Commands.runEnd(() -> turret.setDutyCycle(+0.25), turret::stopTurret, turret));//manual turret turning

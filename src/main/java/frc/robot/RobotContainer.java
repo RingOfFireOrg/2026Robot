@@ -73,6 +73,7 @@ import frc.robot.commands.Rollin;
 import frc.robot.commands.BallinTest;
 import frc.robot.commands.DriveAim;
 import frc.robot.commands.WakePreload;
+import frc.robot.commands.TrenchBaller;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.networktables.GenericEntry;
@@ -223,6 +224,7 @@ public class RobotContainer {
         autoChooser.addOption("wake preload depot", new PathPlannerAuto("WakePreloadDepotAuto", false));
         autoChooser.addOption("wake preload depot trench", new PathPlannerAuto("WakePreloadDepotTrenchAuto", false));
         autoChooser.addOption("Wake Trench Shuttle", new PathPlannerAuto("WakeTrenchShuttle", false));
+        autoChooser.addOption("Wake Trench Shoot", TrenchBaller.create(turret, indexer, transfer));
         
         /* 
         autoChooser.addOption("Preload", new PathPlannerAuto("CenterPreloadAuto", false));

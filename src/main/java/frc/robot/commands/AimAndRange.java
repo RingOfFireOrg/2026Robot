@@ -7,13 +7,12 @@ package frc.robot.commands;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.util.LimelightHelpers;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class AimAndRange extends Command {
   /** Creates a new AimAndRange. */
-  double rangingDistance = 0.5;//change ts
+  double rangingDistance = 0.25;//change ts
   double kpAim = 0.5;
   double kpRange = 0.1;
   Drive drive;
@@ -34,8 +33,8 @@ public class AimAndRange extends Command {
   public void execute() {
     if(!LimelightHelpers.getTV(camera)) return;
     double offBy = LimelightHelpers.getTX(camera)*kpAim;
-    double offByDistance = (LimelightHelpers.getTY(camera) + rangingDistance) * kpRange * DriveConstants.maxSpeedMetersPerSec;
-    drive.runVelocity(new ChassisSpeeds(offByDistance, 0, offBy));
+    //double offByDistance = (LimelightHelpers.getTY(camera) + rangingDistance) * kpRange * DriveConstants.maxSpeedMetersPerSec;
+    drive.runVelocity(new ChassisSpeeds(0, 0, offBy));
   }
 
   // Called once the command ends or is interrupted.

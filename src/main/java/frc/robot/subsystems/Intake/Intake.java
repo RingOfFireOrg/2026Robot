@@ -54,7 +54,7 @@ public class Intake extends SubsystemBase {
 //private final GenericEntry sbRollersInVolts = tab.add("Rollers In Volts", 3.0).getEntry();
 //private final GenericEntry sbRollersOutVolts = tab.add("Rollers Out Volts", 3.0).getEntry();
 
-  private final GenericEntry sbDeployOutDeg = tab.add("Deploy Out (deg)", 75.0).getEntry();
+  private final GenericEntry sbDeployOutDeg = tab.add("Deploy Out (deg)", 83.0).getEntry();
   private final GenericEntry sbDeployInDeg = tab.add("Deploy In (deg)", 3.0).getEntry();
 
   private final GenericEntry sbDeployPosDeg = tab.add("Deploy Pos (deg)", 0.0).getEntry();

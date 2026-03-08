@@ -72,6 +72,7 @@ import frc.robot.commands.Ballin;
 import frc.robot.commands.Rollin;
 import frc.robot.commands.BallinTest;
 import frc.robot.commands.DriveAim;
+import frc.robot.commands.WakePreload;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.networktables.GenericEntry;
@@ -106,7 +107,7 @@ public class RobotContainer {
     // Controller
     private final CommandXboxController driver = new CommandXboxController(0);
     private final CommandXboxController operator = new CommandXboxController(1);
-    private final CommandJoystick climberController = new CommandJoystick(2);
+    //private final CommandJoystick climberController = new CommandJoystick(2);
     private final ShuffleboardTab shooterTab = Shuffleboard.getTab("Shooter");
     private final GenericEntry topRpmEntry = shooterTab.add("Top RPM", 3000.0).getEntry();
     private final GenericEntry bottomRpmEntry = shooterTab.add("Bottom RPM", 2500.0).getEntry();
@@ -115,8 +116,8 @@ public class RobotContainer {
     private final LoggedDashboardChooser<Command> autoChooser;
 
     private final double maxSpeed = 0.6;
-    private final double standardSpeed = 0.7;
-    private final double turnSpeed = 0.5;
+    //private final double standardSpeed = 0.7;
+    //private final double turnSpeed = 0.5;
 
     public RobotContainer() {
 
@@ -220,6 +221,7 @@ public class RobotContainer {
             Ballin.create(turret, indexer, transfer));
         autoChooser.addOption("Preload and Depot", new PathPlannerAuto("PreloadDepotv2", false));
         autoChooser.addOption("Preload pls work", new PathPlannerAuto("PreloadTest", true));
+        autoChooser.addOption("WakePreload", WakePreload.create(drive, turret, indexer, transfer));
         /* 
         autoChooser.addOption("Preload", new PathPlannerAuto("CenterPreloadAuto", false));
         autoChooser.addOption("Preload and Depot V2(use this one)", new PathPlannerAuto("CenterPreloadDepotAuto", false));
@@ -393,8 +395,8 @@ public class RobotContainer {
             //operator.leftStick().whileTrue(indexer.runPercent(() -> -MathUtil.applyDeadband(operator.getLeftY(), 0.12)));
 
 
-            operator.leftStick()
-                .whileTrue(climber.runTeleop(() -> -MathUtil.applyDeadband(operator.getLeftY(), 0.12)));
+            //operator.leftStick()
+                //.whileTrue(climber.runTeleop(() -> -MathUtil.applyDeadband(operator.getLeftY(), 0.12)));
 
                 //idk if gonna use turret
             //operator.rightBumper().whileTrue(Commands.runEnd(() -> turret.setDutyCycle(+0.25), turret::stopTurret, turret));//manual turret turning
@@ -506,11 +508,12 @@ public class RobotContainer {
 
 
             /* Climbing Controls */
+            /*
             climberController.axisMagnitudeGreaterThan(Joystick.AxisType.kY.value, 0.2)
             .and(climberController.button(1))
             .and(climberController.povCenter())
             .whileTrue(climber.runTeleop(() -> -climberController.getY()))
-            .onFalse(climber.runTeleop(() -> 0));
+            .onFalse(climber.runTeleop(() -> 0)); */
             /*
              * EXAMPLE FROM 2025 ^
              */

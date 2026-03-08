@@ -143,8 +143,11 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
                 new SysIdRoutine.Mechanism((voltage) -> runCharacterization(voltage.in(Volts)), null, this));
 
 
-        driveTab.addNumber("Heading (deg)", () -> getRotation().getDegrees());
-        driveTab.addNumber("Raw Gyro (deg)", () -> rawGyroRotation.getDegrees());
+  
+        driveTab.addBoolean("Gyro Connected", () -> gyroInputs.connected);
+        driveTab.addNumber("NavX Yaw Live", () -> gyroInputs.yawPosition.getDegrees());
+        driveTab.addNumber("Raw Gyro", () -> rawGyroRotation.getDegrees());
+        driveTab.addNumber("Heading", () -> getRotation().getDegrees());
     }
 
     @Override

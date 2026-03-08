@@ -217,11 +217,13 @@ public class RobotContainer {
         // Set up auto routines
         autoChooser = new LoggedDashboardChooser<>("Auto Choices");
         autoChooser.addDefaultOption("do nothing", Commands.none());
-        autoChooser.addOption("Ballin",
-            Ballin.create(turret, indexer, transfer));
-        autoChooser.addOption("Preload and Depot", new PathPlannerAuto("PreloadDepotv2", false));
-        autoChooser.addOption("Preload pls work", new PathPlannerAuto("PreloadTest", true));
-        autoChooser.addOption("WakePreload", WakePreload.create(drive, turret, indexer, transfer));
+        autoChooser.addOption("left trench intake", new PathPlannerAuto("LeftTrenchIntake", false));
+        autoChooser.addOption("no gyro reset preload" , new PathPlannerAuto("NoGyroResetPreload", false));
+        autoChooser.addOption("preload test", new PathPlannerAuto("PreloadTest", false));
+        autoChooser.addOption("wake preload depot", new PathPlannerAuto("WakePreloadDepotAuto", false));
+        autoChooser.addOption("wake preload depot trench", new PathPlannerAuto("WakePreloadDepotTrenchAuto", false));
+        autoChooser.addOption("Wake Trench Shuttle", new PathPlannerAuto("WakeTrenchShuttle", false));
+        
         /* 
         autoChooser.addOption("Preload", new PathPlannerAuto("CenterPreloadAuto", false));
         autoChooser.addOption("Preload and Depot V2(use this one)", new PathPlannerAuto("CenterPreloadDepotAuto", false));

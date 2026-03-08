@@ -29,7 +29,7 @@ import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
 
 public class DriveConstants {
     public static final double maxSpeedMetersPerSec = Units.feetToMeters(12/*15.1*/);
-    public static final double odometryFrequency = 100.0; 
+    public static final double odometryFrequency = 50.0; 
     public static final double trackWidth = Units.inchesToMeters(22);
     public static final double wheelBase = Units.inchesToMeters(22.5);
     //idk if the math is right for wheelBase

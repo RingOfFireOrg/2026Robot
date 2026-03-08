@@ -55,6 +55,7 @@ public class WakePreload {
     }
   }
 
+  @SuppressWarnings("unused")
   private static class Turn180 extends Command {
     private final Drive drive;
     private final PIDController pid = new PIDController(3.0, 0.0, 0.1);

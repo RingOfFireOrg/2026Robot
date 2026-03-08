@@ -16,6 +16,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.path.PathPlannerPath;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -225,6 +226,10 @@ public class RobotContainer {
         autoChooser.addOption("wake preload depot trench", new PathPlannerAuto("WakePreloadDepotTrenchAuto", false));
         autoChooser.addOption("Wake Trench Shuttle", new PathPlannerAuto("WakeTrenchShuttle", false));
         autoChooser.addOption("Wake Trench Preload", TrenchBaller.create(turret, indexer, transfer));
+        autoChooser.addOption("V1", new PathPlannerAuto("Ver1", false));
+        autoChooser.addOption("V2", new PathPlannerAuto("Ver2", false));
+
+
 
 
 
@@ -414,8 +419,8 @@ public class RobotContainer {
             //operator.leftBumper().whileTrue(Commands.runEnd(() -> turret.setDutyCycle(-0.25), turret::stopTurret, turret));
             //operator.rightBumper().onTrue(HubTurn);
 
-            operator.rightBumper().whileTrue(turret.runShooterRPM( () -> 2500, () -> 2000));
-            operator.leftBumper().whileTrue(turret.runShooterRPM( () -> 4500, () -> 3500));
+            operator.rightBumper().whileTrue(turret.runShooterRPM( () -> 3000, () -> 1500));
+            operator.leftBumper().whileTrue(turret.runShooterRPM( () -> 3500, () -> 4500));
 
              
 

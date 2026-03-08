@@ -12,9 +12,10 @@ import frc.robot.util.LimelightHelpers;
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class AimAndRange extends Command {
   /** Creates a new AimAndRange. */
-  double rangingDistance = 0.25;//change ts
-  double kpAim = 0.5;
-  double kpRange = 0.1;
+  double rangingDistance = 6;//change ts
+  double kpAim = 0.05;
+  double kpRange = 0.025;
+  boolean end = false;
   Drive drive;
   String camera;
   public AimAndRange(Drive drive, String camera) {
@@ -31,10 +32,16 @@ public class AimAndRange extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if(!LimelightHelpers.getTV(camera)) return;
-    double offBy = LimelightHelpers.getTX(camera)*kpAim;
-    //double offByDistance = (LimelightHelpers.getTY(camera) + rangingDistance) * kpRange * DriveConstants.maxSpeedMetersPerSec;
-    drive.runVelocity(new ChassisSpeeds(0, 0, offBy));
+    if(!LimelightHelpers.getTV(camera)) end = true;
+    double offBy = 0;
+    if(LimelightHelpers.getFiducialID(camera) == 26 || 
+        LimelightHelpers.getFiducialID(camera) == 25 ||
+        LimelightHelpers.getFiducialID(camera) == 10 ||
+        LimelightHelpers.getFiducialID(camera) == 9) 
+      offBy = LimelightHelpers.getTX(camera)*kpAim;
+    else end = true;
+    double offByDistance = (LimelightHelpers.getTY(camera) ) * kpRange;
+    drive.runVelocity(new ChassisSpeeds(offByDistance, 0, offBy));
   }
 
   // Called once the command ends or is interrupted.

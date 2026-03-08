@@ -10,8 +10,8 @@ public class TrenchBaller {
 
   public static Command create(Turret turret, Indexer indexer, Transfer transfer) {
 
-    double topRPM = 3250;
-    double bottomRPM = 2250.0;
+    double topRPM = 3000;
+    double bottomRPM = 2000.0;
 
     return Commands.sequence(
 
@@ -21,7 +21,7 @@ public class TrenchBaller {
 
         Commands.parallel(
             indexer.runPercent(0.8),
-            transfer.runPercent(0.8)
+            transfer.runPercent(-0.8)
         ).withTimeout(4.0),
 
         Commands.runOnce(() -> {

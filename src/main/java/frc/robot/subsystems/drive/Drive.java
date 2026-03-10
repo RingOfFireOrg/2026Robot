@@ -287,6 +287,10 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         kinematics.resetHeadings(headings);
         stop();
     }
+    /** Returns a command to stop drive in X configuration */
+    public Command stopX() {
+        return run(()->stopWithX());
+    }
 
     /** Returns a command to run a quasistatic test in the specified direction. */
     public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {

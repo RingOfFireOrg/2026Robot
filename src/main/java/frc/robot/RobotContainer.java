@@ -334,6 +334,7 @@ public class RobotContainer {
             return new Rotation2d(Math.toRadians(isFlipped ? 125 + 180 : 125));
         }));
         driver.a().whileTrue(new AimAndRange(drive, LimelightFrontName));
+        driver.x().whileTrue(drive.stopX());
 
 
         //Reset gyro / odometry

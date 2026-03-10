@@ -2,15 +2,20 @@ package frc.robot.commands;
 
 import static frc.robot.subsystems.vision.VisionConstants.aprilTagLayout;
 
+import java.util.Vector;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -77,12 +82,22 @@ public class AlignToHub extends Command {
       ratePrint("[AlignToHub] unknown tag id=" + tagId);
       return;
     }
-
-    Pose2d tagPose = tagPoseOpt.get().toPose2d().transformBy(new Transform2d(-kStandoffMeters, 0.0, Rotation2d.fromDegrees(180.0)));
+    Translation2d hubCenter = new Translation2d(4.6,4.03);
     Pose2d current = drive.getPose();
-    Pose2d goal = current;
-    if(tagId == 25) goal = new Pose2d(tagPose.getX()-1.9, tagPose.getY()+1, tagPose.getRotation());
-    if(tagId == 26) goal = new Pose2d(tagPose.getX()-1.9, tagPose.getY(), tagPose.getRotation());
+    double goalDistance = Units.feetToMeters(6.1);
+    double distanceFromHub = current.getTranslation().getDistance(hubCenter); 
+    double dx = hubCenter.getX() - current.getX();
+    double dy = hubCenter.getY() - current.getY();
+    Translation2d target = new Translation2d(
+      ((dx / distanceFromHub) * goalDistance) + hubCenter.getX(),
+      ((dy / distanceFromHub) * goalDistance) + hubCenter.getY()
+    );
+    Pose2d goal = new Pose2d(
+      target,
+      new Rotation2d(Math.atan2(
+        (dy), 
+        (dx)
+    )));
 
     
     ChassisSpeeds fieldRelative =

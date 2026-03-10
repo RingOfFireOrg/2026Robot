@@ -22,6 +22,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.vision.Vision;
 
+
+@SuppressWarnings("unused")
 public class AlignToHub extends Command {
   private final Drive drive;
   private final Vision vision;

@@ -17,6 +17,10 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import com.revrobotics.REVLibError;
+import com.revrobotics.ResetMode;
+import com.revrobotics.PersistMode;
+
 
 @SuppressWarnings("removal")
 public class Intake extends SubsystemBase {
@@ -30,6 +34,8 @@ public class Intake extends SubsystemBase {
 
   private final RelativeEncoder deployEncoder = deployMotor.getEncoder();
   private final SparkClosedLoopController deployController = deployMotor.getClosedLoopController();
+  private final SparkFlexConfig deployRuntimeCfg = new SparkFlexConfig();
+  private IdleMode currentDeployIdleMode = IdleMode.kBrake;
 
   private static final double kDeadband = 0.02;
 
@@ -71,7 +77,7 @@ public class Intake extends SubsystemBase {
 
   public Intake() {
     SparkFlexConfig deployCfg = new SparkFlexConfig();
-    deployCfg.idleMode(IdleMode.kCoast);
+    deployCfg.idleMode(IdleMode.kBrake);
     deployCfg.inverted(false);
     deployCfg.smartCurrentLimit(60);
 
@@ -180,13 +186,33 @@ public class Intake extends SubsystemBase {
     stopDeploy();
     stopRollers();
   }
+  private void setDeployIdleMode(IdleMode mode) {
+    if (currentDeployIdleMode == mode) return;
+
+    deployRuntimeCfg.idleMode(mode);
+    REVLibError err =
+      deployMotor.configure(
+          deployRuntimeCfg,
+          ResetMode.kNoResetSafeParameters,
+          PersistMode.kNoPersistParameters);
+
+  if (err == REVLibError.kOk) {
+    currentDeployIdleMode = mode;
+  }
+}
 
   public Command deployOut() {
-    return runOnce(() -> setDeployPositionDeg(sbDeployOutDeg.getDouble(70.0)));
+    return runOnce(() -> {
+    setDeployIdleMode(IdleMode.kCoast);
+    setDeployPositionDeg(sbDeployOutDeg.getDouble(83.0));
+  });
   }
 
   public Command retractIn() {
-    return runOnce(() -> setDeployPositionDeg(sbDeployInDeg.getDouble(4.0)));
+    return runOnce(() -> {
+    setDeployIdleMode(IdleMode.kBrake);
+    setDeployPositionDeg(sbDeployInDeg.getDouble(3.0));
+  });
   }
 
   public Command deployOutManual() {
@@ -216,6 +242,7 @@ public Command rollersOut() {
       this::stopRollers
    );
   }
+
 
   @Override
   public void periodic() {

@@ -35,10 +35,6 @@ import frc.robot.Constants.PivotAngles;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.Climber.Climber;
 
-import frc.robot.subsystems.EndEffector.EndEffector;
-import frc.robot.subsystems.EndEffector.EndEffectorIO;
-import frc.robot.subsystems.EndEffector.EndEffectorIOReal;
-import frc.robot.subsystems.EndEffector.EndEffectorIOSim;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.drive.GyroIO;

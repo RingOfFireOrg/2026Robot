@@ -32,7 +32,7 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 
 @SuppressWarnings({ "removal", "unused" })
 public class Turret extends SubsystemBase {
-  //private static final String kCanBus = "FRC-3459-PT-CANivore";
+  private static final String kCanBus = "FRC-3459-PT-CANivore";
   private static int hello = 1;
   private static final int kMotorCanId = 40; //turret
   private static final int kShooterCanId = 41;//bottom
@@ -66,13 +66,13 @@ public class Turret extends SubsystemBase {
   private final RelativeEncoder rotEncoder = rotMotor.getEncoder();
 
   //private final TalonFX shooterMotor = new TalonFX(kShooterCanId, kCanBus);
-  private final TalonFX shooterMotor = new TalonFX(kShooterCanId);
+  private final TalonFX shooterMotor = new TalonFX(kShooterCanId, kCanBus);
 
   private final VoltageOut shooterVoltsReq = new VoltageOut(0.0);
   private static final double kShooterMaxVolts = 12.0;
 
   //private final TalonFX shooterMotor2 = new TalonFX(kShooter2CanId, kCanBus);
-  private final TalonFX shooterMotor2 = new TalonFX(kShooter2CanId);
+  private final TalonFX shooterMotor2 = new TalonFX(kShooter2CanId, kCanBus);
 
   private final VoltageOut shooter2VoltsReq = new VoltageOut(0.0);
   private static final double kShooter2MaxVolts = 12.0;

@@ -63,6 +63,8 @@ public class DriveConstants {
     public static final int frontRightCancoderID = 10;
     public static final int backLeftCancoderID = 11;
     public static final int backRightCancoderID = 12;
+    public static final int pigeonCanId = 0;
+    public static final String canivoreBusName = "FRC-3459-PT-CANivore";
 
 
     // Drive motor configuration

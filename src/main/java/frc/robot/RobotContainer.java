@@ -32,8 +32,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.AlgaeAngles;
 import frc.robot.Constants.ElevatorHeights;
 import frc.robot.Constants.PivotAngles;
-import frc.robot.commands.AlignToReef;
-import frc.robot.commands.AlignToReef.reefSide;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.Climber.Climber;
 
@@ -143,7 +141,7 @@ public class RobotContainer {
                 intake = new Intake();
                 
                 this.vision = new Vision(
-                    drive::accept,
+                    drive,
                     new VisionIOLimelight("limelight-tag", drive::getRotation),
                     new VisionIOPhotonVision(camera1Name, robotToCamera1),
                     new VisionIOPhotonVision(camera0Name, robotToCamera0)

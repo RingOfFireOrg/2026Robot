@@ -37,6 +37,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -84,7 +85,9 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
             kinematics, 
             rawGyroRotation, 
             lastModulePositions, 
-            new Pose2d()
+            new Pose2d(),
+            VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5)),
+            VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(30))
         );
     private final Consumer<Pose2d> resetSimulationPoseCallBack;
 
@@ -233,7 +236,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
 
         // Update gyro alert
         gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);
-        
+
         }
 
     /**
@@ -351,7 +354,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     }*/
     public Rotation2d getRotation() {
         return cachedRotation;
-        }
+    }
 
     public void zeroHeading() {
         odometryLock.lock();

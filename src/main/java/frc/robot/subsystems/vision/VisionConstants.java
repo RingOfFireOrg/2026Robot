@@ -32,7 +32,7 @@ public final class VisionConstants{
 
   static {
     try {
-      aprilTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+      aprilTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltAndymark);
     } catch (Exception e) {
       throw new RuntimeException("Failed to load AprilTagFieldLayout", e);
     }
@@ -61,7 +61,6 @@ public final class VisionConstants{
 
     // Camera names, must match names configured on coprocessor
     public static String LimelightFrontName = "limelight-tag";
-
     public static String camera0Name = "Photon_Front";
     public static String camera1Name = "Photon_Second";
 
@@ -83,6 +82,7 @@ public final class VisionConstants{
         0.0, 
         Math.toRadians(-15.0), 
         Math.toRadians(-25.0)));
+    public static Transform3d robotToCameraLL = new Transform3d();
 
     // Basic filtering thresholds
     public static double maxAmbiguity = 0.3;

@@ -57,6 +57,7 @@ import frc.robot.commands.HubLock;
 import frc.robot.commands.HubTurn;
 import frc.robot.subsystems.Turret.Turret;
 import frc.robot.subsystems.vision.VisionIOLimelight;
+import frc.robot.subsystems.vision.VisionIOPhotonVision;
 //import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.commands.AimAndRange;
 import frc.robot.commands.AlignToHub;
@@ -141,10 +142,12 @@ public class RobotContainer {
                 //dioLed = new LedManager(new LedModeBus(0, 1, 2, 3));
                 intake = new Intake();
                 
-                /*this.vision = new Vision(
-                   drive,
-                    new VisionIOLimelight("limelight-tag", drive::getRotation)
-                );*/
+                this.vision = new Vision(
+                    drive::accept,
+                    new VisionIOLimelight("limelight-tag", drive::getRotation),
+                    new VisionIOPhotonVision(camera1Name, robotToCamera1),
+                    new VisionIOPhotonVision(camera0Name, robotToCamera0)
+                );
                
                 //hubLock = new HubLock(turret, this.vision, 0);
                 //turret.setDefaultCommand(hubLock);

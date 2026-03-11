@@ -1,0 +1,157 @@
+package frc.robot.commands;
+import static frc.robot.subsystems.vision.VisionConstants.aprilTagLayout;
+
+import java.util.Random;
+
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.HolonomicDriveController;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.vision.Vision;
+@SuppressWarnings("unused")
+public class AlignWhileMoving extends Command {
+  private final Drive drive;
+  private final Vision vision;
+  private final int cameraIndex;
+
+  private final PIDController xPid;
+  private final PIDController yPid;
+  private final ProfiledPIDController thetaPid;
+  private final HolonomicDriveController controller;
+  private final CommandXboxController Xcontroller;
+
+  // how far away from april tag
+  private static final double kStandoffMeters = 1.00;
+
+  private static final double kMaxV = 1.5;     // m/s
+  private static final double kMaxOmega = 2.5; // rad/s
+  private static final double tag25Offset = -0.3;
+
+  private double lastPrint = 0.0;
+  private final double RANGING_DISTANCE = Units.feetToMeters(6.1);
+  private final Translation2d hubCenter = new Translation2d(4.6,4.03);
+
+  public AlignWhileMoving(Drive drive, Vision vision, int cameraIndex, CommandXboxController Xcontroller) {
+    this.drive = drive;
+    this.vision = vision;
+    this.cameraIndex = cameraIndex;
+    this.Xcontroller = Xcontroller;
+    addRequirements(drive);
+
+    xPid = new PIDController(2.5, 0.0, 0.0);
+    yPid = new PIDController(2.5, 0.0, 0.0);
+
+    thetaPid =
+        new ProfiledPIDController(
+            5.0, 0.0, 0.15,
+            new TrapezoidProfile.Constraints(6.0, 10.0));
+    thetaPid.enableContinuousInput(-Math.PI, Math.PI);
+
+    controller = new HolonomicDriveController(xPid, yPid, thetaPid);
+  }
+
+  @Override
+  public void initialize() {
+    xPid.reset();
+    yPid.reset();
+    thetaPid.reset(drive.getRotation().getRadians());
+    lastPrint = 0.0;
+    System.out.println("[AlignToHub] init cam=" + cameraIndex);
+  }
+
+  @Override
+  public void execute() {
+    Pose2d current = drive.getPose();
+    ChassisSpeeds currentSpeed = drive.currentSpeed();
+
+    if (!vision.hasTarget(cameraIndex)) {
+      drive.stop();
+      ratePrint("[AlignToHub] no target");
+      return;
+    }
+
+    int tagId = (int) Math.round(vision.getTargetID(cameraIndex));
+    
+    var tagPoseOpt = aprilTagLayout.getTagPose(tagId);
+    if (tagPoseOpt.isEmpty()) {
+      drive.stop();
+      ratePrint("[AlignToHub] unknown tag id=" + tagId);
+      return;
+    }
+    double sidewaysSpeed = currentSpeed.vyMetersPerSecond;
+    double frontBackSpeed = currentSpeed.vxMetersPerSecond;
+    double distanceFromHub = current.getTranslation().getDistance(hubCenter); 
+    //USE LINEAR REGRESSION TO FIND OUT ACTUAL NEEDED VALUES
+    double shotTime = (distanceFromHub*1)+1;
+    
+    Translation2d translatedHub = new Translation2d(hubCenter.getX(), hubCenter.getY() + sidewaysSpeed*shotTime);
+
+    double dx = translatedHub.getX() - current.getX();
+    double dy = translatedHub.getY() - current.getY();
+
+    Pose2d goal = new Pose2d(
+      current.getTranslation(),
+      new Rotation2d(Math.atan2(
+        dy, 
+        dx
+    )));
+
+    ChassisSpeeds fieldRelative =
+        controller.calculate(current, goal, 0.0, goal.getRotation());
+
+    double vx = MathUtil.clamp(fieldRelative.vxMetersPerSecond, -kMaxV, kMaxV);
+    double vy = MathUtil.clamp(fieldRelative.vyMetersPerSecond, -kMaxV, kMaxV);
+    double omega = MathUtil.clamp(fieldRelative.omegaRadiansPerSecond, -kMaxOmega, kMaxOmega);
+    
+    
+    drive.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(-Xcontroller.getLeftY()*drive.getMaxLinearSpeedMetersPerSec(), -Xcontroller.getLeftX()*drive.getMaxLinearSpeedMetersPerSec(), omega, drive.getRotation()));
+
+    ratePrint(
+        "[AlignToHub] id=" + tagId
+            + " hasTarget=true"
+            + " tx=" + String.format("%.2f", vision.getTxDeg(cameraIndex))
+            + " cur=(" + fmt(current.getX()) + "," + fmt(current.getY()) + "," + fmtDeg(current.getRotation().getDegrees()) + ")"
+            + " goal=(" + fmt(goal.getX()) + "," + fmt(goal.getY()) + "," + fmtDeg(goal.getRotation().getDegrees()) + ")"
+            + " v=(" + fmt(vx) + "," + fmt(vy) + "," + fmt(omega) + ")"
+    );
+  }
+
+  @Override
+  public void end(boolean interrupted) {
+    drive.stop();
+    System.out.println("[AlignToHub] end interrupted=" + interrupted);
+  }
+
+  @Override
+  public boolean isFinished() {
+    return false;
+  }
+
+  private void ratePrint(String msg) {
+    double now = Timer.getFPGATimestamp();
+    if (now - lastPrint > 0.25) {
+      System.out.println(msg);
+      lastPrint = now;
+    }
+  }
+
+  private static String fmt(double v) {
+    return String.format("%.2f", v);
+  }
+
+  private static String fmtDeg(double v) {
+    return String.format("%.1f", v);
+  }
+}

@@ -1,6 +1,7 @@
 package frc.robot.commands;
-
 import static frc.robot.subsystems.vision.VisionConstants.aprilTagLayout;
+
+import java.util.Random;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.HolonomicDriveController;
@@ -19,7 +20,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.vision.Vision;
-
+@SuppressWarnings("unused")
 public class AlignWhileMoving extends Command {
   private final Drive drive;
   private final Vision vision;
@@ -39,6 +40,8 @@ public class AlignWhileMoving extends Command {
   private static final double tag25Offset = -0.3;
 
   private double lastPrint = 0.0;
+  private final double RANGING_DISTANCE = Units.feetToMeters(6.1);
+  private final Translation2d hubCenter = new Translation2d(4.6,4.03);
 
   public AlignWhileMoving(Drive drive, Vision vision, int cameraIndex, CommandXboxController Xcontroller) {
     this.drive = drive;
@@ -70,6 +73,9 @@ public class AlignWhileMoving extends Command {
 
   @Override
   public void execute() {
+    Pose2d current = drive.getPose();
+    ChassisSpeeds currentSpeed = drive.currentSpeed();
+
     if (!vision.hasTarget(cameraIndex)) {
       drive.stop();
       ratePrint("[AlignToHub] no target");
@@ -84,16 +90,17 @@ public class AlignWhileMoving extends Command {
       ratePrint("[AlignToHub] unknown tag id=" + tagId);
       return;
     }
-    Translation2d hubCenter = new Translation2d(4.6,4.03);
-    Pose2d current = drive.getPose();
-    double goalDistance = Units.feetToMeters(6.1);
+    double sidewaysSpeed = currentSpeed.vyMetersPerSecond;
+    double frontBackSpeed = currentSpeed.vxMetersPerSecond;
     double distanceFromHub = current.getTranslation().getDistance(hubCenter); 
-    double dx = hubCenter.getX() - current.getX();
-    double dy = hubCenter.getY() - current.getY();
-    Translation2d target = new Translation2d(
-      ((dx / distanceFromHub) * goalDistance) + hubCenter.getX(),
-      ((dy / distanceFromHub) * goalDistance) + hubCenter.getY()
-    );
+    //USE LINEAR REGRESSION TO FIND OUT ACTUAL NEEDED VALUES
+    double shotTime = (distanceFromHub*1)+1;
+    
+    Translation2d translatedHub = new Translation2d(hubCenter.getX(), hubCenter.getY() + sidewaysSpeed*shotTime);
+
+    double dx = translatedHub.getX() - current.getX();
+    double dy = translatedHub.getY() - current.getY();
+
     Pose2d goal = new Pose2d(
       current.getTranslation(),
       new Rotation2d(Math.atan2(

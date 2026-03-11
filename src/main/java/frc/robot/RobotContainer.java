@@ -29,9 +29,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.Constants.AlgaeAngles;
-import frc.robot.Constants.ElevatorHeights;
-import frc.robot.Constants.PivotAngles;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.Climber.Climber;
 

@@ -12,9 +12,11 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
-
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.vision.Vision;
 
@@ -27,6 +29,7 @@ public class AlignToHub extends Command {
   private final PIDController yPid;
   private final ProfiledPIDController thetaPid;
   private final HolonomicDriveController controller;
+  private final CommandXboxController Xcontroller;
 
   // how far away from april tag
   private static final double kStandoffMeters = 1.00;
@@ -37,10 +40,11 @@ public class AlignToHub extends Command {
 
   private double lastPrint = 0.0;
 
-  public AlignToHub(Drive drive, Vision vision, int cameraIndex) {
+  public AlignToHub(Drive drive, Vision vision, int cameraIndex, CommandXboxController Xcontroller) {
     this.drive = drive;
     this.vision = vision;
     this.cameraIndex = cameraIndex;
+    this.Xcontroller = Xcontroller;
     addRequirements(drive);
 
     xPid = new PIDController(2.5, 0.0, 0.0);
@@ -80,12 +84,22 @@ public class AlignToHub extends Command {
       ratePrint("[AlignToHub] unknown tag id=" + tagId);
       return;
     }
+    Translation2d hubCenter = new Translation2d(4.6,4.03);
     Pose2d current = drive.getPose();
-    Pose2d goal = drive.getPose();
-    Pose2d tagPose = tagPoseOpt.get().toPose2d().transformBy(new Transform2d(-kStandoffMeters, 0.0, Rotation2d.fromDegrees(180.0)));
-
-    //find a better way to do ts
-    if(tagId == 26) goal = new Pose2d(3.0, tagPose.getY(), tagPose.getRotation());
+    double goalDistance = Units.feetToMeters(6.1);
+    double distanceFromHub = current.getTranslation().getDistance(hubCenter); 
+    double dx = hubCenter.getX() - current.getX();
+    double dy = hubCenter.getY() - current.getY();
+    Translation2d target = new Translation2d(
+      ((dx / distanceFromHub) * goalDistance) + hubCenter.getX(),
+      ((dy / distanceFromHub) * goalDistance) + hubCenter.getY()
+    );
+    Pose2d goal = new Pose2d(
+      current.getTranslation(),
+      new Rotation2d(Math.atan2(
+        dy, 
+        dx
+    )));
 
     ChassisSpeeds fieldRelative =
         controller.calculate(current, goal, 0.0, goal.getRotation());
@@ -95,7 +109,7 @@ public class AlignToHub extends Command {
     double omega = MathUtil.clamp(fieldRelative.omegaRadiansPerSecond, -kMaxOmega, kMaxOmega);
     
     
-    drive.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, drive.getRotation()));
+    drive.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(-Xcontroller.getLeftY()*drive.getMaxLinearSpeedMetersPerSec(), -Xcontroller.getLeftX()*drive.getMaxLinearSpeedMetersPerSec(), omega*1.5, drive.getRotation()));
 
     ratePrint(
         "[AlignToHub] id=" + tagId

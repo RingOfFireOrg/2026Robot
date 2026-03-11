@@ -162,7 +162,7 @@ public class RobotContainer {
         drive.setDefaultCommand(DriveCommands.joystickDrive(
                 drive, () -> controller.getLeftY(), () -> controller.getLeftX(), () -> -controller.getRightX()));
 
-        controller.a().whileTrue(new AlignToHub(drive, vision, 0));
+        controller.a().whileTrue(new AlignToHub(drive, vision, 0, controller));
 
         // Switch to X pattern when X button is pressed
         controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));

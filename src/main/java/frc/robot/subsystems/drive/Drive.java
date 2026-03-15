@@ -238,6 +238,15 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);
 
         }
+    /** 
+     * Returns the current speed of the robot.
+     * FIELD ORIENTED SPEEDS
+     */
+    public ChassisSpeeds currentSpeed() {
+        ChassisSpeeds speeds = kinematics.toChassisSpeeds(modules[0].getState(), modules[1].getState(), modules[2].getState(), modules[3].getState());
+        speeds = ChassisSpeeds.fromRobotRelativeSpeeds(speeds, getRotation());
+        return speeds;
+    }
 
     /**
      * Runs the drive at the desired velocity.
@@ -374,12 +383,12 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     }
  */
     public void resetOdometry(Pose2d pose) {
-    resetSimulationPoseCallBack.accept(pose);
-    odometryLock.lock();
-    headingOffset = rawGyroRotation.minus(pose.getRotation());
-    poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
-    odometryLock.unlock();
-}
+        resetSimulationPoseCallBack.accept(pose);
+        odometryLock.lock();
+        headingOffset = rawGyroRotation.minus(pose.getRotation());
+        poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
+        odometryLock.unlock();
+    }
 
         
     /** Adds a new timestamped vision measurement. */

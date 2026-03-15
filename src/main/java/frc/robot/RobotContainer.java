@@ -29,9 +29,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.Constants.AlgaeAngles;
-import frc.robot.Constants.ElevatorHeights;
-import frc.robot.Constants.PivotAngles;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.Climber.Climber;
 
@@ -56,6 +53,7 @@ import frc.robot.subsystems.vision.VisionIOPhotonVision;
 //import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.commands.AimAndRange;
 import frc.robot.commands.AlignToHub;
+import frc.robot.commands.AlignWhileMoving;
 //import frc.robot.commands.PhotonAlign;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Transfer.Transfer;
@@ -329,8 +327,11 @@ public class RobotContainer {
             boolean isFlipped = DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red;
             return new Rotation2d(Math.toRadians(isFlipped ? 125 + 180 : 125));
         }));
-        driver.a().whileTrue(new AimAndRange(drive, LimelightFrontName));
+        //Takes over drive completely and ranges into hub
+        driver.a().whileTrue(new AlignToHub(drive, vision, 0));
         driver.x().whileTrue(drive.stopX());
+        //Only takes over rotation allows driver to continue to move while aligning
+        driver.b().whileTrue(new AlignWhileMoving(drive, vision, 0, driver));
 
 
         //Reset gyro / odometry

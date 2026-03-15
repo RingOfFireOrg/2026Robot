@@ -104,10 +104,7 @@ public class RobotContainer {
     private final CommandXboxController driver = new CommandXboxController(0);
     private final CommandXboxController operator = new CommandXboxController(1);
     private final CommandXboxController climberController = new CommandXboxController(2);
-    private final ShuffleboardTab shooterTab = Shuffleboard.getTab("Shooter");
-    private final GenericEntry topRpmEntry = shooterTab.add("Top RPM", 3000.0).getEntry();
-    private final GenericEntry bottomRpmEntry = shooterTab.add("Bottom RPM", 2500.0).getEntry();
-
+    
     // Dashboard inputs
     private final LoggedDashboardChooser<Command> autoChooser;
 
@@ -433,9 +430,9 @@ public class RobotContainer {
             
             operator.rightTrigger().whileTrue
             //(turret.runShooterPercent(0.9));
-            (turret.runShooterRPM(
-            () -> topRpmEntry.getDouble(3000.0),
-            () -> bottomRpmEntry.getDouble(3000.0)));
+            (turret.runShooterRPM( () -> 3000, () -> 2500));
+            //() -> topRpmEntry.getDouble(3000.0),
+            //() -> bottomRpmEntry.getDouble(3000.0)));
             
             //(turret.runShooterPercent(0.9));
                 //.onTrue(Commands.runOnce(() -> dioLed.setShooterActive(true)))

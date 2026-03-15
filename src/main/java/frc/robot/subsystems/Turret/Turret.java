@@ -9,6 +9,8 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
@@ -25,6 +27,9 @@ import java.util.function.DoubleSupplier;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 
 
 
@@ -59,6 +64,31 @@ public class Turret extends SubsystemBase {
   private static final double kBoostFullRpmErr = 900.0;
   private static final double kBoostMaxVolts = 2.5;
   private double lastShooterPrintTime = 0.0;
+  private static final double kShooterDefaultKp = 0.12;
+  private static final double kShooterDefaultKi = 0.0;
+  private static final double kShooterDefaultKd = 0.0;
+  private static final double kShooterDefaultKv = 0.12;
+
+  private final ShuffleboardTab shooterTab = Shuffleboard.getTab("Shooter");
+
+  private final GenericEntry sbTopRpm = shooterTab.add("Top RPM", 3000.0).getEntry();
+  private final GenericEntry sbBottomRpm = shooterTab.add("Bottom RPM", 2500.0).getEntry();
+
+  private final GenericEntry sbShooterKp = shooterTab.add("kP", kShooterDefaultKp).getEntry();
+  private final GenericEntry sbShooterKi = shooterTab.add("kI", kShooterDefaultKi).getEntry();
+  private final GenericEntry sbShooterKd = shooterTab.add("kD", kShooterDefaultKd).getEntry();
+  private final GenericEntry sbShooterKv = shooterTab.add("kV", kShooterDefaultKv).getEntry();
+
+  private final GenericEntry sbBoostStartErr = shooterTab.add("Boost Start Err RPM", kBoostStartRpmErr).getEntry();
+  private final GenericEntry sbBoostFullErr = shooterTab.add("Boost Full Err RPM", kBoostFullRpmErr).getEntry();
+  private final GenericEntry sbBoostMaxVolts = shooterTab.add("Boost Max Volts", kBoostMaxVolts).getEntry();
+
+  private double appliedShooterKp = Double.NaN;
+  private double appliedShooterKi = Double.NaN;
+  private double appliedShooterKd = Double.NaN;
+  private double appliedShooterKv = Double.NaN;
+
+  
 
 
 
@@ -115,10 +145,10 @@ public class Turret extends SubsystemBase {
     TalonFXConfiguration shooter2Cfg = new TalonFXConfiguration();
 
     Slot0Configs slot0 = new Slot0Configs();
-    slot0.kP = 0.12;
-    slot0.kI = 0.0;
-    slot0.kD = 0.0;
-    slot0.kV = 0.12;
+    slot0.kP = kShooterDefaultKp;
+    slot0.kI = kShooterDefaultKi;
+    slot0.kD = kShooterDefaultKd;
+    slot0.kV = kShooterDefaultKv;
 
     shooterCfg.Slot0 = slot0;
     shooter2Cfg.Slot0 = slot0;
@@ -163,7 +193,58 @@ public class Turret extends SubsystemBase {
     shooterMotor.getConfigurator().apply(shooterCfg);
     shooterMotor2.getConfigurator().apply(shooter2Cfg);
     initShooterRpmMap();
+    configureShooterShuffleboard();
+    applyShooterPid(
+        sbShooterKp.getDouble(kShooterDefaultKp),
+        sbShooterKi.getDouble(kShooterDefaultKi),
+        sbShooterKd.getDouble(kShooterDefaultKd),
+        sbShooterKv.getDouble(kShooterDefaultKv));
   }
+private void configureShooterShuffleboard() {
+  shooterTab.addNumber("Top Measured RPM", this::getShooterTopMeasuredRpm);
+  shooterTab.addNumber("Bottom Measured RPM", this::getShooterBottomMeasuredRpm);
+  shooterTab.addNumber("Top RPM Error", () -> getDashboardTopRpm() - getShooterTopMeasuredRpm());
+  shooterTab.addNumber("Bottom RPM Error", () -> getDashboardBottomRpm() - getShooterBottomMeasuredRpm());
+  shooterTab.addNumber("Top Current", () -> shooterMotor2.getStatorCurrent().getValueAsDouble());
+  shooterTab.addNumber("Bottom Current", () -> shooterMotor.getStatorCurrent().getValueAsDouble());
+  shooterTab.addNumber("Top Temp C", () -> shooterMotor2.getDeviceTemp().getValueAsDouble());
+  shooterTab.addNumber("Bottom Temp C", () -> shooterMotor.getDeviceTemp().getValueAsDouble());
+}
+
+private void applyShooterPid(double kP, double kI, double kD, double kV) {
+  Slot0Configs slot0 = new Slot0Configs();
+  slot0.kP = kP;
+  slot0.kI = kI;
+  slot0.kD = kD;
+  slot0.kV = kV;
+
+  shooterMotor.getConfigurator().apply(slot0);
+  shooterMotor2.getConfigurator().apply(slot0);
+
+  appliedShooterKp = kP;
+  appliedShooterKi = kI;
+  appliedShooterKd = kD;
+  appliedShooterKv = kV;
+}
+
+private void updateShooterPidFromDashboard() {
+  double kP = sbShooterKp.getDouble(kShooterDefaultKp);
+  double kI = sbShooterKi.getDouble(kShooterDefaultKi);
+  double kD = sbShooterKd.getDouble(kShooterDefaultKd);
+  double kV = sbShooterKv.getDouble(kShooterDefaultKv);
+
+  if (kP != appliedShooterKp || kI != appliedShooterKi || kD != appliedShooterKd || kV != appliedShooterKv) {
+    applyShooterPid(kP, kI, kD, kV);
+  }
+}
+
+public double getDashboardTopRpm() {
+  return sbTopRpm.getDouble(3000.0);
+}
+
+public double getDashboardBottomRpm() {
+  return sbBottomRpm.getDouble(2500.0);
+}
 
   public double getTurretRotations() {
     return rotEncoder.getPosition();
@@ -266,16 +347,20 @@ public void setShooterRPM(double topRPM, double bottomRPM) {
   double topErr = topRPM - topMeas;
   double botErr = bottomRPM - botMeas;
 
+  double boostStartErr = sbBoostStartErr.getDouble(kBoostStartRpmErr);
+  double boostFullErr = sbBoostFullErr.getDouble(kBoostFullRpmErr);
+  double boostMaxVolts = sbBoostMaxVolts.getDouble(kBoostMaxVolts);
+
   double topBoost = 0.0;
-  if (topErr > kBoostStartRpmErr) {
-    double t = clamp((topErr - kBoostStartRpmErr) / (kBoostFullRpmErr - kBoostStartRpmErr), 0.0, 1.0);
-    topBoost = lerp(0.0, kBoostMaxVolts, t);
+  if (topErr > boostStartErr) {
+    double t = clamp((topErr - boostStartErr) / (boostFullErr - boostStartErr), 0.0, 1.0);
+    topBoost = lerp(0.0, boostMaxVolts, t);
   }
 
   double botBoost = 0.0;
-  if (botErr > kBoostStartRpmErr) {
-    double t = clamp((botErr - kBoostStartRpmErr) / (kBoostFullRpmErr - kBoostStartRpmErr), 0.0, 1.0);
-    botBoost = lerp(0.0, kBoostMaxVolts, t);
+  if (botErr > boostStartErr) {
+    double t = clamp((botErr - boostStartErr) / (boostFullErr - boostStartErr), 0.0, 1.0);
+    botBoost = lerp(0.0, boostMaxVolts, t);
   }
 
   double topRps = topRPM / 60.0;
@@ -394,6 +479,7 @@ public double getDistanceToTagMeters(String limelightName) {
 }
 @Override
 public void periodic(){
+  updateShooterPidFromDashboard();
   //updateAngler();
 }
 }

@@ -153,7 +153,7 @@ public class RobotContainer {
 
 
                 break;
-                /* 
+                
             case SIM:
                 this.driveSimulation = new SwerveDriveSimulation(DriveConstants.mapleSimConfig,
                     new Pose2d(3, 3, new Rotation2d()));
@@ -169,7 +169,7 @@ public class RobotContainer {
                 indexer = new Indexer();
                 transfer = new Transfer();
                 intake = new Intake();
-                climber = new Climber();*/
+                climber = new Climber();
 
 
                 //this.vision = new Vision(s
@@ -187,7 +187,7 @@ public class RobotContainer {
 
 
 
-                //break;
+                break;
             default:
                 // Replayed robot, disable IO implementations
                 this.drive = new Drive(

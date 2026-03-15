@@ -105,7 +105,7 @@ public class RobotContainer {
     // Controller
     private final CommandXboxController driver = new CommandXboxController(0);
     private final CommandXboxController operator = new CommandXboxController(1);
-    //private final CommandJoystick climberController = new CommandJoystick(2);
+    private final CommandXboxController climberController = new CommandXboxController(2);
     private final ShuffleboardTab shooterTab = Shuffleboard.getTab("Shooter");
     private final GenericEntry topRpmEntry = shooterTab.add("Top RPM", 3000.0).getEntry();
     private final GenericEntry bottomRpmEntry = shooterTab.add("Bottom RPM", 2500.0).getEntry();
@@ -420,7 +420,7 @@ public class RobotContainer {
             //operator.rightBumper().onTrue(HubTurn);
 
             operator.rightBumper().whileTrue(turret.runShooterRPM( () -> 3000, () -> 1500));
-            operator.leftBumper().whileTrue(turret.runShooterRPM( () -> 3500, () -> 4500));
+            operator.leftBumper().whileTrue(turret.runShooterRPM( () -> 5500, () -> 5500));
 
              
 
@@ -523,13 +523,14 @@ public class RobotContainer {
         
 
 
-            /* Climbing Controls */
-            /*
-            climberController.axisMagnitudeGreaterThan(Joystick.AxisType.kY.value, 0.2)
-            .and(climberController.button(1))
-            .and(climberController.povCenter())
-            .whileTrue(climber.runTeleop(() -> -climberController.getY()))
-            .onFalse(climber.runTeleop(() -> 0)); */
+           // Climbing Controls
+            climberController.povRight().onTrue(intake.retractIn());//intake comes in
+            climberController.povLeft().onTrue(intake.deployOut());//intake goes out
+            climberController.povUp().onTrue(climber.goTop());//go to top
+            climberController.povDown().onTrue(climber.goBottom());//go to bottom
+            climberController.y().whileTrue(climber.runPercent(0.6));//climber up manual
+            climberController.a().whileTrue(climber.runPercent(-0.6));//climber down manual
+
             /*
              * EXAMPLE FROM 2025 ^
              */

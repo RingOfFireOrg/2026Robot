@@ -384,9 +384,9 @@ public class RobotContainer {
 
 
             //operator.y().whileTrue(transfer.runPercent(0.6)); //Transfer
-            operator.y().whileTrue(Commands.parallel(indexer.runPercent(0.8), transfer.runPercent(-0.6))); //indexer and spindexer up
-            operator.x().whileTrue(Commands.parallel(transfer.runPercent(-0.6), intake.rollersOut())); //spindex and Intake
-            operator.a().whileTrue(Commands.parallel(transfer.runPercent(0.6), indexer.runPercent(-0.6))); //Transfer and indexer out
+            operator.y().whileTrue(Commands.parallel(indexer.runPercent(indexer::getFeedPercent), transfer.runPercent(-0.6))); //indexer and spindexer up
+            operator.x().whileTrue(intake.rollersOut()); //Intake
+            operator.a().whileTrue(Commands.parallel(transfer.runPercent(transfer::getFeedPercent), indexer.runPercent(indexer::getReversePercent))); //Transfer and indexer out
             operator.b().whileTrue(intake.rollersIn()); //outtake 
 
             //operator.povUp().onTrue(hubLock); // reapplys hublock if switched off
@@ -428,11 +428,8 @@ public class RobotContainer {
             //operator.rightTrigger().whileTrue(turret.runShooterPercent(0.9));
             
             
-            operator.rightTrigger().whileTrue
-            //(turret.runShooterPercent(0.9));
-            (turret.runShooterRPM( () -> 3000, () -> 2500));
-            //() -> topRpmEntry.getDouble(3000.0),
-            //() -> bottomRpmEntry.getDouble(3000.0)));
+            operator.rightTrigger().whileTrue(turret.runShooterRPM(turret::getDashboardTopRpm, turret::getDashboardBottomRpm));
+            
             
             //(turret.runShooterPercent(0.9));
                 //.onTrue(Commands.runOnce(() -> dioLed.setShooterActive(true)))

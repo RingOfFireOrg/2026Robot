@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import java.util.function.DoubleSupplier;
 
 public class Indexer extends SubsystemBase {
   private static final int kMotorCanId = 32;//indexer
@@ -83,8 +84,16 @@ public class Indexer extends SubsystemBase {
     return runEnd(() -> setVolts(volts), this::stop);
   }
 
+  public Command runVolts(DoubleSupplier volts) {
+    return runEnd(() -> setVolts(volts.getAsDouble()), this::stop);
+  }
+
   public Command runPercent(double percent) {
     return runEnd(() -> setVolts(percent * 12.0), this::stop);
+  }
+
+  public Command runPercent(DoubleSupplier percent) {
+    return runEnd(() -> setVolts(percent.getAsDouble() * 12.0), this::stop);
   }
 
 

@@ -470,6 +470,21 @@ public double getShooterBottomMeasuredRpm() {
   //bottom
   return shooterMotor.getVelocity().getValueAsDouble() * 60.0;
 }
+public boolean isShooterAtSpeed(double topTolRpm, double bottomTolRpm) {
+  return Math.abs(getDashboardTopRpm() - getShooterTopMeasuredRpm()) <= topTolRpm
+      && Math.abs(getDashboardBottomRpm() - getShooterBottomMeasuredRpm()) <= bottomTolRpm;
+}
+
+public Command runShooterUntilReady(double topTolRpm, double bottomTolRpm) {
+  return run(() -> setShooterRPM(getDashboardTopRpm(), getDashboardBottomRpm()))
+      .until(() -> isShooterAtSpeed(topTolRpm, bottomTolRpm));
+}
+
+public Command holdDashboardShooterRpm() {
+  return runEnd(
+      () -> setShooterRPM(getDashboardTopRpm(), getDashboardBottomRpm()),
+      this::stopShooter);
+}
 
 public double getDistanceToTagMeters(String limelightName) {
   Pose3d cam = LimelightHelpers.getTargetPose3d_CameraSpace(limelightName);

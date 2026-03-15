@@ -418,8 +418,30 @@ public class RobotContainer {
             //operator.leftBumper().whileTrue(Commands.runEnd(() -> turret.setDutyCycle(-0.25), turret::stopTurret, turret));
             //operator.rightBumper().onTrue(HubTurn);
 
-            operator.rightBumper().whileTrue(turret.runShooterRPM( () -> 3000, () -> 1500));
-            operator.leftBumper().whileTrue(turret.runShooterRPM( () -> 5500, () -> 5500));
+            operator.rightBumper().whileTrue(
+                Commands.parallel(
+                    turret.holdDashboardShooterRpm(),
+                     Commands.runEnd(() -> {
+                        if (turret.isShooterAtSpeed(120.0, 120.0)) {
+                            indexer.setVolts(indexer.getFeedPercent() * 12.0);
+                            transfer.setVolts(transfer.getFeedPercent() * 12.0);
+                        } else {
+                            indexer.stop();
+                            transfer.stop();
+                        }
+                    },
+                    () -> {
+                        indexer.stop();
+                        transfer.stop();
+                    },
+                    indexer, transfer)));
+
+            operator.leftBumper().whileTrue(Commands.sequence(
+                turret.runShooterUntilReady(120.0, 120.0),
+                Commands.parallel(
+                    turret.holdDashboardShooterRpm(),
+                    indexer.runPercent(indexer::getFeedPercent),
+                    transfer.runPercent(transfer::getFeedPercent))));
 
              
 

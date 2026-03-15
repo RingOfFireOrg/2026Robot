@@ -121,7 +121,8 @@ public class RobotContainer {
             case REAL:
                 drive = new Drive(
                     //new GyroIONavX(),
-                    new GyroIOPigeon2(0, "FRC-3459-PT-CANivore"),
+                    new GyroIOPigeon2(DriveConstants.pigeonCanId, DriveConstants.canivoreBusName),
+                    //new GyroIOPigeon2(0, "FRC-3459-PT-CANivore"),
                     new ModuleIOSpark(0),
                     new ModuleIOSpark(1),
                     new ModuleIOSpark(2),

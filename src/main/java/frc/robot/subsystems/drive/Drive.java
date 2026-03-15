@@ -148,7 +148,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
 
   
         driveTab.addBoolean("Gyro Connected", () -> gyroInputs.connected);
-        driveTab.addNumber("NavX Yaw Live", () -> gyroInputs.yawPosition.getDegrees());
+        driveTab.addNumber("Gyro Yaw Live", () -> gyroInputs.yawPosition.getDegrees());
         driveTab.addNumber("Raw Gyro", () -> rawGyroRotation.getDegrees());
         driveTab.addNumber("Heading", () -> getRotation().getDegrees());
     }

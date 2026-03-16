@@ -40,7 +40,7 @@ public class AutoShoot extends Command {
     double shooterRPM = (distance*1)+1;//change ts
     turret.runShooterRPM(()->shooterRPM, ()->shooterRPM);
     
-    if(turret.getShooterBottomMeasuredRpm() - shooterRPM <= 20) {
+    if((turret.getShooterBottomMeasuredRpm() - shooterRPM <= 20) || (turret.getShooterTopMeasuredRpm() - shooterRPM <= 20)) {
       indexer.setVolts(10);//change ts
     }
   }

@@ -54,6 +54,7 @@ import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.commands.AimAndRange;
 import frc.robot.commands.AlignToHub;
 import frc.robot.commands.AlignWhileMoving;
+import frc.robot.commands.AutoShoot;
 //import frc.robot.commands.PhotonAlign;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Transfer.Transfer;
@@ -69,6 +70,7 @@ import frc.robot.commands.BallinTest;
 import frc.robot.commands.DriveAim;
 import frc.robot.commands.WakePreload;
 import frc.robot.commands.TrenchBaller;
+import frc.robot.commands.TurretLock;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.networktables.GenericEntry;
@@ -286,6 +288,8 @@ public class RobotContainer {
         double standardSpeed = 0.8;
         double turnSpeed = 0.5;
 
+        turret.setDefaultCommand(new TurretLock(turret));
+
         drive.setDefaultCommand(DriveCommands.joystickDrive(
          drive,
             () -> {
@@ -451,7 +455,7 @@ public class RobotContainer {
             
             
             operator.rightTrigger().whileTrue(turret.runShooterRPM(turret::getDashboardTopRpm, turret::getDashboardBottomRpm));
-            
+            operator.leftTrigger().whileTrue(new AutoShoot(indexer, turret));
             
             //(turret.runShooterPercent(0.9));
                 //.onTrue(Commands.runOnce(() -> dioLed.setShooterActive(true)))

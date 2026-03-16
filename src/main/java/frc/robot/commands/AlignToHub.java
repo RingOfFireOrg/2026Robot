@@ -2,6 +2,8 @@ package frc.robot.commands;
 
 import static frc.robot.subsystems.vision.VisionConstants.aprilTagLayout;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
@@ -29,7 +31,6 @@ public class AlignToHub extends Command {
   private final PIDController yPid;
   private final ProfiledPIDController thetaPid;
   private final HolonomicDriveController controller;
-  private final CommandXboxController Xcontroller;
 
   // how far away from april tag
   private static final double kStandoffMeters = 1.00;
@@ -40,11 +41,10 @@ public class AlignToHub extends Command {
 
   private double lastPrint = 0.0;
 
-  public AlignToHub(Drive drive, Vision vision, int cameraIndex, CommandXboxController Xcontroller) {
+  public AlignToHub(Drive drive, Vision vision, int cameraIndex) {
     this.drive = drive;
     this.vision = vision;
     this.cameraIndex = cameraIndex;
-    this.Xcontroller = Xcontroller;
     addRequirements(drive);
 
     xPid = new PIDController(2.5, 0.0, 0.0);
@@ -91,16 +91,16 @@ public class AlignToHub extends Command {
     double dx = hubCenter.getX() - current.getX();
     double dy = hubCenter.getY() - current.getY();
     Translation2d target = new Translation2d(
-      ((dx / distanceFromHub) * goalDistance) + hubCenter.getX(),
-      ((dy / distanceFromHub) * goalDistance) + hubCenter.getY()
+      ((dx / distanceFromHub) * goalDistance),// + hubCenter.getX(),
+      ((dy / distanceFromHub) * goalDistance)// + hubCenter.getY()
     );
     Pose2d goal = new Pose2d(
-      current.getTranslation(),
+      target,
       new Rotation2d(Math.atan2(
         dy, 
         dx
     )));
-
+    Logger.recordOutput("AlignToHub/TargetTranslation", target);
     ChassisSpeeds fieldRelative =
         controller.calculate(current, goal, 0.0, goal.getRotation());
 
@@ -109,7 +109,7 @@ public class AlignToHub extends Command {
     double omega = MathUtil.clamp(fieldRelative.omegaRadiansPerSecond, -kMaxOmega, kMaxOmega);
     
     
-    drive.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(-Xcontroller.getLeftY()*drive.getMaxLinearSpeedMetersPerSec(), -Xcontroller.getLeftX()*drive.getMaxLinearSpeedMetersPerSec(), omega*1.5, drive.getRotation()));
+    drive.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, drive.getRotation()));
 
     ratePrint(
         "[AlignToHub] id=" + tagId

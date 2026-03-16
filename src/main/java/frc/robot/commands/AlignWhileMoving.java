@@ -94,9 +94,9 @@ public class AlignWhileMoving extends Command {
     double frontBackSpeed = currentSpeed.vxMetersPerSecond;
     double distanceFromHub = current.getTranslation().getDistance(hubCenter); 
     //USE LINEAR REGRESSION TO FIND OUT ACTUAL NEEDED VALUES
-    double shotTime = (distanceFromHub*1)+1;
+    double shotTime = (0.287879*distanceFromHub)+0.646667;
     
-    Translation2d translatedHub = new Translation2d(hubCenter.getX(), hubCenter.getY() + sidewaysSpeed*shotTime);
+    Translation2d translatedHub = new Translation2d(hubCenter.getX(), hubCenter.getY() + -sidewaysSpeed*shotTime);
 
     double dx = translatedHub.getX() - current.getX();
     double dy = translatedHub.getY() - current.getY();

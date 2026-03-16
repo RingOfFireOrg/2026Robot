@@ -34,6 +34,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.AlignToHub;
+import frc.robot.commands.AlignWhileMoving;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.vision.*;
@@ -162,7 +163,8 @@ public class RobotContainer {
         drive.setDefaultCommand(DriveCommands.joystickDrive(
                 drive, () -> controller.getLeftY(), () -> controller.getLeftX(), () -> -controller.getRightX()));
 
-        controller.a().whileTrue(new AlignToHub(drive, vision, 0, controller));
+        controller.a().whileTrue(new AlignWhileMoving(drive, vision, 0, controller));
+        controller.b().whileTrue(new AlignToHub(drive, vision, 0));
 
         // Switch to X pattern when X button is pressed
         controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));

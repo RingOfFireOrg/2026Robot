@@ -238,6 +238,16 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         runVelocity(new ChassisSpeeds());
     }
 
+    /** 
+     * Returns the current speed of the robot.
+     * FIELD ORIENTED SPEEDS
+     */
+    public ChassisSpeeds currentSpeed() {
+        ChassisSpeeds speeds = kinematics.toChassisSpeeds(modules[0].getState(), modules[1].getState(), modules[2].getState(), modules[3].getState());
+        speeds = ChassisSpeeds.fromRobotRelativeSpeeds(speeds, getRotation());
+        return speeds;
+    }
+
     /**
      * Stops the drive and turns the modules to an X arrangement to resist movement. The modules will return to their
      * normal orientations the next time a nonzero velocity is requested.

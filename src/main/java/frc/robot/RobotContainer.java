@@ -288,7 +288,7 @@ public class RobotContainer {
         double standardSpeed = 0.8;
         double turnSpeed = 0.5;
 
-        turret.setDefaultCommand(new TurretLock(turret));
+        //turret.setDefaultCommand(new TurretLock(turret));
 
         drive.setDefaultCommand(DriveCommands.joystickDrive(
          drive,
@@ -391,7 +391,9 @@ public class RobotContainer {
             operator.y().whileTrue(Commands.parallel(indexer.runPercent(indexer::getFeedPercent), transfer.runPercent(-0.6))); //indexer and spindexer up
             operator.x().whileTrue(intake.rollersOut()); //Intake
             operator.a().whileTrue(Commands.parallel(transfer.runPercent(transfer::getFeedPercent), indexer.runPercent(indexer::getReversePercent))); //Transfer and indexer out
-            operator.b().whileTrue(intake.rollersIn()); //outtake 
+            //operator.b().whileTrue(intake.rollersIn()); //outtake 
+            operator.b().onTrue(Commands.parallel(intake.shakeBalls(), intake.rollersOut()));
+
 
             //operator.povUp().onTrue(hubLock); // reapplys hublock if switched off
             //operator.povUp().onTrue(Commands.runOnce(() -> turret.setDefaultCommand(hubLock())));

@@ -15,6 +15,7 @@ import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.revrobotics.REVLibError;
@@ -66,10 +67,14 @@ public class Intake extends SubsystemBase {
   private final GenericEntry sbDeployPosDeg = tab.add("Deploy Pos (deg)", 0.0).getEntry();
   private final GenericEntry sbDeployPosMotorRot = tab.add("Deploy Pos (motor rot)", 0.0).getEntry();
 
-  private final GenericEntry sbDeploySpeedDegPerSec = tab.add("Sped", 750.0).getEntry();
+  private final GenericEntry sbDeploySpeedDegPerSec = tab.add("Deploy Speed Deg Per Sec", 360.0).getEntry();
 
   private final GenericEntry sbRollersInPercent = tab.add("Rollers In %", 0.35).getEntry();
   private final GenericEntry sbRollersOutPercent = tab.add("Rollers Out %", 0.35).getEntry();
+
+  private final GenericEntry sbShakeLowDeg =  tab.add("Shake Low Deg", 50.0).getEntry();
+  private final GenericEntry sbShakeHighDeg = tab.add("Shake High Deg", 83.0).getEntry();
+  private final GenericEntry sbShakeWaitSec = tab.add("Shake Wait Sec", 0.1).getEntry();
 
   private double goalMotorRot = 0.0;
   private boolean goalActive = false;
@@ -242,6 +247,33 @@ public Command rollersOut() {
       this::stopRollers
    );
   }
+public double getDeployPositionDeg() {
+  return motorRotToDeg(deployEncoder.getPosition());
+}
+
+public Command shakeBalls() {
+  return Commands.sequence(
+      Commands.runOnce(() -> setDeployPositionDeg(sbShakeLowDeg.getDouble(50.0)), this),
+      Commands.waitSeconds(sbShakeWaitSec.getDouble(0.1)),
+      Commands.runOnce(() -> setDeployPositionDeg(sbShakeHighDeg.getDouble(83.0)), this),
+      Commands.waitSeconds(sbShakeWaitSec.getDouble(0.1)),
+      Commands.runOnce(() -> setDeployPositionDeg(sbShakeLowDeg.getDouble(50.0)), this),
+      Commands.waitSeconds(sbShakeWaitSec.getDouble(0.1)),
+      Commands.runOnce(() -> setDeployPositionDeg(sbShakeHighDeg.getDouble(83.0)), this),
+      Commands.waitSeconds(sbShakeWaitSec.getDouble(0.1)),
+      Commands.runOnce(() -> setDeployPositionDeg(sbShakeLowDeg.getDouble(50.0)), this),
+      Commands.waitSeconds(sbShakeWaitSec.getDouble(0.1)),
+      Commands.runOnce(() -> setDeployPositionDeg(sbShakeHighDeg.getDouble(83.0)), this),
+      Commands.waitSeconds(sbShakeWaitSec.getDouble(0.1)),
+      Commands.runOnce(() -> setDeployPositionDeg(sbShakeLowDeg.getDouble(50.0)), this),
+      Commands.waitSeconds(sbShakeWaitSec.getDouble(0.1)),
+      Commands.runOnce(() -> setDeployPositionDeg(sbShakeHighDeg.getDouble(83.0)), this),
+      Commands.waitSeconds(sbShakeWaitSec.getDouble(0.1)),
+      Commands.runOnce(() -> setDeployPositionDeg(sbShakeLowDeg.getDouble(50.0)), this),
+      Commands.waitSeconds(sbShakeWaitSec.getDouble(0.1)),
+      Commands.runOnce(() -> setDeployPositionDeg(sbShakeHighDeg.getDouble(83.0)), this)
+  );
+}
 
 
   @Override
@@ -258,7 +290,7 @@ public Command rollersOut() {
 
     if (!goalActive) return;
 
-    double speedDegPerSec = MathUtil.clamp(sbDeploySpeedDegPerSec.getDouble(45.0), 1.0, 360.0);
+    double speedDegPerSec = MathUtil.clamp(sbDeploySpeedDegPerSec.getDouble(360.0), 1.0, 720.0);
     double maxMotorRotPerSec = degPerSecToMotorRotPerSec(speedDegPerSec);
     double maxStep = maxMotorRotPerSec * dt;
 

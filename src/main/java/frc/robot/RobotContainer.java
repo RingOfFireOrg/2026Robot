@@ -404,25 +404,11 @@ public class RobotContainer {
             //intake and transfer out, indexer down
             operator.povRight().onTrue(intake.retractIn());//intake comes in
             operator.povLeft().onTrue(intake.deployOut());//intake goes out
-            //operator.povDown().whileTrue(Commands.run(() -> {}, turret));//offs hublock
-            //operator.povDown().onTrue(Commands.runOnce(() ->turret.setDefaultCommand(Commands.run(() -> {}, turret))));
 
-
-            //operator.leftStick().whileTrue(climber.runTeleop(() -> -MathUtil.applyDeadband(operator.getLeftY(), 0.12)));//climber
-            //operator.leftStick().whileTrue(Commands.parallel(
-                //climber.runTeleop(() -> -MathUtil.applyDeadband(operator.getLeftY(), 0.12)),
-                //Commands.runOnce(() -> led.setSolid(255,0,0)).repeatedly()))
-            //.onFalse(Commands.runOnce(led::restoreAlliance));
-            //operator.leftStick().whileTrue(indexer.runPercent(() -> -MathUtil.applyDeadband(operator.getLeftY(), 0.12)));
-
-
-            //operator.leftStick()
-              //  .whileTrue(climber.runTeleop(() -> -MathUtil.applyDeadband(operator.getLeftY(), 0.12)));
-
-                //idk if gonna use turret
-            //operator.rightBumper().whileTrue(Commands.runEnd(() -> turret.setDutyCycle(+0.25), turret::stopTurret, turret));//manual turret turning
-            //operator.leftBumper().whileTrue(Commands.runEnd(() -> turret.setDutyCycle(-0.25), turret::stopTurret, turret));
-            //operator.rightBumper().onTrue(HubTurn);
+            operator.rightStick().whileTrue(
+                turret.runEnd(() -> {double x = operator.getRightX();
+                    if (Math.abs(x) < 0.05) x = 0.0;turret.setDutyCycle(x * 0.3);},
+                    turret::stopTurret));     
 
             operator.rightBumper().whileTrue(
                 Commands.parallel(
@@ -555,6 +541,10 @@ public class RobotContainer {
             climberController.povDown().onTrue(climber.goBottom());//go to bottom
             climberController.y().whileTrue(climber.runPercent(0.6));//climber up manual
             climberController.a().whileTrue(climber.runPercent(-0.6));//climber down manual
+            climberController.back().whileTrue(turret.goToTurretAngle(0.0));
+            climberController.x().whileTrue(turret.goToTurretAngle(-30.0));
+            climberController.b().whileTrue(turret.goToTurretAngle(30.0));
+            
 
             /*
              * EXAMPLE FROM 2025 ^

@@ -9,8 +9,6 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
@@ -30,6 +28,11 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.FeedbackSensor;
+import java.util.function.DoubleSupplier;
+import edu.wpi.first.wpilibj.RobotBase;
 
 
 
@@ -69,6 +72,7 @@ public class Turret extends SubsystemBase {
   private static final double kShooterDefaultKd = 0.0;
   private static final double kShooterDefaultKv = 0.12;
 
+
   private final ShuffleboardTab shooterTab = Shuffleboard.getTab("Shooter");
 
   private final GenericEntry sbTopRpm = shooterTab.add("Top RPM", 3000.0).getEntry();
@@ -94,6 +98,7 @@ public class Turret extends SubsystemBase {
 
   private final SparkMax rotMotor = new SparkMax(kMotorCanId, MotorType.kBrushless);
   private final RelativeEncoder rotEncoder = rotMotor.getEncoder();
+  
 
   //private final TalonFX shooterMotor = new TalonFX(kShooterCanId, kCanBus);
   private final TalonFX shooterMotor = new TalonFX(kShooterCanId, kCanBus);
@@ -125,20 +130,27 @@ public class Turret extends SubsystemBase {
   private double lastPrintTimeSec = 0.0;
   private double lastCmdDuty = 0.0;
 
+  private final SparkClosedLoopController rotController = rotMotor.getClosedLoopController();
+  private static final double kTurretGearRatio = 105.0;
+  private static final double kTurretPosP = 0.15;
+  private static final double kTurretPosI = 0.0;
+  private static final double kTurretPosD = 0.0;
+
   public Turret() {
     //rotation motor config
     SparkMaxConfig rotConfig = new SparkMaxConfig();
-    rotConfig.idleMode(IdleMode.kBrake);
-    rotConfig.inverted(false);
-    rotConfig.smartCurrentLimit(30);
+      rotConfig.idleMode(IdleMode.kBrake);
+      rotConfig.inverted(false);
+      rotConfig.smartCurrentLimit(30);
+
+    rotConfig.closedLoop
+      .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+      .pid(kTurretPosP, kTurretPosI, kTurretPosD);
 
     rotMotor.configure(
-        rotConfig,
-        SparkBase.ResetMode.kResetSafeParameters,
-        SparkBase.PersistMode.kPersistParameters);
-
-    rotEncoder.setPosition(0.0);
-    System.out.println("[Turret] init: CAN=" + kMotorCanId + " inverted=false brake=true");
+      rotConfig,
+      SparkBase.ResetMode.kResetSafeParameters,
+      SparkBase.PersistMode.kPersistParameters);
 
     // shooter motor configs
     TalonFXConfiguration shooterCfg = new TalonFXConfiguration();
@@ -253,6 +265,31 @@ public double getDashboardBottomRpm() {
   public double getTurretRPM() {
     return rotEncoder.getVelocity();
   }
+  public double turretDegreesToMotorRotations(double turretDeg) {
+    return (turretDeg / 360.0) * kTurretGearRatio;
+  }
+
+  public double motorRotationsToTurretDegrees(double motorRot) {
+    return (motorRot / kTurretGearRatio) * 360.0;
+  }
+
+  public double getTurretAngleDeg() {
+    return motorRotationsToTurretDegrees(rotEncoder.getPosition());
+  }
+
+  public void setTurretAngleDeg(double turretDeg) {
+    if (RobotBase.isReal()) {
+      rotController.setReference(
+        turretDegreesToMotorRotations(turretDeg),
+        ControlType.kPosition
+      );
+    }
+  }
+
+  public Command goToTurretAngle(double turretDeg) {
+    return run(() -> setTurretAngleDeg(turretDeg));
+  }
+  
   
   public void setDutyCycle(double duty) {
     final double posRot = getTurretRotations();
@@ -492,6 +529,7 @@ public double getDistanceToTagMeters(String limelightName) {
   double z = cam.getZ();
   return Math.hypot(x, z);
 }
+
 @Override
 public void periodic(){
   updateShooterPidFromDashboard();

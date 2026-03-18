@@ -54,7 +54,7 @@ import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.commands.AimAndRange;
 import frc.robot.commands.AlignToHub;
 import frc.robot.commands.AlignWhileMoving;
-import frc.robot.commands.AutoShoot;
+//import frc.robot.commands.AutoShoot;
 //import frc.robot.commands.PhotonAlign;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Transfer.Transfer;
@@ -216,12 +216,6 @@ public class RobotContainer {
         // Set up auto routines
         autoChooser = new LoggedDashboardChooser<>("Auto Choices");
         autoChooser.addDefaultOption("do nothing", Commands.none());
-        autoChooser.addOption("left trench intake", new PathPlannerAuto("LeftTrenchIntake", false));
-        autoChooser.addOption("no gyro reset preload" , new PathPlannerAuto("NoGyroResetPreload", false));
-        autoChooser.addOption("preload test", new PathPlannerAuto("PreloadTest", false));
-        autoChooser.addOption("wake preload depot", new PathPlannerAuto("WakePreloadDepotAuto", false));
-        autoChooser.addOption("wake preload depot trench", new PathPlannerAuto("WakePreloadDepotTrenchAuto", false));
-        autoChooser.addOption("Wake Trench Shuttle", new PathPlannerAuto("WakeTrenchShuttle", false));
         autoChooser.addOption("Wake Trench Preload", TrenchBaller.create(turret, indexer, transfer));
         autoChooser.addOption("V1", new PathPlannerAuto("Ver1", false));
         autoChooser.addOption("V2", new PathPlannerAuto("Ver2", false));
@@ -361,11 +355,11 @@ public class RobotContainer {
         if (Constants.currentMode == Constants.Mode.REAL) {
 
             /* Driver - Align to the Hub */
-            driver.x().whileTrue(new AlignToHub(drive, vision, 0));
+            //driver.x().whileTrue(new AlignToHub(drive, vision, 0));
             //driver.y().whileTrue(new PhotonAlign(drive, vision, 1));
             //driver.a().whileTrue(new PhotonAlign(drive, vision, 2));
-            driver.b().whileTrue(
-                DriveAim.create(drive, "limelight-tag", () ->  -driver.getLeftY(), () ->  -driver.getLeftX()).onlyIf(() -> LimelightHelpers.getTV("limelight-tag")));
+            //driver.b().whileTrue(
+                //DriveAim.create(drive, "limelight-tag", () ->  -driver.getLeftY(), () ->  -driver.getLeftX()).onlyIf(() -> LimelightHelpers.getTV("limelight-tag")));
 
    
             //.onTrue(new AlignToReef(drive, reefSide.LEFT).withTimeout(1.2));
@@ -392,7 +386,7 @@ public class RobotContainer {
             operator.x().whileTrue(intake.rollersOut()); //Intake
             operator.a().whileTrue(Commands.parallel(transfer.runPercent(transfer::getFeedPercent), indexer.runPercent(indexer::getReversePercent))); //Transfer and indexer out
             //operator.b().whileTrue(intake.rollersIn()); //outtake 
-            operator.b().onTrue(Commands.parallel(intake.shakeBalls(), intake.rollersOut()));
+            //operator.b().onTrue(Commands.parallel(intake.shakeBalls(), intake.rollersOut()));
 
 
             //operator.povUp().onTrue(hubLock); // reapplys hublock if switched off
@@ -444,7 +438,7 @@ public class RobotContainer {
             
             operator.rightTrigger().whileTrue(turret.runShooterRPM(turret::getDashboardTopRpm, turret::getDashboardBottomRpm));
             //run shooter at rpm determined by vision, run indexer when shooter is right speed
-            operator.leftTrigger().whileTrue(new AutoShoot(indexer, turret));
+            //operator.leftTrigger().whileTrue(new AutoShoot(indexer, turret));
             
             //(turret.runShooterPercent(0.9));
                 //.onTrue(Commands.runOnce(() -> dioLed.setShooterActive(true)))
@@ -462,7 +456,7 @@ public class RobotContainer {
             
            
 
-            operator.leftTrigger(0.15).whileTrue(
+            /*operator.leftTrigger(0.15).whileTrue(
                 turret.runEnd(
                     () -> {
                         String ll = "limelight-tag";
@@ -503,7 +497,7 @@ public class RobotContainer {
         },
         turret::stopShooter
     )
-);
+);*/
 /* 
             operator.leftTrigger(0.15).whileTrue(
                 turret.runEnd(

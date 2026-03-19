@@ -219,16 +219,7 @@ public class RobotContainer {
         autoChooser.addOption("Wake Trench Preload", TrenchBaller.create(turret, indexer, transfer));
         autoChooser.addOption("V1", new PathPlannerAuto("Ver1", false));
         autoChooser.addOption("V2", new PathPlannerAuto("Ver2", false));
-
-
-
-
-
-
-
-
-
-        
+                
         /* 
         autoChooser.addOption("Preload", new PathPlannerAuto("CenterPreloadAuto", false));
         autoChooser.addOption("Preload and Depot V2(use this one)", new PathPlannerAuto("CenterPreloadDepotAuto", false));
@@ -239,13 +230,6 @@ public class RobotContainer {
         ////autoChooser.addOption("Limelight score(DONT USE)", new PathPlannerAuto().andThen());
         
         
-        //autoChooser.addOption("MECK) Align Right",
-
-//        new PathPlannerAuto("range into reef", false) // Get in Vision Range of the reef & prep L2
- //           .andThen( new AlignToReef(drive, reefSide.RIGHT).withTimeout(3)) // Align using LL
-  //          .andThen( new PathPlannerAuto("range & station", false)) //Resetting Odo, run up on the reef and drop, and then back out and go to feeder station
-   //         .andThen( new PathPlannerAuto("range & score", false)) //Resetting Odo, run up on the reef and drop, and then back out and go to feeder station
-    //    );
 
         // Set up SysId routines
         autoChooser.addOption("Drive Wheel Radius Characterization",

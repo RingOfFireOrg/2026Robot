@@ -400,8 +400,9 @@ public class RobotContainer {
             operator.povLeft().onTrue(intake.deployOut());//intake goes out
 
             operator.rightStick().whileTrue(
-                turret.runEnd(() -> {double x = operator.getRightX();
-                    if (Math.abs(x) < 0.05) x = 0.0;turret.setDutyCycle(x * 0.3);},
+                turret.runEnd(() -> {
+                    turret.setDutyCycle(MathUtil.applyDeadband(operator.getRightX(), 0.05)*0.3);
+                },
                     turret::stopTurret));     
 
             operator.rightBumper().whileTrue(

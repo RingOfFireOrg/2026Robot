@@ -219,6 +219,8 @@ public class RobotContainer {
         autoChooser.addOption("Wake Trench Preload", TrenchBaller.create(turret, indexer, transfer));
         autoChooser.addOption("V1", new PathPlannerAuto("Ver1", false));
         autoChooser.addOption("V2", new PathPlannerAuto("Ver2", false));
+        autoChooser.addOption("PreloadTrench", new PathPlannerAuto("WakePreloadDepotTrench"));
+
                 
         /* 
         autoChooser.addOption("Preload", new PathPlannerAuto("CenterPreloadAuto", false));
@@ -558,7 +560,10 @@ public class RobotContainer {
         NamedCommands.registerCommand("Rollin", Rollin.create(intake));
         NamedCommands.registerCommand("BallinTest", BallinTest.create(turret, indexer, transfer));
         NamedCommands.registerCommand("Aim And Range", new AimAndRange(drive, LimelightFrontName));
-/* 
+        NamedCommands.registerCommand("Intake Out", intake.deployOut());
+        NamedCommands.registerCommand("Intake In", intake.retractIn());
+
+/*   
         NamedCommands.registerCommand(
         "AimAndShoot",
         hubLock.withTimeout(1.0)

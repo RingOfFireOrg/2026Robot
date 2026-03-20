@@ -31,13 +31,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "WakeToTrench"
+            "pathName": "LeftTrenchLeave"
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "LeftTrenchLeave"
+            "name": "Intake Out"
           }
         },
         {

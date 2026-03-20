@@ -29,6 +29,7 @@
   "bumperOffsetX": 0.0,
   "bumperOffsetY": 0.0,
   "robotFeatures": [
-    "{\"name\":\"Circle\",\"type\":\"circle\",\"data\":{\"center\":{\"x\":0.3,\"y\":0.0},\"radius\":0.1,\"strokeWidth\":0.02,\"filled\":false}}"
+    "{\"name\":\"Circle\",\"type\":\"circle\",\"data\":{\"center\":{\"x\":0.3,\"y\":0.0},\"radius\":0.1,\"strokeWidth\":0.02,\"filled\":false}}",
+    "{\"name\":\"Rectangle\",\"type\":\"rounded_rect\",\"data\":{\"center\":{\"x\":-0.45,\"y\":0.0},\"size\":{\"width\":0.75,\"length\":0.1},\"borderRadius\":0.05,\"strokeWidth\":0.005,\"filled\":false}}"
   ]
 }

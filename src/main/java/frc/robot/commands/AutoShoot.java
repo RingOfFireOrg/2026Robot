@@ -17,9 +17,9 @@ public class AutoShoot extends Command {
   private Turret turret;
   private Indexer indexer;
 
-  private final double limelightMountAngle = 25;//change ts
-  private final double limelightLensHeight = 20.0;//change ts
-  private final double hubTagHeight = 60.0;//change ts
+  private final double limelightMountAngle = 10;//change ts
+  private final double limelightLensHeight = 21.5;//change ts
+  private final double hubTagHeight = 44.5;//change ts
 
   public AutoShoot(Indexer indexer, Turret turret) {
     this.turret = turret;

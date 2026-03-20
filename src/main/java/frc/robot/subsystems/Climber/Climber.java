@@ -69,7 +69,6 @@ public class Climber extends SubsystemBase {
   public double getMotorRpm() {
     return encoder.getVelocity();
   }
-  
 
   public void setVolts(double volts) {
     double cmd = MathUtil.applyDeadband(volts, kDeadband);

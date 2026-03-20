@@ -35,12 +35,46 @@ public class TurretLock extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if(LimelightHelpers.getFiducialID(LimelightFrontName) != 26){
-      turret.stopTurret();
-      return;
+    double offset = 0;
+    switch ((int)LimelightHelpers.getFiducialID(LimelightFrontName)) {
+      case 24:
+        offset = 1;//change ts
+        break;
+      case 25:
+        offset = 0.5;//change ts
+        break;
+      case 27:
+        offset = -1;//change ts
+        break;
+      case 23: 
+        offset = 5;//change ts
+        break;
+      case 28: 
+        offset = -5;//change ts;
+        break;
+      case 8:
+        offset = 1;//change ts
+        break;
+      case 9:
+        offset = 0.5;//change ts
+        break;
+      case 11:
+        offset = -1;//change ts
+        break;
+      case 7: 
+        offset = 5;//change ts
+        break;
+      case 12: 
+        offset = -5;//change ts;
+        break;
+      default:
+        turret.stopTurret();
+        return;
     }
-    
-    turret.setDutyCycle(turretPID.calculate(LimelightHelpers.getTX(LimelightFrontName)));
+
+    turret.setDutyCycle(
+      turretPID.calculate(
+        LimelightHelpers.getTX(LimelightFrontName) + offset));
   }
 
   // Called once the command ends or is interrupted.

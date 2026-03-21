@@ -282,7 +282,7 @@ public class RobotContainer {
             },
             () -> {
                 double maxSpeedTheta = (1 - driver.getLeftTriggerAxis()) * (turnSpeed + (1-turnSpeed) * driver.getRightTriggerAxis());
-                return MathUtil.applyDeadband(MathUtil.clamp(driver.getRightX(), -maxSpeedTheta, maxSpeedTheta), 0.1);
+                return MathUtil.applyDeadband(MathUtil.clamp(-driver.getRightX(), -maxSpeedTheta, maxSpeedTheta), 0.1);
             }
         ));
 
@@ -425,6 +425,7 @@ public class RobotContainer {
             
             
             operator.rightTrigger().whileTrue(turret.runShooterRPM(turret::getDashboardTopRpm, turret::getDashboardBottomRpm));
+            operator.back().onTrue(Commands.runOnce(() -> turret.zeroTurret(), turret));
             //run shooter at rpm determined by vision, run indexer when shooter is right speed
             //operator.leftTrigger().whileTrue(new AutoShoot(indexer, turret));
             
@@ -526,7 +527,7 @@ public class RobotContainer {
             climberController.back().whileTrue(turret.goToTurretAngle(0.0));
             climberController.x().whileTrue(turret.goToTurretAngle(-30.0));
             climberController.b().whileTrue(turret.goToTurretAngle(30.0));
-            
+            climberController.rightBumper().whileTrue(Commands.runOnce(() -> turret.zeroTurret(), turret));
 
             /*
              * EXAMPLE FROM 2025 ^
@@ -585,6 +586,11 @@ public class RobotContainer {
     public Command getAutonomousCommand() {
         return autoChooser.get();
     }
+
+    public Drive getDrive() {
+    return drive;
+    } 
+
     private Command hubLock() {
     return new HubLock(turret, vision, 0);
 }

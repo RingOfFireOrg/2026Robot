@@ -151,6 +151,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         driveTab.addNumber("Gyro Yaw Live", () -> gyroInputs.yawPosition.getDegrees());
         driveTab.addNumber("Raw Gyro", () -> rawGyroRotation.getDegrees());
         driveTab.addNumber("Heading", () -> getRotation().getDegrees());
+
     }
 
     @Override
@@ -190,7 +191,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
                         modulePositions[moduleIndex].angle);
                 lastModulePositions[moduleIndex] = modulePositions[moduleIndex];
             }
-
+/* 
             // Update gyro angle
             if (gyroInputs.connected) {
                 // Use the real gyro angle
@@ -200,7 +201,18 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
                 Twist2d twist = kinematics.toTwist2d(moduleDeltas);
                 rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
             }
-            
+            */
+
+            if (gyroInputs.connected) {
+                if (i < gyroInputs.odometryYawPositions.length) {
+                    rawGyroRotation = gyroInputs.odometryYawPositions[i];
+                } else {
+                    rawGyroRotation = gyroInputs.yawPosition;
+                }
+            } else {
+                Twist2d twist = kinematics.toTwist2d(moduleDeltas);
+                rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
+            }
             // Apply update
             //poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions); }}
             poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions); }
@@ -366,12 +378,19 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         return getPose().getRotation();
     }*/
     public Rotation2d getRotation() {
+        if (gyroInputs.connected) {
+            return gyroInputs.yawPosition.minus(headingOffset);
+        }
         return cachedRotation;
     }
 
     public void zeroHeading() {
         odometryLock.lock();
-        headingOffset = rawGyroRotation;
+        if (gyroInputs.connected) {
+            headingOffset = gyroInputs.yawPosition;
+        } else {
+            headingOffset = rawGyroRotation;
+        }
         odometryLock.unlock();
     }
     

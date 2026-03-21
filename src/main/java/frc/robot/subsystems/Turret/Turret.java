@@ -119,9 +119,10 @@ public class Turret extends SubsystemBase {
   private final RelativeEncoder eRelativeEncoder = anglerMotor.getEncoder();
   
 
-  private static final double kMinRot = -1.0;
-  private static final double kMaxRot =  1.0;
-  private static final boolean kEnableSoftLimits = false;
+  private static final boolean kEnableSoftLimits = true;
+  private static final double kMinTurretDeg = -90.0;
+  private static final double kMaxTurretDeg = 90.0;
+  private static final double kTurretToleranceDeg = 2.0;
 
   private static final double kDeadband = 0.02;
   private static final double kMaxDuty = 0.35;
@@ -151,6 +152,8 @@ public class Turret extends SubsystemBase {
       rotConfig,
       SparkBase.ResetMode.kResetSafeParameters,
       SparkBase.PersistMode.kPersistParameters);
+    
+    rotEncoder.setPosition(0.0);
 
     // shooter motor configs
     TalonFXConfiguration shooterCfg = new TalonFXConfiguration();
@@ -278,21 +281,28 @@ public double getDashboardBottomRpm() {
   }
 
   public void setTurretAngleDeg(double turretDeg) {
+    double clampedDeg = MathUtil.clamp(turretDeg, kMinTurretDeg, kMaxTurretDeg);
     if (RobotBase.isReal()) {
       rotController.setReference(
-        turretDegreesToMotorRotations(turretDeg),
-        ControlType.kPosition
+          turretDegreesToMotorRotations(clampedDeg),
+          ControlType.kPosition
       );
     }
   }
 
+  public boolean isTurretAtAngle(double targetDeg, double toleranceDeg) {
+    return Math.abs(getTurretAngleDeg() - targetDeg) <= toleranceDeg;
+  }
+
   public Command goToTurretAngle(double turretDeg) {
-    return run(() -> setTurretAngleDeg(turretDeg));
+    double clampedDeg = MathUtil.clamp(turretDeg, kMinTurretDeg, kMaxTurretDeg);
+    return run(() -> setTurretAngleDeg(clampedDeg))
+      .until(() -> isTurretAtAngle(clampedDeg, kTurretToleranceDeg));
   }
   
   
   public void setDutyCycle(double duty) {
-    final double posRot = getTurretRotations();
+    final double angleDeg = getTurretAngleDeg();
 
     double cmd = MathUtil.applyDeadband(duty, kDeadband);
     cmd = MathUtil.clamp(cmd, -kMaxDuty, kMaxDuty);
@@ -302,13 +312,13 @@ public double getDashboardBottomRpm() {
     }
 
     if (kEnableSoftLimits) {
-      boolean hitMin = posRot <= kMinRot && cmd < 0;
-      boolean hitMax = posRot >= kMaxRot && cmd > 0;
+      boolean hitMin = angleDeg <= kMinTurretDeg && cmd < 0;
+      boolean hitMax = angleDeg >= kMaxTurretDeg && cmd > 0;
       if (hitMin || hitMax) {
         rotMotor.set(0.0);
         rateLimitedPrint(
-            "[Turret] SOFT LIMIT hit (posRot=" + fmt(posRot) + ") cmd=" + fmt(cmd) +
-                " min=" + fmt(kMinRot) + " max=" + fmt(kMaxRot));
+            "[Turret] SOFT LIMIT hit (angleDeg=" + fmt(angleDeg) + ") cmd=" + fmt(cmd) +
+                " min=" + fmt(kMinTurretDeg) + " max=" + fmt(kMaxTurretDeg));
         lastCmdDuty = 0.0;
         return;
       }
@@ -320,8 +330,12 @@ public double getDashboardBottomRpm() {
     rateLimitedPrint(
         "[Turret] cmd=" + fmt(cmd) +
             " in=" + fmt(duty) +
-            " posRot=" + fmt(posRot) +
+            " angleDeg=" + fmt(angleDeg) +
             " rpm=" + fmt(getTurretRPM()));
+  }
+
+  public void zeroTurret() {
+    rotEncoder.setPosition(0.0);
   }
 
   public void stopTurret() {

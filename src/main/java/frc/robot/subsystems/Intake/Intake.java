@@ -67,10 +67,10 @@ public class Intake extends SubsystemBase {
   private final GenericEntry sbDeployPosDeg = tab.add("Deploy Pos (deg)", 0.0).getEntry();
   private final GenericEntry sbDeployPosMotorRot = tab.add("Deploy Pos (motor rot)", 0.0).getEntry();
 
-  private final GenericEntry sbDeploySpeedDegPerSec = tab.add("Deploy Speed Deg Per Sec", 360.0).getEntry();
+  private final GenericEntry sbDeploySpeedDegPerSec = tab.add("Deploy Speed Deg Per Sec", 500.0).getEntry();
 
-  private final GenericEntry sbRollersInPercent = tab.add("Rollers In %", 0.35).getEntry();
-  private final GenericEntry sbRollersOutPercent = tab.add("Rollers Out %", 0.35).getEntry();
+  private final GenericEntry sbRollersInPercent = tab.add("Rollers In %", 0.7).getEntry();
+  private final GenericEntry sbRollersOutPercent = tab.add("Rollers Out %", 0.7).getEntry();
 
   private final GenericEntry sbShakeLowDeg =  tab.add("Shake Low Deg", 50.0).getEntry();
   private final GenericEntry sbShakeHighDeg = tab.add("Shake High Deg", 83.0).getEntry();

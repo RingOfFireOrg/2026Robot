@@ -5,7 +5,7 @@
 package frc.robot.commands;
 
 import static frc.robot.subsystems.vision.VisionConstants.LimelightFrontName;
-import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -16,15 +16,13 @@ import frc.robot.util.LimelightHelpers;
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class TurretLock extends Command {
   private Turret turret;
-  private ProfiledPIDController turretPID;
-  private final double TURRET_P = 0.5;//change ts
-  private final double TURRET_D = 0.5;//change ts
-  private final double TURRET_MAX_VELOCITY = 1;//change ts
-  private final double TURRET_MAX_ACCEL = 1;//change ts
-
+  private PIDController turretPID;
+  private final double TURRET_P = 0.1;//change ts
+  private final double TURRET_D = 0;//change ts
+ 
   public TurretLock(Turret turret) {
     this.turret = turret;
-    turretPID = new ProfiledPIDController(TURRET_P, 0, TURRET_D, new Constraints(TURRET_MAX_VELOCITY, TURRET_MAX_ACCEL));
+    turretPID = new PIDController(TURRET_P, 0, TURRET_D);
     addRequirements(turret);
   }
 

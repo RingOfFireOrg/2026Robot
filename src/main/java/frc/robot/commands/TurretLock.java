@@ -8,21 +8,25 @@ import static frc.robot.subsystems.vision.VisionConstants.LimelightFrontName;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Turret.Turret;
 import frc.robot.util.LimelightHelpers;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 @SuppressWarnings("unused")
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class TurretLock extends Command {
   private Turret turret;
   private PIDController turretPID;
-  private final double TURRET_P = 0.1;//change ts
-  private final double TURRET_D = 0;//change ts
+ 
+  //private final double TURRET_P = 0.1;//change ts
+  //private final double TURRET_D = 0;//change ts
  
   public TurretLock(Turret turret) {
     this.turret = turret;
-    turretPID = new PIDController(TURRET_P, 0, TURRET_D);
+    turretPID = new PIDController(turret.sbTURRET_P.getDouble(0.1), 0, turret.sbTURRET_D.getDouble(0));
     addRequirements(turret);
   }
 
@@ -72,7 +76,7 @@ public class TurretLock extends Command {
 
     turret.setDutyCycle(
       turretPID.calculate(
-        LimelightHelpers.getTX(LimelightFrontName) + offset)*0.1);
+        LimelightHelpers.getTX(LimelightFrontName))*0.1);
   }
 
   // Called once the command ends or is interrupted.

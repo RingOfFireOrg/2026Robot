@@ -40,6 +40,9 @@ import edu.wpi.first.wpilibj.RobotBase;
 
 @SuppressWarnings({ "removal", "unused" })
 public class Turret extends SubsystemBase {
+  
+
+  
   private static final String kCanBus = "FRC-3459-PT-CANivore";
   private static int hello = 1;
   private static final int kMotorCanId = 40; //turret
@@ -86,6 +89,8 @@ public class Turret extends SubsystemBase {
   private final GenericEntry sbBoostStartErr = shooterTab.add("Boost Start Err RPM", kBoostStartRpmErr).getEntry();
   private final GenericEntry sbBoostFullErr = shooterTab.add("Boost Full Err RPM", kBoostFullRpmErr).getEntry();
   private final GenericEntry sbBoostMaxVolts = shooterTab.add("Boost Max Volts", kBoostMaxVolts).getEntry();
+  public final GenericEntry sbTURRET_P = shooterTab.add("Turret_P", 0.10).getEntry();
+  public final GenericEntry sbTURRET_D = shooterTab.add("Turret_D", 0.0).getEntry();
 
   private double appliedShooterKp = Double.NaN;
   private double appliedShooterKi = Double.NaN;

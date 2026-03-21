@@ -256,22 +256,7 @@ public Command shakeBalls() {
       Commands.runOnce(() -> setDeployPositionDeg(sbShakeLowDeg.getDouble(50.0)), this),
       Commands.waitSeconds(sbShakeWaitSec.getDouble(0.1)),
       Commands.runOnce(() -> setDeployPositionDeg(sbShakeHighDeg.getDouble(83.0)), this),
-      Commands.waitSeconds(sbShakeWaitSec.getDouble(0.1)),
-      Commands.runOnce(() -> setDeployPositionDeg(sbShakeLowDeg.getDouble(50.0)), this),
-      Commands.waitSeconds(sbShakeWaitSec.getDouble(0.1)),
-      Commands.runOnce(() -> setDeployPositionDeg(sbShakeHighDeg.getDouble(83.0)), this),
-      Commands.waitSeconds(sbShakeWaitSec.getDouble(0.1)),
-      Commands.runOnce(() -> setDeployPositionDeg(sbShakeLowDeg.getDouble(50.0)), this),
-      Commands.waitSeconds(sbShakeWaitSec.getDouble(0.1)),
-      Commands.runOnce(() -> setDeployPositionDeg(sbShakeHighDeg.getDouble(83.0)), this),
-      Commands.waitSeconds(sbShakeWaitSec.getDouble(0.1)),
-      Commands.runOnce(() -> setDeployPositionDeg(sbShakeLowDeg.getDouble(50.0)), this),
-      Commands.waitSeconds(sbShakeWaitSec.getDouble(0.1)),
-      Commands.runOnce(() -> setDeployPositionDeg(sbShakeHighDeg.getDouble(83.0)), this),
-      Commands.waitSeconds(sbShakeWaitSec.getDouble(0.1)),
-      Commands.runOnce(() -> setDeployPositionDeg(sbShakeLowDeg.getDouble(50.0)), this),
-      Commands.waitSeconds(sbShakeWaitSec.getDouble(0.1)),
-      Commands.runOnce(() -> setDeployPositionDeg(sbShakeHighDeg.getDouble(83.0)), this)
+      Commands.waitSeconds(sbShakeWaitSec.getDouble(0.1))
   );
 }
 

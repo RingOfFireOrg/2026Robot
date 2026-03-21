@@ -368,7 +368,7 @@ public class RobotContainer {
 
 
             //operator.y().whileTrue(transfer.runPercent(0.6)); //Transfer
-            operator.y().whileTrue(Commands.parallel(indexer.runPercent(indexer::getFeedPercent), transfer.runPercent(-0.6))); //indexer and spindexer up
+            operator.y().whileTrue(Commands.parallel(indexer.runPercent(indexer::getFeedPercent), transfer.runPercent(transfer::getFeedPercent))); //indexer and spindexer up
             operator.x().whileTrue(intake.rollersOut()); //Intake
             operator.a().whileTrue(new TurretLock(turret));
             //operator.a().whileTrue(Commands.parallel(transfer.runPercent(transfer::getFeedPercent), indexer.runPercent(indexer::getReversePercent))); //Transfer and indexer out
@@ -388,7 +388,7 @@ public class RobotContainer {
 
             operator.rightStick().whileTrue(
                 turret.runEnd(() -> {
-                    turret.setDutyCycle(MathUtil.applyDeadband(operator.getRightX(), 0.05)*0.3);
+                    turret.setDutyCycle(MathUtil.applyDeadband(operator.getRightX(), 0.05)*0.2);
                 },
                     turret::stopTurret));     
 

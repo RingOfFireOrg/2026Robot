@@ -18,8 +18,8 @@ public class AutoShoot extends Command {
   private Indexer indexer;
 
   private final double limelightMountAngle = 10;//change ts
-  private final double limelightLensHeight = 21.5;//change ts
-  private final double hubTagHeight = 44.5;//change ts
+  private final double limelightLensHeight = 21.5;
+  private final double hubTagHeight = 44.5;
 
   public AutoShoot(Indexer indexer, Turret turret) {
     this.turret = turret;
@@ -40,8 +40,8 @@ public class AutoShoot extends Command {
     double shooterRPM = (distance*1)+1;//change ts
     turret.runShooterRPM(()->shooterRPM, ()->shooterRPM);
     
-    if((turret.getShooterBottomMeasuredRpm() - shooterRPM <= 20) || (turret.getShooterTopMeasuredRpm() - shooterRPM <= 20)) {
-      indexer.setVolts(10);//change ts
+    if((Math.abs(turret.getShooterBottomMeasuredRpm() - shooterRPM) <= 100) && (Math.abs(turret.getShooterTopMeasuredRpm() - shooterRPM) <= 100)) {
+      indexer.runPercent(0.9);
     }
   }
 

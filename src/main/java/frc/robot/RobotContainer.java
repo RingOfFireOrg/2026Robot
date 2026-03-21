@@ -282,7 +282,7 @@ public class RobotContainer {
             },
             () -> {
                 double maxSpeedTheta = (1 - driver.getLeftTriggerAxis()) * (turnSpeed + (1-turnSpeed) * driver.getRightTriggerAxis());
-                return MathUtil.applyDeadband(MathUtil.clamp(driver.getRightX(), -maxSpeedTheta, maxSpeedTheta), 0.1);
+                return MathUtil.applyDeadband(MathUtil.clamp(-driver.getRightX(), -maxSpeedTheta, maxSpeedTheta), 0.1);
             }
         ));
 
@@ -584,6 +584,11 @@ public class RobotContainer {
     public Command getAutonomousCommand() {
         return autoChooser.get();
     }
+
+    public Drive getDrive() {
+    return drive;
+    } 
+
     private Command hubLock() {
     return new HubLock(turret, vision, 0);
 }

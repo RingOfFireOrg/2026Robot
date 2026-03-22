@@ -378,10 +378,11 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         return getPose().getRotation();
     }*/
     public Rotation2d getRotation() {
-        if (gyroInputs.connected) {
-            return gyroInputs.yawPosition.minus(headingOffset);
-        }
-        return cachedRotation;
+        return getPose().getRotation();
+        //if (gyroInputs.connected) {
+           //return gyroInputs.yawPosition.minus(headingOffset);
+        //}
+        //return cachedRotation;
     }
 
     public void zeroHeading() {

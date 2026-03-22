@@ -66,10 +66,12 @@ import frc.robot.subsystems.Intake.Intake;
 import frc.robot.commands.HubTurn;
 import frc.robot.commands.Ballin;
 import frc.robot.commands.Rollin;
+import frc.robot.commands.Shuttle;
 import frc.robot.commands.BallinTest;
 import frc.robot.commands.DriveAim;
 import frc.robot.commands.WakePreload;
 import frc.robot.commands.TrenchBaller;
+import frc.robot.commands.TurretFindAndLock;
 import frc.robot.commands.TurretLock;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -392,30 +394,10 @@ public class RobotContainer {
                 },
                     turret::stopTurret));     
 
-            operator.rightBumper().whileTrue(
-                Commands.parallel(
-                    turret.holdDashboardShooterRpm(),
-                     Commands.runEnd(() -> {
-                        if (turret.isShooterAtSpeed(120.0, 120.0)) {
-                            indexer.setVolts(indexer.getFeedPercent() * 12.0);
-                            transfer.setVolts(transfer.getFeedPercent() * 12.0);
-                        } else {
-                            indexer.stop();
-                            transfer.stop();
-                        }
-                    },
-                    () -> {
-                        indexer.stop();
-                        transfer.stop();
-                    },
-                    indexer, transfer)));
+            operator.rightBumper().whileTrue(new TurretFindAndLock(turret));
+    
 
-            operator.leftBumper().whileTrue(Commands.sequence(
-                turret.runShooterUntilReady(120.0, 120.0),
-                Commands.parallel(
-                    turret.holdDashboardShooterRpm(),
-                    indexer.runPercent(indexer::getFeedPercent),
-                    transfer.runPercent(transfer::getFeedPercent))));
+            operator.leftBumper().whileTrue(new Shuttle(turret,indexer, transfer));
 
              
 

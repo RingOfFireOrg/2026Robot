@@ -73,10 +73,10 @@ public class TurretLock extends Command {
         turret.stopTurret();
         return;
     }
-
-    turret.setDutyCycle(
-      turretPID.calculate(
-        LimelightHelpers.getTX(LimelightFrontName))*0.1);
+    if(LimelightHelpers.getFiducialID(LimelightFrontName) == 26)
+      turret.setDutyCycle(
+        turretPID.calculate(
+          LimelightHelpers.getTX(LimelightFrontName))*0.1);
   }
 
   // Called once the command ends or is interrupted.

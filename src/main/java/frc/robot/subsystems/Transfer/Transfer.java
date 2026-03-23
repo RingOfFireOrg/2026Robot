@@ -49,6 +49,13 @@ public class Transfer extends SubsystemBase {
     tab.addNumber("Motor Temp C", motor::getMotorTemperature);
   }
 
+  @Override
+public void periodic() {
+  if (getMotorRpm() < 50 && motor.getOutputCurrent() > 30) {
+    runPercent(-0.3);
+  }
+}
+
   public void setVolts(double volts) {
     double maxVolts = Math.abs(sbMaxVolts.getDouble(kMaxVolts));
     double minMoveVolts = Math.abs(sbMinMoveVolts.getDouble(kMinVoltsToMove));
@@ -87,6 +94,14 @@ public class Transfer extends SubsystemBase {
 
   public double getFeedPercent() {
     return sbFeedPercent.getDouble(-0.60);
+  }
+
+  public double getMotorRotations() {
+    return encoder.getPosition();
+  }
+
+  public double getMotorRpm() {
+    return encoder.getVelocity();
   }
 
   public double getReversePercent() {

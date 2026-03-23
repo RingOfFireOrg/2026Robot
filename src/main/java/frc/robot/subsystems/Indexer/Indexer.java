@@ -85,6 +85,9 @@ public class Indexer extends SubsystemBase {
 @Override
 public void periodic() {
   updatePidFromDashboard();
+  if (getMotorRpm() < 50 && motor.getOutputCurrent() > 25) {
+    runPercent(-0.3);
+  }
 }
 
   public double getMotorRotations() {

@@ -91,6 +91,10 @@ public class Turret extends SubsystemBase {
   private final GenericEntry sbBoostMaxVolts = shooterTab.add("Boost Max Volts", kBoostMaxVolts).getEntry();
   public final GenericEntry sbTURRET_P = shooterTab.add("Turret_P", 0.10).getEntry();
   public final GenericEntry sbTURRET_D = shooterTab.add("Turret_D", 0.0).getEntry();
+  public final GenericEntry trenchOffset = shooterTab.add("Trench Offset Left", 5).getEntry();
+  public final GenericEntry HubMiddleOffset = shooterTab.add("Hub Middle Tag Offset", 0.5).getEntry();
+  public final GenericEntry HubSideOffset = shooterTab.add("Hub Side Tag Offset", 1).getEntry();
+
 
   private double appliedShooterKp = Double.NaN;
   private double appliedShooterKi = Double.NaN;

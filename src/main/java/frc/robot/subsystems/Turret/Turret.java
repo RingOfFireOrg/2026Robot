@@ -267,7 +267,7 @@ public double getDashboardTopRpm() {
 }
 
 public double getDashboardBottomRpm() {
-  return sbBottomRpm.getDouble(2500.0);
+  return sbBottomRpm.getDouble(3000.0);
 }
 
   public double getTurretRotations() {

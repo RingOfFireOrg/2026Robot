@@ -43,7 +43,6 @@ public class AimAndRange extends Command {
     else return;
     offBy = (((LimelightHelpers.getTX(camera)+offset))/29) * drive.getMaxAngularSpeedRadPerSec() * kpAim;
     
-    
     drive.runVelocity(new ChassisSpeeds(0, 0, offBy));
   }
 

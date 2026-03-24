@@ -41,9 +41,9 @@ public class AimAndRange extends Command {
     else if(tagId == 9 || tagId == 25 || tagId == 11 || tagId == 27) offset = 2;
     else if (tagId == 8 || tagId == 24) offset = -2;
     else return;
-    offBy = (((LimelightHelpers.getTX(camera)+offset)*kpAim)/27) * drive.getMaxAngularSpeedRadPerSec();
+    offBy = (((LimelightHelpers.getTX(camera)+offset))/29) * drive.getMaxAngularSpeedRadPerSec() * kpAim;
     
-    if(LimelightHelpers.getTX(camera) < 10)  
+    
     drive.runVelocity(new ChassisSpeeds(0, 0, offBy));
   }
 

@@ -309,6 +309,9 @@ public double getDashboardBottomRpm() {
       .until(() -> isTurretAtAngle(clampedDeg, kTurretToleranceDeg));
   }
   
+  public void setTurret(double duty) {
+    rotMotor.set(duty);
+  }
   
   public void setDutyCycle(double duty) {
     final double angleDeg = getTurretAngleDeg();

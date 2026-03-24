@@ -70,13 +70,18 @@ public class TurretLock extends Command {
         offset = -turret.trenchOffset.getDouble(5);//change ts;
         break;
       default:
-        turret.stopTurret();
-        return;
+        break;
     }
-    if(LimelightHelpers.getFiducialID(LimelightFrontName) == 26)
-      turret.setDutyCycle(
-        turretPID.calculate(
-          LimelightHelpers.getTX(LimelightFrontName))*0.1);
+    if(LimelightHelpers.getFiducialID(LimelightFrontName) == 26) {
+      double output = turretPID.calculate(
+          LimelightHelpers.getTX(LimelightFrontName));
+      System.out.println("Turret PID output: " + output);
+      if (output > 1) output = 1;
+      if (output < -1) output = -1;
+      turret.setTurret(
+        output*0.07);
+    
+    }
   }
 
   // Called once the command ends or is interrupted.

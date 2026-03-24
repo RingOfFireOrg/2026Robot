@@ -9,6 +9,7 @@ import static frc.robot.subsystems.vision.VisionConstants.LimelightFrontName;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Indexer.Indexer;
+import frc.robot.subsystems.Transfer.Transfer;
 import frc.robot.subsystems.Turret.Turret;
 import frc.robot.util.LimelightHelpers;
 
@@ -16,14 +17,16 @@ import frc.robot.util.LimelightHelpers;
 public class AutoShoot extends Command {
   private Turret turret;
   private Indexer indexer;
+  private Transfer transfer;
 
   private final double limelightMountAngle = 10;//change ts
   private final double limelightLensHeight = 21.5;
   private final double hubTagHeight = 44.5;
 
-  public AutoShoot(Indexer indexer, Turret turret) {
+  public AutoShoot(Indexer indexer, Turret turret, Transfer transfer) {
     this.turret = turret;
     this.indexer = indexer;
+    this.transfer = transfer;
     addRequirements(indexer);
   }
 
@@ -37,11 +40,12 @@ public class AutoShoot extends Command {
     double verticalOffset = LimelightHelpers.getTY(LimelightFrontName);
     double angleToGoal = Units.degreesToRadians(limelightMountAngle+verticalOffset);
     double distance = (hubTagHeight - limelightLensHeight) / Math.tan(angleToGoal);
-    double shooterRPM = (distance*1)+1;//change ts
+    double shooterRPM = (distance*92.5)+1990;//change ts
     turret.runShooterRPM(()->shooterRPM, ()->shooterRPM);
     
     if((Math.abs(turret.getShooterBottomMeasuredRpm() - shooterRPM) <= 100) && (Math.abs(turret.getShooterTopMeasuredRpm() - shooterRPM) <= 100)) {
       indexer.runPercent(0.9);
+      transfer.runPercent(0.8);
     }
   }
 

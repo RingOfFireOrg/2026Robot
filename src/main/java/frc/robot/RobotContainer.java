@@ -54,6 +54,7 @@ import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.commands.AimAndRange;
 import frc.robot.commands.AlignToHub;
 import frc.robot.commands.AlignWhileMoving;
+import frc.robot.commands.AutoShoot;
 //import frc.robot.commands.AutoShoot;
 //import frc.robot.commands.PhotonAlign;
 import frc.robot.subsystems.Indexer.Indexer;
@@ -390,7 +391,7 @@ public class RobotContainer {
 
             operator.rightStick().whileTrue(
                 turret.runEnd(() -> {
-                    turret.setDutyCycle(MathUtil.applyDeadband(operator.getRightX(), 0.05)*0.2);
+                    turret.setDutyCycle(MathUtil.applyDeadband(operator.getRightX(), 0.05)*0.4);
                 },
                     turret::stopTurret));     
 
@@ -409,7 +410,7 @@ public class RobotContainer {
             operator.rightTrigger().whileTrue(turret.runShooterRPM(turret::getDashboardTopRpm, turret::getDashboardBottomRpm));
             operator.back().onTrue(Commands.runOnce(() -> turret.zeroTurret(), turret));
             //run shooter at rpm determined by vision, run indexer when shooter is right speed
-            //operator.leftTrigger().whileTrue(new AutoShoot(indexer, turret));
+            operator.leftTrigger().whileTrue(new AutoShoot(indexer, turret, transfer));
             
             //(turret.runShooterPercent(0.9));
                 //.onTrue(Commands.runOnce(() -> dioLed.setShooterActive(true)))

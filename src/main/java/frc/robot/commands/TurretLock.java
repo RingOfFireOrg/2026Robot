@@ -14,6 +14,7 @@ import frc.robot.subsystems.Turret.Turret;
 import frc.robot.util.LimelightHelpers;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.math.MathUtil;
 @SuppressWarnings("unused")
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
@@ -32,7 +33,9 @@ public class TurretLock extends Command {
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    turretPID.reset();
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
@@ -72,21 +75,32 @@ public class TurretLock extends Command {
       default:
         break;
     }
-    if(LimelightHelpers.getFiducialID(LimelightFrontName) == 26) {
-      double output = turretPID.calculate(
-          LimelightHelpers.getTX(LimelightFrontName));
-      System.out.println("Turret PID output: " + output);
-      if (output > 1) output = 1;
-      if (output < -1) output = -1;
-      turret.setTurret(
-        output*0.07);
-    
+    double tx = LimelightHelpers.getTX(LimelightFrontName);
+
+    if (LimelightHelpers.getTV(LimelightFrontName)
+    && (int) LimelightHelpers.getFiducialID(LimelightFrontName) == 26) {
+      //double output = turretPID.calculate(
+          //LimelightHelpers.getTX(LimelightFrontName));
+      double output = turretPID.calculate(tx - offset, 0.0);
+      System.out.println("tx" + tx + "Turret PID output: " + output);
+      //if (output > 1) output = 1;
+      //if (output < -1) output = -1;
+      output = MathUtil.clamp(output, -0.20, 0.20);
+      if (Math.abs(tx - offset) < 1.0) {
+        turret.stopTurret();
+        return;
+      }
+      turret.setDutyCycle(-output); 
+    } else {
+      turret.stopTurret();
     }
   }
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+    turret.stopTurret();
+  }
 
   // Returns true when the command should end.
   @Override

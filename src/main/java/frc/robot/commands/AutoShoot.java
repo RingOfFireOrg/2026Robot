@@ -27,7 +27,7 @@ public class AutoShoot extends Command {
     this.turret = turret;
     this.indexer = indexer;
     this.transfer = transfer;
-    addRequirements(indexer);
+    addRequirements(indexer, turret, transfer);
   }
 
   // Called when the command is initially scheduled.
@@ -37,21 +37,45 @@ public class AutoShoot extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    if (!LimelightHelpers.getTV(LimelightFrontName)) {
+      turret.stopShooter();
+      indexer.stop();
+      transfer.stop();
+      return;
+    }
     double verticalOffset = LimelightHelpers.getTY(LimelightFrontName);
     double angleToGoal = Units.degreesToRadians(limelightMountAngle+verticalOffset);
+    if (Math.abs(Math.tan(angleToGoal)) < 1e-6) {
+      turret.stopShooter();
+      indexer.stop();
+      transfer.stop();
+      return;
+    }
     double distance = (hubTagHeight - limelightLensHeight) / Math.tan(angleToGoal);
     double shooterRPM = (distance*92.5)+1990;//change ts
-    turret.runShooterRPM(()->shooterRPM, ()->shooterRPM);
+    System.out.println("ty=" + verticalOffset + " distance=" + distance + " shooterRPM=" + shooterRPM);
+    turret.setShooterRPM(shooterRPM, shooterRPM);
+    System.out.println(
+    "top=" + turret.getShooterTopMeasuredRpm()
+    + " bottom=" + turret.getShooterBottomMeasuredRpm()
+    + " target=" + shooterRPM);
     
-    if((Math.abs(turret.getShooterBottomMeasuredRpm() - shooterRPM) <= 100) && (Math.abs(turret.getShooterTopMeasuredRpm() - shooterRPM) <= 100)) {
-      indexer.runPercent(0.9);
-      transfer.runPercent(0.8);
+    if((Math.abs(turret.getShooterBottomMeasuredRpm() - shooterRPM) <= 150) && (Math.abs(turret.getShooterTopMeasuredRpm() - shooterRPM) <= 150)) {
+      indexer.setVolts(0.9 * 12.0);
+      transfer.setVolts(0.8 * 12.0);
+    }else {
+      indexer.stop();
+      transfer.stop();
     }
   }
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+    turret.stopShooter();
+    indexer.stop();
+    transfer.stop();
+  }
 
   // Returns true when the command should end.
   @Override

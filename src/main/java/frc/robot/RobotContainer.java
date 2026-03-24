@@ -223,8 +223,8 @@ public class RobotContainer {
         autoChooser.addOption("V1", new PathPlannerAuto("Ver1", false));
         autoChooser.addOption("V2", new PathPlannerAuto("Ver2", false));
         autoChooser.addOption("PreloadTrench", new PathPlannerAuto("WakePreloadDepotTrench"));
-
-                
+        autoChooser.addOption("Center Preload + Depot V2", new PathPlannerAuto("CenterDepotAutoV2", false));     
+           
         /* 
         autoChooser.addOption("Preload", new PathPlannerAuto("CenterPreloadAuto", false));
         autoChooser.addOption("Preload and Depot V2(use this one)", new PathPlannerAuto("CenterPreloadDepotAuto", false));

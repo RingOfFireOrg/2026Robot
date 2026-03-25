@@ -90,7 +90,7 @@ public class TurretLock extends Command {
         turret.stopTurret();
         return;
       }
-      turret.setDutyCycle(-output); 
+      turret.setDutyCycle(output); 
     } else {
       turret.stopTurret();
     }

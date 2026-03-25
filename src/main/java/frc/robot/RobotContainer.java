@@ -33,6 +33,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.commands.AimAndRange;
 import frc.robot.commands.AlignToHub;
 import frc.robot.commands.AlignWhileMoving;
 import frc.robot.commands.DriveCommands;
@@ -165,6 +166,7 @@ public class RobotContainer {
 
         controller.a().whileTrue(new AlignWhileMoving(drive, vision, 0, controller));
         controller.b().whileTrue(new AlignToHub(drive, vision, 0));
+        controller.y().whileTrue(new AimAndRange(drive, vision));
 
         // Switch to X pattern when X button is pressed
         controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
@@ -182,7 +184,7 @@ public class RobotContainer {
         // TODO: delete these code for your own project
         if (Constants.currentMode == Constants.Mode.SIM) {
             // L4 placement
-            controller.y().onTrue(Commands.runOnce(() -> SimulatedArena.getInstance()
+            /*controller.y().onTrue(Commands.runOnce(() -> SimulatedArena.getInstance()
                     .addGamePieceProjectile(new ReefscapeCoralOnFly(
                             driveSimulation.getSimulatedDriveTrainPose().getTranslation(),
                             new Translation2d(0.4, 0),
@@ -200,7 +202,7 @@ public class RobotContainer {
                             driveSimulation.getSimulatedDriveTrainPose().getRotation(),
                             Meters.of(1.35),
                             MetersPerSecond.of(1.5),
-                            Degrees.of(-60)))));
+                            Degrees.of(-60)))));*/
         }
     }
 

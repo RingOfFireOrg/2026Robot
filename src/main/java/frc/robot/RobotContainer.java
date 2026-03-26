@@ -378,7 +378,7 @@ public class RobotContainer {
             operator.a().whileTrue(new TurretLock(turret));
             //operator.a().whileTrue(Commands.parallel(transfer.runPercent(transfer::getFeedPercent), indexer.runPercent(indexer::getReversePercent))); //Transfer and indexer out
             //operator.b().whileTrue(intake.rollersIn()); //outtake 
-            //operator.b().onTrue(Commands.parallel(intake.shakeBalls(), intake.rollersOut()));
+            operator.b().whileTrue(Commands.parallel(intake.shakeBalls(), intake.rollersOut()));
 
 
             //operator.povUp().onTrue(hubLock); // reapplys hublock if switched off

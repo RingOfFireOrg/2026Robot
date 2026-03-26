@@ -26,8 +26,8 @@ public class Transfer extends SubsystemBase {
   private static final double kMinVoltsToMove = 1.5;
   private final ShuffleboardTab tab = Shuffleboard.getTab("Spindexer");
 
-  private final GenericEntry sbFeedPercent = tab.add("Feed %", -0.80).getEntry();
-  private final GenericEntry sbReversePercent = tab.add("Reverse %", 0.80).getEntry();
+  private final GenericEntry sbFeedPercent = tab.add("Feed %", -0.70).getEntry();
+  private final GenericEntry sbReversePercent = tab.add("Reverse %", 0.70).getEntry();
   private final GenericEntry sbManualVolts = tab.add("Manual Volts", -5.0).getEntry();
   private final GenericEntry sbMaxVolts = tab.add("Clamp Max Volts", kMaxVolts).getEntry();
   private final GenericEntry sbMinMoveVolts = tab.add("Min Move Volts", kMinVoltsToMove).getEntry();

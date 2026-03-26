@@ -28,10 +28,10 @@ public class Indexer extends SubsystemBase {
   private static final double kMinVoltsToMove = 1.5;
 
 
-  private static final double kDefaultKp = 0.0003;
+  private static final double kDefaultKp = 0.0005;
   private static final double kDefaultKi = 0.0;
   private static final double kDefaultKd = 0.0;
-  private static final double kDefaultKff = 0.00017;
+  private static final double kDefaultKff = 0.0002;
 
   private double appliedKp = Double.NaN;
   private double appliedKi = Double.NaN;

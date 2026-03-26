@@ -68,12 +68,12 @@ public class Turret extends SubsystemBase {
   private static final double kSpinDeltaRpm = 250.0;
   private static final double kBoostStartRpmErr = 200.0;
   private static final double kBoostFullRpmErr = 900.0;
-  private static final double kBoostMaxVolts = 2.5;
+  private static final double kBoostMaxVolts = 1.0;
   private double lastShooterPrintTime = 0.0;
-  private static final double kShooterDefaultKp = 0.125;
+  private static final double kShooterDefaultKp = 0.10;
   private static final double kShooterDefaultKi = 0.0;
   private static final double kShooterDefaultKd = 0.0;
-  private static final double kShooterDefaultKv = 0.115;
+  private static final double kShooterDefaultKv = 0.112;
 
 
   private final ShuffleboardTab shooterTab = Shuffleboard.getTab("Shooter");
@@ -403,7 +403,7 @@ public void setShooterRPM(double topRPM, double bottomRPM) {
   shooterMotor2.setControl(shooter2VelReq.withVelocity(topRps));
 }
 */
-public void setShooterRPM(double topRPM, double bottomRPM) {
+/*public void setShooterRPM(double topRPM, double bottomRPM) {
   double topMeas = getShooterTopMeasuredRpm();
   double botMeas = getShooterBottomMeasuredRpm();
 
@@ -442,6 +442,29 @@ public void setShooterRPM(double topRPM, double bottomRPM) {
       " Botmeas=" + String.format("%.0f", botMeas) +
       " Topboost=" + String.format("%.2f", topBoost) +
       " Botboost=" + String.format("%.2f", botBoost) +
+      " Vbat=" + String.format("%.2f", edu.wpi.first.wpilibj.RobotController.getBatteryVoltage())
+    );
+    lastShooterPrintTime = now;
+  }
+}*/
+public void setShooterRPM(double topRPM, double bottomRPM) {
+  double topRps = topRPM / 60.0;
+  double botRps = bottomRPM / 60.0;
+
+  shooterMotor2.setControl(shooter2VelReq.withVelocity(topRps));
+  shooterMotor.setControl(shooterVelReq.withVelocity(botRps));
+
+  double topMeas = getShooterTopMeasuredRpm();
+  double botMeas = getShooterBottomMeasuredRpm();
+
+  double now = Timer.getFPGATimestamp();
+  if (now - lastShooterPrintTime > 0.15) {
+    System.out.println(
+      "[SHOOT] " +
+      "Topset=" + String.format("%.0f", topRPM) +
+      " Topmeas=" + String.format("%.0f", topMeas) +
+      " Botset=" + String.format("%.0f", bottomRPM) +
+      " Botmeas=" + String.format("%.0f", botMeas) +
       " Vbat=" + String.format("%.2f", edu.wpi.first.wpilibj.RobotController.getBatteryVoltage())
     );
     lastShooterPrintTime = now;

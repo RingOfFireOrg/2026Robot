@@ -227,6 +227,8 @@ public class RobotContainer {
         autoChooser.addOption("Center Preload + Depot V2", new PathPlannerAuto("CenterDepotAutoV2", false));     
         autoChooser.addOption("rolling", Rollin.create(intake));
         autoChooser.addOption("Trench Depot", new PathPlannerAuto("TrenchDepotAuto", false));
+        autoChooser.addOption("DriveTester", new PathPlannerAuto("New Auto", false));
+        
         /* 
         autoChooser.addOption("Preload", new PathPlannerAuto("CenterPreloadAuto", false));
         autoChooser.addOption("Preload and Depot V2(use this one)", new PathPlannerAuto("CenterPreloadDepotAuto", false));

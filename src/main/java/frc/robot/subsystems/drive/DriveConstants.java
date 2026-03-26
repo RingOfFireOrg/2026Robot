@@ -132,7 +132,7 @@ public class DriveConstants {
             new ModuleConfig(
                 wheelRadiusMeters,
                 //maxSpeedMetersPerSec,
-                2,
+                2.5,
                 wheelCOF,
                 driveGearbox.withReduction(driveMotorReduction),
                 driveMotorCurrentLimit,

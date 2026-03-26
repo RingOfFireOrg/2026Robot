@@ -10,6 +10,6 @@ public class Rollin {
 
   public static Command create(Intake intake) {
     return Commands.sequence(
-    Commands.runOnce(() -> intake.deployOut()),
+    Commands.runOnce(() -> intake.setDeployPositionDeg(83), intake),
     intake.rollersOut().withTimeout(3));
 }}

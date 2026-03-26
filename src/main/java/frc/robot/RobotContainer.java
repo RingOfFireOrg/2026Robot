@@ -474,6 +474,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("Aim And Range", new AimAndRange(drive, LimelightFrontName));
         NamedCommands.registerCommand("Intake Out", intake.deployOut());
         NamedCommands.registerCommand("Intake In", intake.retractIn());
+        NamedCommands.registerCommand("Turret Lock", new TurretLock(turret));
 
 /*   
         NamedCommands.registerCommand(

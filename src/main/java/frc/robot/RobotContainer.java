@@ -226,8 +226,7 @@ public class RobotContainer {
         autoChooser.addOption("Center Preload + Depot V1", new PathPlannerAuto("CenterDepotAutoV1", false)); 
         autoChooser.addOption("Center Preload + Depot V2", new PathPlannerAuto("CenterDepotAutoV2", false));     
         autoChooser.addOption("rolling", Rollin.create(intake));
-        autoChooser.addOption("Trench Depot", new PathPlannerAuto("TrenchDepot", false));
-
+        autoChooser.addOption("Trench Depot", new PathPlannerAuto("TrenchDepotAuto", false));
         /* 
         autoChooser.addOption("Preload", new PathPlannerAuto("CenterPreloadAuto", false));
         autoChooser.addOption("Preload and Depot V2(use this one)", new PathPlannerAuto("CenterPreloadDepotAuto", false));
@@ -379,7 +378,7 @@ public class RobotContainer {
             operator.a().whileTrue(new TurretLock(turret));
             //operator.a().whileTrue(Commands.parallel(transfer.runPercent(transfer::getFeedPercent), indexer.runPercent(indexer::getReversePercent))); //Transfer and indexer out
             //operator.b().whileTrue(intake.rollersIn()); //outtake 
-            operator.b().whileTrue(Commands.parallel(intake.shakeBalls(), intake.rollersOut()));
+            //operator.b().whileTrue(Commands.parallel(intake.shakeBalls(), intake.rollersOut()));
 
 
             //operator.povUp().onTrue(hubLock); // reapplys hublock if switched off

@@ -94,7 +94,7 @@ public class Climber extends SubsystemBase {
     controller.setSetpoint(clampedTarget, ControlType.kPosition);
   }
   public Command goTop() {
-    return runOnce(() -> setPosition(sbTopHeight.getDouble(20)));//this will change after tuning, just a placeholder
+    return runOnce(() -> setPosition(sbTopHeight.getDouble(184)));//this will change after tuning, just a placeholder
   }
 
   public Command goBottom() {

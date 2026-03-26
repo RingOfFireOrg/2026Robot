@@ -384,7 +384,8 @@ public class RobotContainer {
             //operator.povUp().onTrue(hubLock); // reapplys hublock if switched off
             //operator.povUp().onTrue(Commands.runOnce(() -> turret.setDefaultCommand(hubLock())));
             //operator.povUp().whileTrue
-            operator.povUp().whileTrue(Commands.parallel(indexer.runVelocityRpm(indexer::getFeedRpm),transfer.runPercent(0.8),intake.rollersIn()));
+            operator.povUp().whileTrue(new TurretFindAndLock(turret));
+                //Commands.parallel(indexer.runVelocityRpm(indexer::getFeedRpm),transfer.runPercent(0.8),intake.rollersIn()));
             //intake and transfer in, indexer up
             operator.povDown().whileTrue(Commands.parallel(indexer.runVelocityRpm(indexer::getReverseRpm),transfer.runPercent(-0.8),intake.rollersOut()));
             //intake and transfer out, indexer down
@@ -397,10 +398,17 @@ public class RobotContainer {
                 },
                     turret::stopTurret));     
 
-            operator.rightBumper().whileTrue(new TurretFindAndLock(turret));
+            operator.leftStick().whileTrue(
+                climber.runEnd(() -> {
+                    climber.runPercent(MathUtil.applyDeadband(operator.getLeftY(), 0.05)*0.5);
+                },
+                    climber::stop));
+
+            operator.rightBumper().whileTrue(turret.goToTurretAngle(90));
     
 
-            operator.leftBumper().whileTrue(new Shuttle(turret,indexer, transfer));
+            operator.leftBumper().whileTrue(turret.goToTurretAngle(-90));
+                //new Shuttle(turret,indexer, transfer));
 
              
 
@@ -414,92 +422,7 @@ public class RobotContainer {
             //run shooter at rpm determined by vision, run indexer when shooter is right speed
             operator.leftTrigger().whileTrue(new AutoShoot(indexer, turret, transfer));
             
-            //(turret.runShooterPercent(0.9));
-                //.onTrue(Commands.runOnce(() -> dioLed.setShooterActive(true)))
-                //.whileTrue(Commands.parallel(
-                    //turret.runShooterPercent(0.9);
-                    //Commands.waitSeconds(1.0).andThen(
-                        //Commands.runOnce(() -> led.setSolid(0, 255, 0)).repeatedly())))
-               //.onFalse(Commands.runOnce(() -> dioLed.setShooterActive(false)))
-                //.onFalse(Commands.runOnce(led::restoreAlliance));
-
-            //.whileTrue(Commands.parallel(turret.runShooterPercent(0.9), 
-            //Commands.waitSeconds(1.0).andThen(Commands.runOnce(() -> led.setSolid(0, 255, 0)).repeatedly())))//shooter
-            //.onFalse(Commands.runOnce(led::restoreAlliance));
-            
-            
-           
-
-            /*operator.leftTrigger(0.15).whileTrue(
-                turret.runEnd(
-                    () -> {
-                        String ll = "limelight-tag";
-
-                        boolean hasTarget = LimelightHelpers.getTV(ll);
-                        double now = edu.wpi.first.wpilibj.Timer.getFPGATimestamp();
-
-                        if (hasTarget) {
-                            lastValidDistanceM = turret.getDistanceToTagMeters(ll);
-                            lastSeenTimeSec = now;
-                        }
-
-                        if (now - lastSeenTimeSec <= kTargetHoldTimeSec) {
-
-                            turret.setShooterFromDistanceMeters(lastValidDistanceM);
-
-                            if (now - lastPrintTimeSec > 0.25) {
-                                double top = turret.getTopRpmForDistanceMeters(lastValidDistanceM);
-                                double bottom = turret.getBottomRpmForDistanceMeters(lastValidDistanceM);
-
-                                double topMeas = turret.getShooterTopMeasuredRpm();
-                                double bottomMeas = turret.getShooterBottomMeasuredRpm();
-
-                                System.out.println(
-                                    "[LL AUTO RPM] dist=" + String.format("%.2f", lastValidDistanceM)
-                                    + " top=" + String.format("%.0f", top)
-                                    + " bottom=" + String.format("%.0f", bottom)
-                                    + " topMeas=" + String.format("%.0f", topMeas)
-                                    + " botMeas=" + String.format("%.0f", bottomMeas)
-                                );
-
-                                lastPrintTimeSec = now;
-                            }
-
-            } else {
-                turret.stopShooter();
-            }
-        },
-        turret::stopShooter
-    )
-);*/
-/* 
-            operator.leftTrigger(0.15).whileTrue(
-                turret.runEnd(
-                    () -> {
-                        String ll = "limelight-tag";
-
-                        boolean hasTarget = LimelightHelpers.getTV(ll);
-                        double now = edu.wpi.first.wpilibj.Timer.getFPGATimestamp();
-
-                        if (hasTarget) {
-                            lastValidDistanceM = turret.getDistanceToTagMeters(ll);
-                            lastSeenTimeSec = now;
-                        }
-
-                        if (now - lastSeenTimeSec <= kTargetHoldTimeSec) {
-                            turret.setShooterFromDistanceMeters(lastValidDistanceM);
-                        } else {
-                            turret.stopShooter();
-                        }
-                    },
-                    turret::stopShooter
-  )
-);
- */                
-                //Commands.parallel(transfer.runPercent(0.6), indexer.runPercent(0.6)));//transfer and indexer up
-
-
-        
+         
 
 
            // Climbing Controls
@@ -507,8 +430,10 @@ public class RobotContainer {
             climberController.povLeft().onTrue(intake.deployOut());//intake goes out
             climberController.povUp().onTrue(climber.goTop());//go to top
             climberController.povDown().onTrue(climber.goBottom());//go to bottom
+
             climberController.y().whileTrue(climber.runPercent(0.6));//climber up manual
             climberController.a().whileTrue(climber.runPercent(-0.6));//climber down manual
+
             climberController.back().whileTrue(turret.goToTurretAngle(0.0));
             climberController.x().whileTrue(turret.goToTurretAngle(-30.0));
             climberController.b().whileTrue(turret.goToTurretAngle(30.0));

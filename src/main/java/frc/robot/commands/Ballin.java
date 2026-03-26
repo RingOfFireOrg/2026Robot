@@ -10,8 +10,8 @@ public class Ballin {
 
   public static Command create(Turret turret, Indexer indexer, Transfer transfer) {
 
-    double topRPM = 3500;
-    double bottomRPM = 2500.0;
+    double topRPM = -3000;
+    double bottomRPM = 3000.0;
 
     return Commands.sequence(
 

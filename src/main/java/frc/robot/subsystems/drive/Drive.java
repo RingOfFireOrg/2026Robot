@@ -214,9 +214,9 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
                 rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
             }
             // Apply update
-            //poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions); }}
-            poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions); }
             cachedRotation = rawGyroRotation.minus(headingOffset);
+            poseEstimator.updateWithTime(sampleTimestamps[i], cachedRotation, modulePositions);
+            }
             
 
             
@@ -388,10 +388,14 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         odometryLock.lock();
         try {
             headingOffset = rawGyroRotation;
+            cachedRotation = rawGyroRotation.minus(headingOffset);
+            poseEstimator.resetPosition(
+                cachedRotation,
+                getModulePositions(),
+                new Pose2d(getPose().getTranslation(), new Rotation2d()));
         } finally {
-            odometryLock.unlock();
+        odometryLock.unlock();
         }
-    
     }
     
 
@@ -401,12 +405,24 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
     }
  */
-    public void resetOdometry(Pose2d pose) {
+    /*public void resetOdometry(Pose2d pose) {
         resetSimulationPoseCallBack.accept(pose);
         odometryLock.lock();
         headingOffset = rawGyroRotation.minus(pose.getRotation());
         poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
         odometryLock.unlock();
+    }*/
+
+    public void resetOdometry(Pose2d pose) {
+        resetSimulationPoseCallBack.accept(pose);
+        odometryLock.lock();
+        try {
+            headingOffset = rawGyroRotation.minus(pose.getRotation());
+            cachedRotation = rawGyroRotation.minus(headingOffset);
+            poseEstimator.resetPosition(cachedRotation, getModulePositions(), pose);
+        } finally {
+            odometryLock.unlock();
+        }
     }
 
         

@@ -19,15 +19,20 @@ public class TrenchBaller {
 
         Commands.runOnce(() -> turret.setShooterRPM(topRPM, bottomRPM), turret),
 
+        Commands.waitUntil(() -> (
+          Math.abs(turret.getShooterBottomMeasuredRpm() - bottomRPM) <= 120) && (Math.abs(turret.getShooterTopMeasuredRpm() - topRPM) <= 120)),
+
         Commands.waitSeconds(1.5),
- 
+
         Commands.parallel(
             intake.rollersOut(),
             indexer.runPercent(0.8),
             transfer.runPercent(-0.8)
-        ).withTimeout(4.0),
+        ).withTimeout(2.0),
 
-        Commands.runOnce(() -> turret.setShooterRPM(0, 0), turret)
+        Commands.runOnce(() -> turret.stopShooter(), turret)
+
+
     );
   }
 }

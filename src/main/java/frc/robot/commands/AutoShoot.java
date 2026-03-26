@@ -61,8 +61,8 @@ public class AutoShoot extends Command {
     + " target=" + shooterRPM);
     
     if((Math.abs(turret.getShooterBottomMeasuredRpm() - shooterRPM) <= 150) && (Math.abs(turret.getShooterTopMeasuredRpm() - shooterRPM) <= 150)) {
-      indexer.setVolts(0.9 * 12.0);
-      transfer.setVolts(0.8 * 12.0);
+      indexer.runPercent(0.9);
+      transfer.runPercent(0.8);
     }else {
       indexer.stop();
       transfer.stop();

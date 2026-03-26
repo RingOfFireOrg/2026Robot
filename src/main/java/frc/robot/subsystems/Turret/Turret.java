@@ -70,16 +70,16 @@ public class Turret extends SubsystemBase {
   private static final double kBoostFullRpmErr = 900.0;
   private static final double kBoostMaxVolts = 2.5;
   private double lastShooterPrintTime = 0.0;
-  private static final double kShooterDefaultKp = 0.12;
+  private static final double kShooterDefaultKp = 0.125;
   private static final double kShooterDefaultKi = 0.0;
   private static final double kShooterDefaultKd = 0.0;
-  private static final double kShooterDefaultKv = 0.12;
+  private static final double kShooterDefaultKv = 0.115;
 
 
   private final ShuffleboardTab shooterTab = Shuffleboard.getTab("Shooter");
 
-  private final GenericEntry sbTopRpm = shooterTab.add("Top RPM", 3000.0).getEntry();
-  private final GenericEntry sbBottomRpm = shooterTab.add("Bottom RPM", 2500.0).getEntry();
+  private final GenericEntry sbTopRpm = shooterTab.add("Top RPM", -3000.0).getEntry();
+  private final GenericEntry sbBottomRpm = shooterTab.add("Bottom RPM", 3000.0).getEntry();
 
   private final GenericEntry sbShooterKp = shooterTab.add("kP", kShooterDefaultKp).getEntry();
   private final GenericEntry sbShooterKi = shooterTab.add("kI", kShooterDefaultKi).getEntry();
@@ -263,7 +263,7 @@ private void updateShooterPidFromDashboard() {
 }
 
 public double getDashboardTopRpm() {
-  return sbTopRpm.getDouble(3000.0);
+  return sbTopRpm.getDouble(-3000.0);
 }
 
 public double getDashboardBottomRpm() {

@@ -10,8 +10,8 @@ import frc.robot.subsystems.drive.Drive;
 public class CenterPreloadRobotAuto {
   public static Command create(Drive drive, Turret turret, Indexer indexer, Transfer transfer) {
     return Commands.sequence(
-        Ballin.create(turret, indexer, transfer),
-        new RobotDriveForTime(drive, 1.0, 0.0, 0.0, 3)
+        new RobotDriveForTime(drive, 0.5, 0.0, 0.0, 3.25),
+        Ballin.create(turret, indexer, transfer)
     );
   }
 }

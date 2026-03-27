@@ -35,7 +35,7 @@ public class Climber extends SubsystemBase {
   private final ShuffleboardTab tab = Shuffleboard.getTab("Climber");
 
   private final GenericEntry sbTopHeight =
-    tab.add("Top Height", 20).getEntry();
+    tab.add("Top Height", 185).getEntry();
 
   private final GenericEntry sbBottomHeight =
     tab.add("Bottom Height", 0).getEntry();
@@ -74,7 +74,7 @@ public class Climber extends SubsystemBase {
     cmd = MathUtil.clamp(cmd, -kMaxVolts, kMaxVolts);
 
     double pos = encoder.getPosition();
-    double top = sbTopHeight.getDouble(80);
+    double top = sbTopHeight.getDouble(185);
     double bottom = sbBottomHeight.getDouble(0);
 
     if (cmd > 0 && pos >= top) cmd = 0;
@@ -88,13 +88,13 @@ public class Climber extends SubsystemBase {
   }
 
   public void setPosition(double targetRotations) {
-    double top = sbTopHeight.getDouble(80);
+    double top = sbTopHeight.getDouble(185);
     double bottom = sbBottomHeight.getDouble(0);
     double clampedTarget = MathUtil.clamp(targetRotations, bottom, top);
     controller.setSetpoint(clampedTarget, ControlType.kPosition);
   }
   public Command goTop() {
-    return runOnce(() -> setPosition(sbTopHeight.getDouble(184)));//this will change after tuning, just a placeholder
+    return runOnce(() -> setPosition(sbTopHeight.getDouble(185)));
   }
 
   public Command goBottom() {

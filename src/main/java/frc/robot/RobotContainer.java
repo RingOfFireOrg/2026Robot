@@ -74,6 +74,9 @@ import frc.robot.commands.WakePreload;
 import frc.robot.commands.TrenchBaller;
 import frc.robot.commands.TurretFindAndLock;
 import frc.robot.commands.TurretLock;
+import frc.robot.commands.RobotDriveForTime;
+import frc.robot.commands.CenterPreloadRobotAuto;
+import frc.robot.commands.CenterPreloadDepotRobotAuto;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.networktables.GenericEntry;
@@ -229,6 +232,9 @@ public class RobotContainer {
         autoChooser.addOption("Trench Depot", new PathPlannerAuto("TrenchDepotAuto", false));
         autoChooser.addOption("DriveTester", new PathPlannerAuto("New Auto", false));
         autoChooser.addOption("tester", new PathPlannerAuto("testerauto", false));
+        autoChooser.addOption("robotTest", new RobotDriveForTime(drive, 1.0, 0.0, 0.0, 3.0));
+        autoChooser.addOption("Robot Center Preload", CenterPreloadRobotAuto.create(drive, turret, indexer, transfer));
+        autoChooser.addOption("Robot Center Preload Depot", CenterPreloadDepotRobotAuto.create(drive, turret, indexer, transfer, intake));
         /* 
         autoChooser.addOption("Preload", new PathPlannerAuto("CenterPreloadAuto", false));
         autoChooser.addOption("Preload and Depot V2(use this one)", new PathPlannerAuto("CenterPreloadDepotAuto", false));

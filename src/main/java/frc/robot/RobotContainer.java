@@ -400,17 +400,16 @@ public class RobotContainer {
             operator.povRight().onTrue(intake.retractIn());//intake comes in
             operator.povLeft().onTrue(intake.deployOut());//intake goes out
 
-            operator.rightStick().whileTrue(
                 turret.runEnd(() -> {
                     turret.setDutyCycle(MathUtil.applyDeadband(operator.getRightX(), 0.05)*0.4);
                 },
-                    turret::stopTurret));     
+                    turret::stopTurret);     
 
-            operator.leftStick().whileTrue(
+        
                 climber.runEnd(() -> {
                     climber.runPercent(MathUtil.applyDeadband(operator.getLeftY(), 0.05)*0.5);
                 },
-                    climber::stop));
+                    climber::stop);
 
             operator.rightBumper().whileTrue(turret.goToTurretAngle(90));
     

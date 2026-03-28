@@ -155,8 +155,6 @@ public class TurretLock extends Command {
     return;
   }
 
-  if(Math.abs(LimelightHelpers.getTX(LimelightFrontName)) < 4) return;
-
     Double desiredTx = null;
 
     Double mid25_26 = getMidpointTx(25, 26);
@@ -191,12 +189,12 @@ public class TurretLock extends Command {
 
     System.out.println("desiredTx=" + desiredTx + " output=" + output);
 
-    if (Math.abs(desiredTx) < 1.0) {
+    if (Math.abs(desiredTx) < 5.0) {
       turretPID.reset();
       turret.stopTurret();
       return;
     }
-    if (Math.abs(output) < 0.02) {
+    if (Math.abs(output) < 0.1) {
       turretPID.reset();
       turret.stopTurret();
       return;

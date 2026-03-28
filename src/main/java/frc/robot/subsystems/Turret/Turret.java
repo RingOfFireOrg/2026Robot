@@ -94,6 +94,7 @@ public class Turret extends SubsystemBase {
   public final GenericEntry trenchOffset = shooterTab.add("Trench Offset Left", 5).getEntry();
   public final GenericEntry HubMiddleOffset = shooterTab.add("Hub Middle Tag Offset", 0.5).getEntry();
   public final GenericEntry HubSideOffset = shooterTab.add("Hub Side Tag Offset", 1).getEntry();
+  public final GenericEntry autoShoot = shooterTab.add("AutoShoot thing", 1000).getEntry();
 
 
   private double appliedShooterKp = Double.NaN;

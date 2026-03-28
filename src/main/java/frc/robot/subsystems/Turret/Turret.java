@@ -70,7 +70,7 @@ public class Turret extends SubsystemBase {
   private static final double kBoostFullRpmErr = 900.0;
   private static final double kBoostMaxVolts = 1.0;
   private double lastShooterPrintTime = 0.0;
-  private static final double kShooterDefaultKp = 0.10;
+  private static final double kShooterDefaultKp = 0.12;
   private static final double kShooterDefaultKi = 0.0;
   private static final double kShooterDefaultKd = 0.0;
   private static final double kShooterDefaultKv = 0.112;
@@ -129,22 +129,23 @@ public class Turret extends SubsystemBase {
   
 
   private static final boolean kEnableSoftLimits = true;
-  private static final double kMinTurretDeg = -90.0;
-  private static final double kMaxTurretDeg = 90.0;
+  private static final double kMinTurretDeg = -80.0;
+  private static final double kMaxTurretDeg = 80.0;
   private static final double kTurretToleranceDeg = 2.0;
 
   private static final double kDeadband = 0.02;
   private static final double kMaxDuty = 0.35;
   private static final double kMinDutyToMove = 0.08;
-
+2
   private double lastPrintTimeSec = 0.0;
   private double lastCmdDuty = 0.0;
 
   private final SparkClosedLoopController rotController = rotMotor.getClosedLoopController();
   private static final double kTurretGearRatio = 105.0;
-  private static final double kTurretPosP = 0.15;
+  private static final double kTurretPosP = 0.2
+  ;
   private static final double kTurretPosI = 0.0;
-  private static final double kTurretPosD = 0.0;
+  private static final double kTurretPosD = 0.2;
 
   public Turret() {
     //rotation motor config

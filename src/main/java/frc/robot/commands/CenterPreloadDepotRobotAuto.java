@@ -11,10 +11,12 @@ import frc.robot.subsystems.Intake.Intake;
 public class CenterPreloadDepotRobotAuto {
   public static Command create(Drive drive, Turret turret, Indexer indexer, Transfer transfer, Intake intake) {
     return Commands.sequence(
+      Commands.runOnce(() -> intake.setDeployPositionDeg(83), intake),
+
         new RobotDriveForTime(drive, 0.5, 0.0, 0.0, 3.25),//go back the first time
         Ballin.create(turret, indexer, transfer),
         new RobotDriveForTime(drive, 0.0, -0.5, 0.0, 3.0),//line up with depot
-        Commands.runOnce(() -> intake.setDeployPositionDeg(83), intake),
+        
 
         Commands.parallel(
           intake.rollersOut(),

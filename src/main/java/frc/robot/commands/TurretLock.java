@@ -149,11 +149,13 @@ public class TurretLock extends Command {
       turret.stopTurret();
     }
   }*/
-  if (!LimelightHelpers.getTV(LimelightFrontName) || LimelightHelpers.getTX(LimelightFrontName) < 1) {
+  if (!LimelightHelpers.getTV(LimelightFrontName)) {
     turretPID.reset();
     turret.stopTurret();
     return;
-    }
+  }
+
+  if(Math.abs(LimelightHelpers.getTX(LimelightFrontName)) < 4) return;
 
     Double desiredTx = null;
 

@@ -16,18 +16,14 @@ import frc.robot.util.LimelightHelpers;
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class AutoShoot extends Command {
   private Turret turret;
-  private Indexer indexer;
-  private Transfer transfer;
 
   private final double limelightMountAngle = 10;//change ts
   private final double limelightLensHeight = 21.5;
   private final double hubTagHeight = 44.5;
 
-  public AutoShoot(Indexer indexer, Turret turret, Transfer transfer) {
+  public AutoShoot(Turret turret) {
     this.turret = turret;
-    this.indexer = indexer;
-    this.transfer = transfer;
-    addRequirements(indexer, turret, transfer);
+    addRequirements(turret);
   }
 
   // Called when the command is initially scheduled.
@@ -39,16 +35,12 @@ public class AutoShoot extends Command {
   public void execute() {
     if (!LimelightHelpers.getTV(LimelightFrontName)) {
       turret.stopShooter();
-      indexer.stop();
-      transfer.stop();
       return;
     }
     double verticalOffset = LimelightHelpers.getTY(LimelightFrontName);
     double angleToGoal = Units.degreesToRadians(limelightMountAngle+verticalOffset);
     if (Math.abs(Math.tan(angleToGoal)) < 1e-6) {
       turret.stopShooter();
-      indexer.stop();
-      transfer.stop();
       return;
     }
     double distance = (hubTagHeight - limelightLensHeight) / Math.tan(angleToGoal);
@@ -60,21 +52,12 @@ public class AutoShoot extends Command {
     + " bottom=" + turret.getShooterBottomMeasuredRpm()
     + " target=" + shooterRPM);
     
-    if((Math.abs(turret.getShooterBottomMeasuredRpm() - shooterRPM) <= 150) && (Math.abs(turret.getShooterTopMeasuredRpm() - shooterRPM) <= 150)) {
-      indexer.setVolts(indexer.getFeedPercent() * 12.0);
-      transfer.setVolts(transfer.getFeedPercent() * 12.0);
-    }else {
-      indexer.stop();
-      transfer.stop();
-    }
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
     turret.stopShooter();
-    indexer.stop();
-    transfer.stop();
   }
 
   // Returns true when the command should end.

@@ -136,7 +136,7 @@ public class Turret extends SubsystemBase {
   private static final double kDeadband = 0.02;
   private static final double kMaxDuty = 0.35;
   private static final double kMinDutyToMove = 0.08;
-2
+
   private double lastPrintTimeSec = 0.0;
   private double lastCmdDuty = 0.0;
 

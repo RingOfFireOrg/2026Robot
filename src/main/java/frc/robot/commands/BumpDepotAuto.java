@@ -16,7 +16,7 @@ public class BumpDepotAuto {
 
         new RobotDriveForTime(drive, 0.5, 0.0, 0.0, 3),//back up and shoot preload
         new TurretLock(turret),
-        Ballin.create(turret, indexer, transfer),
+        Ballin.create(turret, indexer, transfer, intake),
 
         Commands.parallel(//go into depot and shoot
             new RobotDriveForTime(drive, 0.5, 0.0, 0.0, 3),
@@ -24,7 +24,7 @@ public class BumpDepotAuto {
             intake.rollersOut(),
             new TurretLock(turret)),
             
-        Ballin.create(turret, indexer, transfer)        
+        Ballin.create(turret, indexer, transfer,intake)        
         );
     }
     

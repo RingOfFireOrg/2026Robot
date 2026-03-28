@@ -233,8 +233,9 @@ public class RobotContainer {
         autoChooser.addOption("DriveTester", new PathPlannerAuto("New Auto", false));
         autoChooser.addOption("tester", new PathPlannerAuto("testerauto", false));
         autoChooser.addOption("robotTest", new RobotDriveForTime(drive, 1.0, 0.0, 0.0, 3.0));
-        autoChooser.addOption("Robot Center Preload", CenterPreloadRobotAuto.create(drive, turret, indexer, transfer));
+        autoChooser.addOption("Robot Center Preload", CenterPreloadRobotAuto.create(drive, turret, indexer, transfer,intake));
         autoChooser.addOption("Robot Center Preload Depot", CenterPreloadDepotRobotAuto.create(drive, turret, indexer, transfer, intake));
+        autoChooser.addOption("ballin", Ballin.create(turret, indexer, transfer, intake));
         /* 
         autoChooser.addOption("Preload", new PathPlannerAuto("CenterPreloadAuto", false));
         autoChooser.addOption("Preload and Depot V2(use this one)", new PathPlannerAuto("CenterPreloadDepotAuto", false));
@@ -476,7 +477,7 @@ public class RobotContainer {
     }
 
     public void setNamedCommands() {
-        NamedCommands.registerCommand("Ballin", Ballin.create(turret, indexer, transfer));
+        NamedCommands.registerCommand("Ballin", Ballin.create(turret, indexer, transfer,intake));
         NamedCommands.registerCommand("Rollin", Rollin.create(intake));
         NamedCommands.registerCommand("BallinTest", BallinTest.create(turret, indexer, transfer));
         NamedCommands.registerCommand("Aim And Range", new AimAndRange(drive, LimelightFrontName));

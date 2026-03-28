@@ -5,24 +5,26 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.Indexer.Indexer;
 import frc.robot.subsystems.Transfer.Transfer;
 import frc.robot.subsystems.Turret.Turret;
+import frc.robot.subsystems.Intake.Intake;
 
 public class Ballin {
 
-  public static Command create(Turret turret, Indexer indexer, Transfer transfer) {
+  public static Command create(Turret turret, Indexer indexer, Transfer transfer, Intake intake) {
 
-    double topRPM = -3000;
-    double bottomRPM = 3000.0;
+    double topRPM = -2975;
+    double bottomRPM = 2975.0;
 
     return Commands.sequence(
 
         Commands.runOnce(() -> turret.setShooterRPM(topRPM, bottomRPM), turret),
 
-        Commands.waitSeconds(1.5),
+        Commands.waitSeconds(0.5),
 
         Commands.parallel(
-            indexer.runPercent(0.8),
-            transfer.runPercent(0.8)
-        ).withTimeout(4.0),
+            intake.rollersOut(),
+            indexer.runPercent(0.9),
+            transfer.runPercent(-0.9)
+        ).withTimeout(3.0),
 
         Commands.runOnce(() -> {
           turret.setShooterRPM(0, 0);

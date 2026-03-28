@@ -25,10 +25,11 @@ public class TrenchBaller {
         Commands.waitSeconds(1.5),
 
         Commands.parallel(
+            
             intake.rollersOut(),
             indexer.runPercent(0.8),
             transfer.runPercent(-0.8)
-        ).withTimeout(2.0),
+        ).withTimeout(5.0),
 
         Commands.runOnce(() -> turret.stopShooter(), turret)
 

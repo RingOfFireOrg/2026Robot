@@ -14,8 +14,8 @@ public class CenterPreloadDepotRobotAuto {
       Commands.runOnce(() -> intake.setDeployPositionDeg(83), intake),
 
         new RobotDriveForTime(drive, 0.5, 0.0, 0.0, 3.25),//go back the first time
-        Ballin.create(turret, indexer, transfer),
-        new RobotDriveForTime(drive, 0.0, -0.5, 0.0, 3.0),//line up with depot
+        Ballin.create(turret, indexer, transfer,intake),
+        new RobotDriveForTime(drive, 0.0, -0.5, 0.0, 3.5),//line up with depot
         
 
         Commands.parallel(
@@ -25,7 +25,7 @@ public class CenterPreloadDepotRobotAuto {
         new RobotDriveForTime(drive, -0.25, 0, 0, 3.0),//away from depot
         new RobotDriveForTime(drive, 0, 0.5, 0, 3),//in front of ladder
 
-        Ballin.create(turret, indexer, transfer)
+        Ballin.create(turret, indexer, transfer,intake)
     );
   }
 }

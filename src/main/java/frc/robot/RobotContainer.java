@@ -428,7 +428,7 @@ public class RobotContainer {
             operator.rightTrigger().whileTrue(turret.runShooterRPM(turret::getDashboardTopRpm, turret::getDashboardBottomRpm));
             operator.back().onTrue(Commands.runOnce(() -> turret.zeroTurret(), turret));
             //run shooter at rpm determined by vision, run indexer when shooter is right speed
-            operator.leftTrigger().whileTrue(new AutoShoot(indexer, turret, transfer));
+            operator.leftTrigger().whileTrue(new AutoShoot(turret));
             
          
 

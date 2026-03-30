@@ -15,8 +15,8 @@ import frc.robot.util.LimelightHelpers;
 public class AutoShoot extends Command {
   private Turret turret;
 
-  private final double limelightMountAngle = 10;//change ts
-  private final double limelightLensHeight = 21.5;
+  private final double limelightMountAngle = 15;//change ts
+  private final double limelightLensHeight = 20;
   private final double hubTagHeight = 44.5;
 
   public AutoShoot(Turret turret) {

@@ -223,16 +223,16 @@ public class RobotContainer {
         autoChooser = new LoggedDashboardChooser<>("Auto Choices");
         autoChooser.addDefaultOption("do nothing", Commands.none());
         autoChooser.addOption("Wake Trench Preload", TrenchBaller.create(turret, indexer, transfer, intake));
-        autoChooser.addOption("V1", new PathPlannerAuto("Ver1", false));
-        autoChooser.addOption("V2", new PathPlannerAuto("Ver2", false));
-        autoChooser.addOption("PreloadTrench", new PathPlannerAuto("WakePreloadDepotTrench"));
-        autoChooser.addOption("Center Preload + Depot V1", new PathPlannerAuto("CenterDepotAutoV1", false)); 
-        autoChooser.addOption("Center Preload + Depot V2", new PathPlannerAuto("CenterDepotAutoV2", false));     
+        //autoChooser.addOption("V1", new PathPlannerAuto("Ver1", false));
+        //autoChooser.addOption("V2", new PathPlannerAuto("Ver2", false));
+        //autoChooser.addOption("PreloadTrench", new PathPlannerAuto("WakePreloadDepotTrench"));
+        //autoChooser.addOption("Center Preload + Depot V1", new PathPlannerAuto("CenterDepotAutoV1", false)); 
+        //autoChooser.addOption("Center Preload + Depot V2", new PathPlannerAuto("CenterDepotAutoV2", false));     
         autoChooser.addOption("rolling", Rollin.create(intake));
-        autoChooser.addOption("Trench Depot", new PathPlannerAuto("TrenchDepotAuto", false));
-        autoChooser.addOption("DriveTester", new PathPlannerAuto("New Auto", false));
-        autoChooser.addOption("tester", new PathPlannerAuto("testerauto", false));
-        autoChooser.addOption("robotTest", new RobotDriveForTime(drive, 1.0, 0.0, 0.0, 3.0));
+        //autoChooser.addOption("Trench Depot", new PathPlannerAuto("TrenchDepotAuto", false));
+        //autoChooser.addOption("DriveTester", new PathPlannerAuto("New Auto", false));
+        //autoChooser.addOption("tester", new PathPlannerAuto("testerauto", false));
+        //autoChooser.addOption("robotTest", new RobotDriveForTime(drive, 1.0, 0.0, 0.0, 3.0));
         autoChooser.addOption("Robot Center Preload", CenterPreloadRobotAuto.create(drive, turret, indexer, transfer,intake));
         autoChooser.addOption("Robot Center Preload Depot", CenterPreloadDepotRobotAuto.create(drive, turret, indexer, transfer, intake));
         autoChooser.addOption("ballin", Ballin.create(turret, indexer, transfer, intake));
@@ -429,7 +429,8 @@ public class RobotContainer {
             operator.rightTrigger().whileTrue(turret.runShooterRPM(turret::getDashboardTopRpm, turret::getDashboardBottomRpm));
             operator.back().onTrue(Commands.runOnce(() -> turret.zeroTurret(), turret));
             //run shooter at rpm determined by vision, run indexer when shooter is right speed
-            operator.leftTrigger().whileTrue(turret.runShooterRPM(() -> -2000, ()->1500));
+            //operator.leftTrigger().whileTrue(turret.runShooterRPM(() -> -2000, ()->1500));
+            operator.leftTrigger().whileTrue(new AutoShoot(turret));
             
          
 

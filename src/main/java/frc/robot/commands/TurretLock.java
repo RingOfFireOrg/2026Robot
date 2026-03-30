@@ -181,7 +181,7 @@ public class TurretLock extends Command {
       int id = (int) LimelightHelpers.getFiducialID(LimelightFrontName);
       double tx = LimelightHelpers.getTX(LimelightFrontName);
       double offset = getSingleTagOffset(id);
-      desiredTx = tx - offset;
+      desiredTx = (tx - offset)+12;
     }
 
     double output = turretPID.calculate(desiredTx);

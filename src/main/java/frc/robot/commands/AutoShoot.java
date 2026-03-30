@@ -41,8 +41,9 @@ public class AutoShoot extends Command {
       turret.stopShooter();
       return;
     }
-    double distance = ((hubTagHeight - limelightLensHeight) / Math.tan(angleToGoal))/24;
-    double shooterRPM = (distance*97.5)+2152.5;//change ts
+    double distance = (hubTagHeight - limelightLensHeight) / Math.tan(angleToGoal);
+    //double shooterRPM = (distance*92.5)+1990;//change ts
+    double shooterRPM = (distance*46.25)+turret.autoShoot.getDouble(1000);
     System.out.println("ty=" + verticalOffset + " distance=" + distance + " shooterRPM=" + shooterRPM);
     turret.setShooterRPM(-shooterRPM, shooterRPM);
     System.out.println(

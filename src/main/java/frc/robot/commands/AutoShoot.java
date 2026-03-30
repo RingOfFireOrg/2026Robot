@@ -15,8 +15,8 @@ import frc.robot.util.LimelightHelpers;
 public class AutoShoot extends Command {
   private Turret turret;
 
-  private final double limelightMountAngle = 10;//change ts
-  private final double limelightLensHeight = 21.5;
+  private final double limelightMountAngle = 15;//change ts
+  private final double limelightLensHeight = 20;
   private final double hubTagHeight = 44.5;
 
   public AutoShoot(Turret turret) {
@@ -41,10 +41,10 @@ public class AutoShoot extends Command {
       turret.stopShooter();
       return;
     }
-    double distance = (hubTagHeight - limelightLensHeight) / Math.tan(angleToGoal);
-    double shooterRPM = (distance*92.5)+1990;//change ts
+    double distance = ((hubTagHeight - limelightLensHeight) / Math.tan(angleToGoal))/24;
+    double shooterRPM = (distance*97.5)+2152.5;//change ts
     System.out.println("ty=" + verticalOffset + " distance=" + distance + " shooterRPM=" + shooterRPM);
-    turret.setShooterRPM(shooterRPM, shooterRPM);
+    turret.setShooterRPM(-shooterRPM, shooterRPM);
     System.out.println(
     "top=" + turret.getShooterTopMeasuredRpm()
     + " bottom=" + turret.getShooterBottomMeasuredRpm()

@@ -15,7 +15,7 @@ public class TrenchBaller {
     double bottomRPM = 3000.0;
 
     return Commands.sequence(
-        Commands.runOnce(() -> intake.setDeployPositionDeg(83), intake),
+        Commands.runOnce(() -> intake.setDeployPositionDeg(13), intake),
 
         Commands.runOnce(() -> turret.setShooterRPM(topRPM, bottomRPM), turret),
 

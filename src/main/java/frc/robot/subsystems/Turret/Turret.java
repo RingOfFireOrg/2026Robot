@@ -48,7 +48,7 @@ public class Turret extends SubsystemBase {
   private static final int kMotorCanId = 40; //turret
   private static final int kShooterCanId = 41;//bottom
   private static final int kShooter2CanId = 42;//top
-  private static final int kAnglerCanId = 43;
+  //rivate static final int kAnglerCanId = 43;
   //private final InterpolatingDoubleTreeMap shooterRpmMap = new InterpolatingDoubleTreeMap();
   private final InterpolatingDoubleTreeMap topRpmMap = new InterpolatingDoubleTreeMap();
   private final InterpolatingDoubleTreeMap bottomRpmMap = new InterpolatingDoubleTreeMap();
@@ -95,6 +95,7 @@ public class Turret extends SubsystemBase {
   public final GenericEntry HubMiddleOffset = shooterTab.add("Hub Middle Tag Offset", 0.5).getEntry();
   public final GenericEntry HubSideOffset = shooterTab.add("Hub Side Tag Offset", 1).getEntry();
   public final GenericEntry autoShoot = shooterTab.add("AutoShoot thing", 1000).getEntry();
+  public final GenericEntry autoShoot2 = shooterTab.add("AutoShoot thing2", 92.5).getEntry();
 
 
   private double appliedShooterKp = Double.NaN;
@@ -125,8 +126,8 @@ public class Turret extends SubsystemBase {
   private final VelocityVoltage shooterVelReq = new VelocityVoltage(0.0);
   private final VelocityVoltage shooter2VelReq = new VelocityVoltage(0.0);
 
-  private final SparkMax anglerMotor = new SparkMax(kAnglerCanId, MotorType.kBrushless);
-  private final RelativeEncoder eRelativeEncoder = anglerMotor.getEncoder();
+  //private final SparkMax anglerMotor = new SparkMax(kAnglerCanId, MotorType.kBrushless);
+  //private final RelativeEncoder eRelativeEncoder = anglerMotor.getEncoder();
   
 
   private static final boolean kEnableSoftLimits = true;
@@ -185,12 +186,12 @@ public class Turret extends SubsystemBase {
     anglerCfg.inverted(false);
     anglerCfg.smartCurrentLimit(kAnglerCurrentLimit);
 
-    anglerMotor.configure(
+    /*anglerMotor.configure(
       anglerCfg,
       SparkBase.ResetMode.kResetSafeParameters,
       SparkBase.PersistMode.kPersistParameters);
     
-    eRelativeEncoder.setPosition(0.0);
+    eRelativeEncoder.setPosition(0.0);*/
    
     //Shooter motor 1 output configs
     MotorOutputConfigs shooterOut = new MotorOutputConfigs();
@@ -516,7 +517,7 @@ public void setShooterFromDistanceMeters(double distanceM) {
   double bottomRpm = getBottomRpmForDistanceMeters(distanceM);
   setShooterRPM(topRpm, bottomRpm);
 }
-
+/* 
 public double getAnglerRotations() {
   return eRelativeEncoder.getPosition();
 }
@@ -547,7 +548,7 @@ public void updateAngler() {
 
   double volts = MathUtil.clamp(err * kAnglerKpVoltsPerRot, -kAnglerMaxVolts, kAnglerMaxVolts);
   anglerMotor.setVoltage(volts);
-}
+}*/
 
 public double getShooterTopMeasuredRpm() {
   //top

@@ -24,10 +24,8 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.Filesystem;
 
-
-
 @SuppressWarnings("unused")
-public final class VisionConstants{
+public final class VisionConstants {
   public static final AprilTagFieldLayout aprilTagLayout;
 
   static {
@@ -38,70 +36,61 @@ public final class VisionConstants{
     }
   }
 
-  private VisionConstants() {}
+  private VisionConstants() {
+  }
 
-/* 
-      Path json =
-        Filesystem.getDeployDirectory().toPath()
-            .resolve("apriltags/2026-apriltags.json");
-      AprilTagFieldLayout layout = new AprilTagFieldLayout("");
-*/
+  /*
+   * Path json =
+   * Filesystem.getDeployDirectory().toPath()
+   * .resolve("apriltags/2026-apriltags.json");
+   * AprilTagFieldLayout layout = new AprilTagFieldLayout("");
+   */
 
+  /*
+   * /= AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+   * try {
+   * Path json = Filesystem.getDeployDirectory().toPath()
+   * .resolve("apriltags/2026-rebuilt-andymark.json");
+   * aprilTagLayout = new AprilTagFieldLayout(json);
+   * } catch (Exception e) {
+   * throw new RuntimeException(e);}
+   */
 
-    /*/= AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
-      try {
-          Path json = Filesystem.getDeployDirectory().toPath()
-            .resolve("apriltags/2026-rebuilt-andymark.json");
-      aprilTagLayout = new AprilTagFieldLayout(json);
-      } catch (Exception e) {
-      throw new RuntimeException(e);}
-      */
-  
+  // Camera names, must match names configured on coprocessor
+  public static String LimelightFrontName = "limelight-tag";
+  public static String camera0Name = "Photon_Front";
 
-
-    // Camera names, must match names configured on coprocessor
-    public static String LimelightFrontName = "limelight-tag";
-    public static String camera0Name = "Photon_Front";
-    public static String camera1Name = "Photon_Second";
-
-    // Robot to camera transforms
-    // (Not used by Limelight, configure in web UI instead)
-    public static Transform3d robotToCamera0 = new Transform3d(
+  // Robot to camera transforms
+  // (Not used by Limelight, configure in web UI instead)
+  public static Transform3d robotToCamera0 = new Transform3d(
       0.3,
       0.28,
       0.35,
       new Rotation3d(
-        0.0,
-        Math.toRadians(-15.0), 
-        Math.toRadians(25.0)));
-    public static Transform3d robotToCamera1 = new Transform3d(
-      0.30, 
-      -0.28, 
-      0.35, 
-      new Rotation3d(
-        0.0, 
-        Math.toRadians(-15.0), 
-        Math.toRadians(-25.0)));
-    public static Transform3d robotToCameraLL = new Transform3d();
+          0.0,
+          Math.toRadians(-15.0),
+          Math.toRadians(25.0)));
 
-    // Basic filtering thresholds
-    public static double maxAmbiguity = 0.3;
-    public static double maxZError = 0.75;
+  public static Transform3d robotToCameraLL = new Transform3d();
 
-    // Standard deviation baselines, for 1 meter distance and 1 tag
-    // (Adjusted automatically based on distance and # of tags)
-    public static double linearStdDevBaseline = 0.02; // Meters
-    public static double angularStdDevBaseline = 0.06; // Radians
+  // Basic filtering thresholds
+  public static double maxAmbiguity = 0.3;
+  public static double maxZError = 0.75;
 
-    // Standard deviation multipliers for each camera
-    // (Adjust to trust some cameras more than others)
-    public static double[] cameraStdDevFactors = new double[] {
-        3.0, // LL
-        1.0, // Camera 0
-        1.0 // Camera 1
-    };
+  // Standard deviation baselines, for 1 meter distance and 1 tag
+  // (Adjusted automatically based on distance and # of tags)
+  public static double linearStdDevBaseline = 0.02; // Meters
+  public static double angularStdDevBaseline = 0.06; // Radians
 
-    // Multipliers to apply for MegaTag 2 observations
-    public static double linearStdDevMegatag2Factor = 0.5; // More stable than full 3D solve
-    public static double angularStdDevMegatag2Factor = Double.POSITIVE_INFINITY;
-  } // No rotation data available
+  // Standard deviation multipliers for each camera
+  // (Adjust to trust some cameras more than others)
+  public static double[] cameraStdDevFactors = new double[] {
+      3.0, // LL
+      1.0, // Camera 0
+      1.0 // Camera 1
+  };
+
+  // Multipliers to apply for MegaTag 2 observations
+  public static double linearStdDevMegatag2Factor = 0.5; // More stable than full 3D solve
+  public static double angularStdDevMegatag2Factor = Double.POSITIVE_INFINITY;
+} // No rotation data available

@@ -1,6 +1,5 @@
 package frc.robot;
 
-import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -14,10 +13,11 @@ import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 import org.littletonrobotics.urcl.URCL;
 
-
 /**
- * The VM is configured to automatically run this class, and to call the functions corresponding to each mode, as
- * described in the TimedRobot documentation. If you change the name of this class or the package after creating this
+ * The VM is configured to automatically run this class, and to call the
+ * functions corresponding to each mode, as
+ * described in the TimedRobot documentation. If you change the name of this
+ * class or the package after creating this
  * project, you must also update the build.gradle file in the project.
  */
 public class Robot extends LoggedRobot {
@@ -30,7 +30,7 @@ public class Robot extends LoggedRobot {
             case REAL:
                 // Running on a real robot, log to a USB stick ("/U/logs")
                 Logger.addDataReceiver(new WPILOGWriter());
-                //Logger.addDataReceiver(new NT4Publisher());
+                // Logger.addDataReceiver(new NT4Publisher());
                 break;
 
             case SIM:
@@ -57,16 +57,13 @@ public class Robot extends LoggedRobot {
         // and put our autonomous chooser on the dashboard.
         robotContainer = new RobotContainer();
         LimelightHelpers.setLEDMode_ForceOff("limelight-tag");
-        CameraServer.startAutomaticCapture();
     }
 
     /** This function is called periodically during all modes. */
     @Override
     public void robotPeriodic() {
         // Switch thread to high priority to improve loop timing
-        Threads.setCurrentThreadPriority(true, 50
-        );
-  
+        Threads.setCurrentThreadPriority(true, 50);
 
         // Runs the Scheduler. This is responsible for polling buttons, adding
         // newly-scheduled commands, running already-scheduled commands, removing
@@ -74,29 +71,30 @@ public class Robot extends LoggedRobot {
         // This must be called from the robot's periodic block in order for anything in
         // the Command-based framework to work.
         CommandScheduler.getInstance().run();
-        //robotContainer.ledPeriodic();
-        
+        // robotContainer.ledPeriodic();
 
         // Return to normal thread priority
 
-
         Threads.setCurrentThreadPriority(false, 10);
-
 
     }
 
     /** This function is called once when the robot is disabled. */
     @Override
     public void disabledInit() {
-        //robotContainer.resetSimulationField();
+        // robotContainer.resetSimulationField();
         LimelightHelpers.setLEDMode_ForceOff("limelight-tag");
     }
 
     /** This function is called periodically when disabled. */
     @Override
-    public void disabledPeriodic() {}
+    public void disabledPeriodic() {
+    }
 
-    /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
+    /**
+     * This autonomous runs the autonomous command selected by your
+     * {@link RobotContainer} class.
+     */
     @Override
     public void autonomousInit() {
         autonomousCommand = robotContainer.getAutonomousCommand();
@@ -110,7 +108,8 @@ public class Robot extends LoggedRobot {
 
     /** This function is called periodically during autonomous. */
     @Override
-    public void autonomousPeriodic() {}
+    public void autonomousPeriodic() {
+    }
 
     /** This function is called once when teleop is enabled. */
     @Override
@@ -127,8 +126,6 @@ public class Robot extends LoggedRobot {
         // robotContainer.getEffector()
         // robotContainer.getEffector().runOnce(robotContainer.getEffector().)
 
-        
-        
     }
 
     /** This function is called periodically during operator control. */
@@ -142,7 +139,7 @@ public class Robot extends LoggedRobot {
                 LimelightHelpers.setLEDMode_ForceOff("limelight-tag");
             }
         }
-        
+
     }
 
     /** This function is called once when test mode is enabled. */
@@ -154,11 +151,13 @@ public class Robot extends LoggedRobot {
 
     /** This function is called periodically during test mode. */
     @Override
-    public void testPeriodic() {}
+    public void testPeriodic() {
+    }
 
     /** This function is called once when the robot is first started up. */
     @Override
-    public void simulationInit() {}
+    public void simulationInit() {
+    }
 
     /** This function is called periodically whilst in simulation. */
     @Override

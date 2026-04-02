@@ -388,6 +388,12 @@ public class RobotContainer {
             //operator.a().whileTrue(Commands.parallel(transfer.runPercent(transfer::getFeedPercent), indexer.runPercent(indexer::getReversePercent))); //Transfer and indexer out
             //operator.b().whileTrue(intake.rollersIn()); //outtake 
             //operator.b().whileTrue(Commands.parallel(intake.shakeBalls(), intake.rollersOut()));
+            operator.b().whileTrue(
+                Commands.repeatingSequence(
+                    intake.Shake(),
+                    Commands.waitSeconds(0.1),
+                    intake.deployOut(),
+                    Commands.waitSeconds(0.1)));
 
 
             //operator.povUp().onTrue(hubLock); // reapplys hublock if switched off

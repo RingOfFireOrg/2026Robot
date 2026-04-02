@@ -62,6 +62,7 @@ public class Intake extends SubsystemBase {
 //private final GenericEntry sbRollersOutVolts = tab.add("Rollers Out Volts", 3.0).getEntry();
 
   private final GenericEntry sbDeployOutDeg = tab.add("Deploy Out (deg)", 83.0).getEntry();
+  private final GenericEntry sbShakeDeg = tab.add("Shake Deg", 50.0).getEntry();
   private final GenericEntry sbDeployInDeg = tab.add("Deploy In (deg)", 3.0).getEntry();
 
   private final GenericEntry sbDeployPosDeg = tab.add("Deploy Pos (deg)", 0.0).getEntry();
@@ -210,6 +211,12 @@ public class Intake extends SubsystemBase {
     return runOnce(() -> {
     setDeployIdleMode(IdleMode.kCoast);
     setDeployPositionDeg(sbDeployOutDeg.getDouble(83.0));
+  });
+  }
+
+  public Command Shake() {
+    return runOnce(() -> {
+    setDeployPositionDeg(sbShakeDeg.getDouble(50.0));
   });
   }
 

@@ -443,6 +443,7 @@ public class RobotContainer {
             climberController.x().whileTrue(turret.goToTurretAngle(-30.0));
             climberController.b().whileTrue(turret.goToTurretAngle(30.0));
             climberController.rightBumper().whileTrue(Commands.runOnce(() -> turret.zeroTurret(), turret));
+            climberController.rightTrigger().toggleOnTrue(turret.runShooterRPM(turret::getDashboardTopRpm, turret::getDashboardBottomRpm));
 
             /*
              * EXAMPLE FROM 2025 ^

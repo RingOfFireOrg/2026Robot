@@ -159,7 +159,7 @@ public void periodic() {
     appliedKff = kFF;
 }
 
-  private void updatePidFromDashboard() {
+private void updatePidFromDashboard() {
     double kP = sbKp.getDouble(kDefaultKp);
     double kI = sbKi.getDouble(kDefaultKi);
     double kD = sbKd.getDouble(kDefaultKd);
@@ -169,6 +169,7 @@ public void periodic() {
       applyPid(kP, kI, kD, kFF);
   }
 }
+
 @SuppressWarnings("removal")
   public void setVelocityRpm(double rpm) {
     motor.getClosedLoopController().setReference(rpm, ControlType.kVelocity);

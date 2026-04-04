@@ -11,9 +11,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.DoubleSupplier;
 import com.revrobotics.RelativeEncoder;
-import edu.wpi.first.networktables.GenericEntry;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+//import edu.wpi.first.networktables.GenericEntry;
+//import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+//import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 
 @SuppressWarnings("removal")
 public class Transfer extends SubsystemBase {
@@ -22,15 +22,15 @@ public class Transfer extends SubsystemBase {
   private final SparkMax motor = new SparkMax(kMotorCanId, MotorType.kBrushless);
   private final RelativeEncoder encoder = motor.getEncoder();
   private static final double kDeadband = 0.02;
-  private static final double kMaxVolts = 12.0;
-  private static final double kMinVoltsToMove = 1.5;
-  private final ShuffleboardTab tab = Shuffleboard.getTab("Spindexer");
+  //private static final double kMaxVolts = 12.0;
+  //private static final double kMinVoltsToMove = 1.5;
+  //private final ShuffleboardTab tab = Shuffleboard.getTab("Spindexer");
 
-  private final GenericEntry sbFeedPercent = tab.add("Feed %", -0.70).getEntry();
-  private final GenericEntry sbReversePercent = tab.add("Reverse %", 0.70).getEntry();
-  private final GenericEntry sbManualVolts = tab.add("Manual Volts", -5.0).getEntry();
-  private final GenericEntry sbMaxVolts = tab.add("Clamp Max Volts", kMaxVolts).getEntry();
-  private final GenericEntry sbMinMoveVolts = tab.add("Min Move Volts", kMinVoltsToMove).getEntry();
+  //private final GenericEntry sbFeedPercent = tab.add("Feed %", -0.70).getEntry();
+  //private final GenericEntry sbReversePercent = tab.add("Reverse %", 0.70).getEntry();
+  //private final GenericEntry sbManualVolts = tab.add("Manual Volts", -5.0).getEntry();
+  //private final GenericEntry sbMaxVolts = tab.add("Clamp Max Volts", kMaxVolts).getEntry();
+  //private final GenericEntry sbMinMoveVolts = tab.add("Min Move Volts", kMinVoltsToMove).getEntry();
 
   public Transfer() {
     SparkMaxConfig config = new SparkMaxConfig();
@@ -42,11 +42,11 @@ public class Transfer extends SubsystemBase {
         SparkBase.ResetMode.kResetSafeParameters,
         SparkBase.PersistMode.kPersistParameters);
   
-    tab.addNumber("RPM", encoder::getVelocity);
-    tab.addNumber("Rotations", encoder::getPosition);
-    tab.addNumber("Applied Volts", this::getAppliedVolts);
-    tab.addNumber("Current", motor::getOutputCurrent);
-    tab.addNumber("Motor Temp C", motor::getMotorTemperature);
+    //tab.addNumber("RPM", encoder::getVelocity);
+    //tab.addNumber("Rotations", encoder::getPosition);
+    //tab.addNumber("Applied Volts", this::getAppliedVolts);
+    //tab.addNumber("Current", motor::getOutputCurrent);
+    //tab.addNumber("Motor Temp C", motor::getMotorTemperature);
   }
 
   @Override
@@ -57,8 +57,10 @@ public void periodic() {
 }
 
   public void setVolts(double volts) {
-    double maxVolts = Math.abs(sbMaxVolts.getDouble(kMaxVolts));
-    double minMoveVolts = Math.abs(sbMinMoveVolts.getDouble(kMinVoltsToMove));
+    double maxVolts = 12.0;
+    //Math.abs(sbMaxVolts.getDouble(kMaxVolts));
+    double minMoveVolts = 1.5;
+    //Math.abs(sbMinMoveVolts.getDouble(kMinVoltsToMove));
 
     double cmd = MathUtil.applyDeadband(volts, kDeadband);
     cmd = MathUtil.clamp(cmd, -maxVolts, maxVolts);
@@ -92,9 +94,9 @@ public void periodic() {
     return motor.getAppliedOutput() * motor.getBusVoltage();
   }
 
-  public double getFeedPercent() {
-    return sbFeedPercent.getDouble(-0.60);
-  }
+  //public double getFeedPercent() {
+  //  return sbFeedPercent.getDouble(-0.60);
+  //}
 
   public double getMotorRotations() {
     return encoder.getPosition();
@@ -104,11 +106,11 @@ public void periodic() {
     return encoder.getVelocity();
   }
 
-  public double getReversePercent() {
-    return sbReversePercent.getDouble(0.60);
-  }
+  //public double getReversePercent() {
+  //  return sbReversePercent.getDouble(0.60);
+ // }
 
-  public double getManualVolts() {
-    return sbManualVolts.getDouble(-5.0);
-  }
+  //public double getManualVolts() {
+  //  return sbManualVolts.getDouble(-5.0);
+  //}
 }

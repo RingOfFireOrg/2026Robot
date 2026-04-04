@@ -43,8 +43,6 @@ public class Indexer extends SubsystemBase {
   private final GenericEntry sbFeedPercent = tab.add("Feed %", 0.90).getEntry();
   private final GenericEntry sbReversePercent = tab.add("Reverse %", -0.90).getEntry();
   private final GenericEntry sbManualVolts = tab.add("Manual Volts", 4.0).getEntry();
-  private final GenericEntry sbMaxVolts = tab.add("Clamp Max Volts", kMaxVolts).getEntry();
-  private final GenericEntry sbMinMoveVolts = tab.add("Min Move Volts", kMinVoltsToMove).getEntry();
 
   private final GenericEntry sbFeedRpm = tab.add("Feed RPM", 3000.0).getEntry();
   private final GenericEntry sbReverseRpm = tab.add("Reverse RPM", -2000.0).getEntry();
@@ -99,14 +97,11 @@ public void periodic() {
   }
 
   public void setVolts(double volts) {
-    double maxVolts = Math.abs(sbMaxVolts.getDouble(kMaxVolts));
-    double minMoveVolts = Math.abs(sbMinMoveVolts.getDouble(kMinVoltsToMove));
-
     double cmd = MathUtil.applyDeadband(volts, kDeadband);
-    cmd = MathUtil.clamp(cmd, -maxVolts, maxVolts);
+    cmd = MathUtil.clamp(cmd, -kMaxVolts, kMaxVolts);
 
     if (Math.abs(cmd) > 1e-6) {
-      cmd = Math.copySign(Math.max(Math.abs(cmd), minMoveVolts), cmd);
+      cmd = Math.copySign(Math.max(Math.abs(cmd), kMinVoltsToMove), cmd);
     }
 
     motor.setVoltage(cmd);

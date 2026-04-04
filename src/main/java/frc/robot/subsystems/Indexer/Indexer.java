@@ -90,7 +90,7 @@ public class Indexer extends SubsystemBase {
     // Constants.tuningMode needs to be false unless you are tuning.
     if (Constants.tuningMode) {
       sbFeedPercent = tab.add("Feed %", kFeedPercent).getEntry();
-      sbReversePercent = tab.add("Reverse %", -kReverseFeedPercent).getEntry();
+      sbReversePercent = tab.add("Reverse %", kReverseFeedPercent).getEntry();
       sbManualVolts = tab.add("Manual Volts", kManualVolts).getEntry();
       sbFeedRpm = tab.add("Feed RPM", kFeedRPM).getEntry();
       sbReverseRpm = tab.add("Reverse RPM", kReverseFeedRPM).getEntry();

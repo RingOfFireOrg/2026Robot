@@ -85,7 +85,7 @@ public class Intake extends SubsystemBase {
     SparkFlexConfig deployCfg = new SparkFlexConfig();
     deployCfg.idleMode(IdleMode.kBrake);
     deployCfg.inverted(false);
-    deployCfg.smartCurrentLimit(60);
+    deployCfg.smartCurrentLimit(30);
 
     deployCfg.closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
@@ -103,7 +103,7 @@ public class Intake extends SubsystemBase {
     SparkFlexConfig rollerCfg1 = new SparkFlexConfig();
     rollerCfg1.idleMode(IdleMode.kCoast);
     rollerCfg1.inverted(false);
-    rollerCfg1.smartCurrentLimit(60);
+    rollerCfg1.smartCurrentLimit(20);
     roller1Motor.configure(
         rollerCfg1,
         SparkBase.ResetMode.kResetSafeParameters,
@@ -112,7 +112,7 @@ public class Intake extends SubsystemBase {
     SparkFlexConfig rollerCfg2 = new SparkFlexConfig();
     rollerCfg2.idleMode(IdleMode.kCoast);
     rollerCfg2.inverted(true);
-    rollerCfg2.smartCurrentLimit(60);
+    rollerCfg2.smartCurrentLimit(20);
     roller2Motor.configure(
         rollerCfg2,
         SparkBase.ResetMode.kResetSafeParameters,

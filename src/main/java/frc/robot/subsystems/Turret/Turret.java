@@ -208,7 +208,7 @@ public class Turret extends SubsystemBase {
     //limits for both shooter motors
     CurrentLimitsConfigs shooterLimits = new CurrentLimitsConfigs();
     shooterLimits.SupplyCurrentLimitEnable = true;
-    shooterLimits.SupplyCurrentLimit = 70.0;
+    shooterLimits.SupplyCurrentLimit = 30.0;
     shooterCfg.CurrentLimits = shooterLimits;
     shooter2Cfg.CurrentLimits = shooterLimits;
 

@@ -141,7 +141,7 @@ public void periodic() {
     motor.setVoltage(cmd);
   }
 
-  @SuppressWarnings("removal")
+  @SuppressWarnings({ "removal", "unused" })
   private void applyPid(double kP, double kI, double kD, double kFF) {
     SparkMaxConfig config = new SparkMaxConfig();
     config.closedLoop

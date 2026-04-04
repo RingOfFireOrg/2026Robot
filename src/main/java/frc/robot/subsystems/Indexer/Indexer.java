@@ -112,7 +112,11 @@ public class Indexer extends SubsystemBase {
 
 @Override
 public void periodic() {
-  updatePidFromDashboard();
+  if (Constants.tuningMode) {
+    updatePidFromDashboard();
+  }
+
+  // TODO: review if this works
   if (getMotorRpm() < 50 && motor.getOutputCurrent() > 25) {
     runPercent(-0.3);
   }
@@ -182,16 +186,8 @@ public void periodic() {
     return runEnd(() -> setVolts(volts), this::stop);
   }
 
-  public Command runVolts(DoubleSupplier volts) {
-    return runEnd(() -> setVolts(volts.getAsDouble()), this::stop);
-  }
-
   public Command runPercent(double percent) {
     return runEnd(() -> setVolts(percent * 12.0), this::stop);
-  }
-
-  public Command runPercent(DoubleSupplier percent) {
-    return runEnd(() -> setVolts(percent.getAsDouble() * 12.0), this::stop);
   }
 
   public Command runVelocityRpm(double rpm) {

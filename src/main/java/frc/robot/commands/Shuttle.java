@@ -68,8 +68,8 @@ public class Shuttle extends Command {
             && Math.abs(turret.getShooterBottomMeasuredRpm() - kBottomRpm) <= kBottomRpmTol;
 
     if (aimed && shooterReady) {
-      indexer.setVolts(indexer.getFeedPercent() * 12.0);
-      transfer.setVolts(transfer.getFeedPercent() * 12.0);
+      indexer.runPercent(-0.8);
+      transfer.runPercent(-0.8);
     } else {
       indexer.stop();
       transfer.stop();

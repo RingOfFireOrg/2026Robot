@@ -35,7 +35,7 @@ public class Indexer extends SubsystemBase {
   private static final double kDefaultKff = 0.0002;
 
   private static final double kFeedPercent = 0.90; 
-  private static final double kFeedReversePercent = -0.90; 
+  private static final double kReverseFeedPercent = -0.90; 
   private static final double kManualVolts = 4.0; 
   private static final double kFeedRPM = 3000.0;
   private static final double kReverseFeedRPM = -2000.0;
@@ -90,7 +90,7 @@ public class Indexer extends SubsystemBase {
     // Constants.tuningMode needs to be false unless you are tuning.
     if (Constants.tuningMode) {
       sbFeedPercent = tab.add("Feed %", kFeedPercent).getEntry();
-      sbReversePercent = tab.add("Reverse %", -kFeedReversePercent).getEntry();
+      sbReversePercent = tab.add("Reverse %", -kReverseFeedPercent).getEntry();
       sbManualVolts = tab.add("Manual Volts", kManualVolts).getEntry();
       sbFeedRpm = tab.add("Feed RPM", kFeedRPM).getEntry();
       sbReverseRpm = tab.add("Reverse RPM", kReverseFeedRPM).getEntry();
@@ -215,17 +215,17 @@ public void periodic() {
   }
 
   public double getReversePercent() {
-    return sbReversePercent.getDouble(kFeedReversePercent);
+    return sbReversePercent != null ? sbReversePercent.getDouble(kReverseFeedPercent):kReverseFeedPercent;
   }
 
   public double getManualVolts() {
-    return sbManualVolts.getDouble(kManualVolts);
+    return sbManualVolts != null ? sbManualVolts.getDouble(kManualVolts):kManualVolts;
   }
   public double getFeedRpm() {
-    return sbFeedRpm.getDouble(kFeedRPM);
+    return sbFeedRpm != null ? sbFeedRpm.getDouble(kFeedRPM):kFeedRPM;
   }
 
   public double getReverseRpm() {
-    return sbReverseRpm.getDouble(kReverseFeedRPM);
+    return sbReverseRpm != null ? sbReverseRpm.getDouble(kReverseFeedRPM):kReverseFeedRPM;
   }
 }

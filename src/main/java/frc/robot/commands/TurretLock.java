@@ -27,7 +27,7 @@ public class TurretLock extends Command {
  
   public TurretLock(Turret turret) {
     this.turret = turret;
-    turretPID = new PIDController(turret.sbTURRET_P.getDouble(0.1), 0, turret.sbTURRET_D.getDouble(0));
+    turretPID = new PIDController(turret.sbTurretKp.getDouble(0.1), 0, turret.sbTurretKd.getDouble(0));
     turretPID.setTolerance(1.0);
     addRequirements(turret);
   }
@@ -56,11 +56,11 @@ public class TurretLock extends Command {
     switch (id) {
       case 24:
       case 8:
-        return turret.HubSideOffset.getDouble(1);
+        return turret.sbHubSideOffset.getDouble(1);
 
       case 25:
       case 9:
-        return turret.HubMiddleOffset.getDouble(0.5);
+        return turret.sbHubMiddleOffset.getDouble(0.5);
 
       case 26:
       case 10:
@@ -68,15 +68,15 @@ public class TurretLock extends Command {
 
       case 27:
       case 11:
-        return -turret.HubSideOffset.getDouble(1);
+        return -turret.sbHubSideOffset.getDouble(1);
 
       case 23:
       case 7:
-        return turret.trenchOffset.getDouble(5);
+        return turret.sbTrenchOffset.getDouble(5);
 
       case 28:
       case 12:
-        return -turret.trenchOffset.getDouble(5);
+        return -turret.sbTrenchOffset.getDouble(5);
 
       default:
         return 0.0;
@@ -86,8 +86,8 @@ public class TurretLock extends Command {
   @Override
   public void initialize() {
     //turretPID.reset();
-    turretPID.setP(turret.sbTURRET_P.getDouble(0.1));
-    turretPID.setD(turret.sbTURRET_D.getDouble(0.0));
+    turretPID.setP(turret.sbTurretKp.getDouble(0.1));
+    turretPID.setD(turret.sbTurretKd.getDouble(0.0));
     turretPID.reset();
   }
 

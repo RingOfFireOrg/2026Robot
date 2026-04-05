@@ -41,19 +41,17 @@ import edu.wpi.first.wpilibj.RobotBase;
 @SuppressWarnings({ "removal", "unused" })
 public class Turret extends SubsystemBase {
   
-
-  
   private static final String kCanBus = "FRC-3459-PT-CANivore";
-  private static int hello = 1;
   private static final int kMotorCanId = 40; //turret
-  private static final int kShooterCanId = 41;//bottom
-  private static final int kShooter2CanId = 42;//top
-  //rivate static final int kAnglerCanId = 43;
-  //private final InterpolatingDoubleTreeMap shooterRpmMap = new InterpolatingDoubleTreeMap();
+  private static final int kShooterCanId = 41; //bottom
+  private static final int kShooter2CanId = 42; //top
+
   private final InterpolatingDoubleTreeMap topRpmMap = new InterpolatingDoubleTreeMap();
   private final InterpolatingDoubleTreeMap bottomRpmMap = new InterpolatingDoubleTreeMap();
+
   private static final double kMinShotDistM = 1.35;
   private static final double kMaxShotDistM = 4.00;
+
   private static final int kAnglerCurrentLimit = 30;
   private static final boolean kAnglerInverted = false;
   private static final double kAnglerKpVoltsPerRot = 6.0;
@@ -63,23 +61,42 @@ public class Turret extends SubsystemBase {
   private static final double kDistMaxM = 4.00;
   private static final double kAnglerMinRot = 0.00;
   private static final double kAnglerMaxRot = 0.80;
-  private double anglerSetpointRot = 0.0;
-  private boolean anglerEnabled = false; 
+
   private static final double kSpinDeltaRpm = 250.0;
   private static final double kBoostStartRpmErr = 200.0;
   private static final double kBoostFullRpmErr = 900.0;
   private static final double kBoostMaxVolts = 1.0;
-  private double lastShooterPrintTime = 0.0;
+  private static final double kTopRpm = -3000.0;
+  private static final double kBottomRpm = 3000.0;
+
+  private static final double kShooterMaxVolts = 12.0;
   private static final double kShooterDefaultKp = 0.12;
   private static final double kShooterDefaultKi = 0.0;
   private static final double kShooterDefaultKd = 0.0;
   private static final double kShooterDefaultKv = 0.112;
 
 
+  private static final double kTurretKp = 0.10;
+  private static final double kTurretKd = 0.0;
+  private static final double kTrenchOffset = 5.0;
+  private static final double kHubMiddleOffset = 0.5;
+  private static final double kHubSideOffset = 1.0;
+
+  private static final double kAutoShoot = 1000;
+
+  private double anglerSetpointRot = 0.0;
+  private boolean anglerEnabled = false;
+  private double lastShooterPrintTime = 0.0;
+
   private final ShuffleboardTab shooterTab = Shuffleboard.getTab("Shooter");
 
-  private final GenericEntry sbTopRpm = shooterTab.add("Top RPM", -3000.0).getEntry();
-  private final GenericEntry sbBottomRpm = shooterTab.add("Bottom RPM", 3000.0).getEntry();
+  // TODO:
+  // [ ] Replace Magic Numbers
+  // [ ] Create getter functions
+  // [ ] Resolve mixed use constants
+
+  private final GenericEntry sbTopRpm = shooterTab.add("Top RPM", kTopRpm).getEntry();
+  private final GenericEntry sbBottomRpm = shooterTab.add("Bottom RPM", kBottomRpm).getEntry();
 
   private final GenericEntry sbShooterKp = shooterTab.add("kP", kShooterDefaultKp).getEntry();
   private final GenericEntry sbShooterKi = shooterTab.add("kI", kShooterDefaultKi).getEntry();
@@ -89,41 +106,29 @@ public class Turret extends SubsystemBase {
   private final GenericEntry sbBoostStartErr = shooterTab.add("Boost Start Err RPM", kBoostStartRpmErr).getEntry();
   private final GenericEntry sbBoostFullErr = shooterTab.add("Boost Full Err RPM", kBoostFullRpmErr).getEntry();
   private final GenericEntry sbBoostMaxVolts = shooterTab.add("Boost Max Volts", kBoostMaxVolts).getEntry();
-  public final GenericEntry sbTURRET_P = shooterTab.add("Turret_P", 0.10).getEntry();
-  public final GenericEntry sbTURRET_D = shooterTab.add("Turret_D", 0.0).getEntry();
-  public final GenericEntry trenchOffset = shooterTab.add("Trench Offset Left", 5).getEntry();
-  public final GenericEntry HubMiddleOffset = shooterTab.add("Hub Middle Tag Offset", 0.5).getEntry();
-  public final GenericEntry HubSideOffset = shooterTab.add("Hub Side Tag Offset", 1).getEntry();
-  public final GenericEntry autoShoot = shooterTab.add("AutoShoot thing", 1000).getEntry();
-  public final GenericEntry autoShoot2 = shooterTab.add("AutoShoot thing2", 92.5).getEntry();
 
+  public final GenericEntry sbTurretKp = shooterTab.add("Turret_kP", kTurretKp).getEntry();
+  public final GenericEntry sbTurretKd = shooterTab.add("Turret_kD", kTurretKd).getEntry();
+  public final GenericEntry sbTrenchOffset = shooterTab.add("Trench Offset Left", kTrenchOffset).getEntry();
+  public final GenericEntry sbHubMiddleOffset = shooterTab.add("Hub Middle Tag Offset", kHubMiddleOffset).getEntry();
+  public final GenericEntry sbHubSideOffset = shooterTab.add("Hub Side Tag Offset", kHubSideOffset).getEntry();
+  public final GenericEntry sbAutoShoot = shooterTab.add("AutoShoot thing", kAutoShoot).getEntry();
 
   private double appliedShooterKp = Double.NaN;
   private double appliedShooterKi = Double.NaN;
   private double appliedShooterKd = Double.NaN;
   private double appliedShooterKv = Double.NaN;
 
-  
-
-
-
   private final SparkMax rotMotor = new SparkMax(kMotorCanId, MotorType.kBrushless);
   private final RelativeEncoder rotEncoder = rotMotor.getEncoder();
   
 
-  //private final TalonFX shooterMotor = new TalonFX(kShooterCanId, kCanBus);
   private final TalonFX shooterMotor = new TalonFX(kShooterCanId, kCanBus);
-
   private final VoltageOut shooterVoltsReq = new VoltageOut(0.0);
-  private static final double kShooterMaxVolts = 12.0;
-
-  //private final TalonFX shooterMotor2 = new TalonFX(kShooter2CanId, kCanBus);
-  private final TalonFX shooterMotor2 = new TalonFX(kShooter2CanId, kCanBus);
-
-  private final VoltageOut shooter2VoltsReq = new VoltageOut(0.0);
-  private static final double kShooter2MaxVolts = 12.0;
-
   private final VelocityVoltage shooterVelReq = new VelocityVoltage(0.0);
+
+  private final TalonFX shooterMotor2 = new TalonFX(kShooter2CanId, kCanBus);
+  private final VoltageOut shooter2VoltsReq = new VoltageOut(0.0);
   private final VelocityVoltage shooter2VelReq = new VelocityVoltage(0.0);
 
   //private final SparkMax anglerMotor = new SparkMax(kAnglerCanId, MotorType.kBrushless);
@@ -144,8 +149,7 @@ public class Turret extends SubsystemBase {
 
   private final SparkClosedLoopController rotController = rotMotor.getClosedLoopController();
   private static final double kTurretGearRatio = 105.0;
-  private static final double kTurretPosP = 0.2
-  ;
+  private static final double kTurretPosP = 0.2;
   private static final double kTurretPosI = 0.0;
   private static final double kTurretPosD = 0.2;
 
@@ -381,15 +385,13 @@ public double getDashboardBottomRpm() {
 
 public void setShooterVolts(double volts) {
   double cmd = MathUtil.clamp(volts, -kShooterMaxVolts, kShooterMaxVolts);
-  shooterMotor.setControl(shooterVoltsReq.withOutput(cmd));//kraken
-  //shooterNeo.setVoltage(cmd);                               //neo
+  shooterMotor.setControl(shooterVoltsReq.withOutput(cmd)); //kraken
   shooterMotor2.setControl(shooter2VoltsReq.withOutput(cmd));
 
 }
 
 public void stopShooter() {
   shooterMotor.setControl(shooterVoltsReq.withOutput(0.0));//kraken
-  //shooterNeo.setVoltage(0.0);
   shooterMotor2.setControl(shooter2VoltsReq.withOutput(0.0));
 
 }

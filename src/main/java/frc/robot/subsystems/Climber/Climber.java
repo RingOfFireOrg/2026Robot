@@ -14,9 +14,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
-import edu.wpi.first.networktables.GenericEntry;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkBase.ControlType;
@@ -34,9 +31,6 @@ public class Climber extends SubsystemBase {
   private static final double kMinVoltsToMove = 1.5;
   private static final double kTopHeight = 185.0;
   private static final double kBottomHeight = 0.0;
-
-  private final ShuffleboardTab tab = Shuffleboard.getTab("Climber");
-  private final GenericEntry sbPosition = tab.add("Climber Position", 0).getEntry();
 
   private final SparkClosedLoopController controller = motor.getClosedLoopController();
 

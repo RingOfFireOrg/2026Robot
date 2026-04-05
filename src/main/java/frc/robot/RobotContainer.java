@@ -11,7 +11,6 @@ import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
-import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathPlannerPath;
@@ -72,12 +71,8 @@ import frc.robot.commands.WakePreload;
 import frc.robot.commands.TrenchBaller;
 import frc.robot.commands.TurretFindAndLock;
 import frc.robot.commands.TurretLock;
-import frc.robot.commands.RobotDriveForTime;
 import frc.robot.commands.CenterPreloadRobotAuto;
 import frc.robot.commands.CenterPreloadDepotRobotAuto;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.networktables.GenericEntry;
 
 @SuppressWarnings("unused")
 public class RobotContainer {

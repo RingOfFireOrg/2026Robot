@@ -37,14 +37,14 @@ public class Shuttle extends Command {
   @Override
   public void initialize() {
     turretPid.reset();
-    turretPid.setP(turret.sbTurretKp.getDouble(0.10));
-    turretPid.setD(turret.sbTurretKd.getDouble(0.0));
+    turretPid.setP(turret.getTurretKp());
+    turretPid.setD(turret.getTurretKd());
   }
 
   @Override
   public void execute() {
-    turretPid.setP(turret.sbTurretKp.getDouble(0.10));
-    turretPid.setD(turret.sbTurretKd.getDouble(0.0));
+    turretPid.setP(turret.getTurretKp());
+    turretPid.setD(turret.getTurretKd());
 
     turret.setShooterRPM(kTopRpm, kBottomRpm);
 

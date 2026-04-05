@@ -1,5 +1,4 @@
 package frc.robot.subsystems.Turret;
-import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -7,7 +6,6 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
@@ -32,7 +30,6 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.FeedbackSensor;
-import java.util.function.DoubleSupplier;
 import edu.wpi.first.wpilibj.RobotBase;
 
 
@@ -54,16 +51,14 @@ public class Turret extends SubsystemBase {
   private static final double kMaxShotDistM = 4.00;
 
   private static final int kAnglerCurrentLimit = 30;
-  private static final boolean kAnglerInverted = false;
-  private static final double kAnglerKpVoltsPerRot = 6.0;
-  private static final double kAnglerMaxVolts = 4.0;
-  private static final double kAnglerTolRot = 0.01;
-  private static final double kDistMinM = 0.75;
-  private static final double kDistMaxM = 4.00;
-  private static final double kAnglerMinRot = 0.00;
-  private static final double kAnglerMaxRot = 0.80;
+  // private static final double kAnglerKpVoltsPerRot = 6.0;
+  // private static final double kAnglerMaxVolts = 4.0;
+  // private static final double kAnglerTolRot = 0.01;
+  // private static final double kDistMinM = 0.75;
+  // private static final double kDistMaxM = 4.00;
+  // private static final double kAnglerMinRot = 0.00;
+  // private static final double kAnglerMaxRot = 0.80;
 
-  private static final double kSpinDeltaRpm = 250.0;
   private static final double kBoostStartRpmErr = 200.0;
   private static final double kBoostFullRpmErr = 900.0;
   private static final double kBoostMaxVolts = 1.0;
@@ -85,19 +80,11 @@ public class Turret extends SubsystemBase {
 
   private static final double kAutoShoot = 1000;
 
-  private double anglerSetpointRot = 0.0;
-  private boolean anglerEnabled = false;
+  // private double anglerSetpointRot = 0.0;
+  // private boolean anglerEnabled = false;
   private double lastShooterPrintTime = 0.0;
 
   private final ShuffleboardTab shooterTab = Shuffleboard.getTab("Shooter");
-
-  // TODO:
-  // [x] Replace Magic Numbers
-  // [x] Fence SB Turret variables
-  // [x] Create getter functions
-  // [ ] Resolve Shuttle.java SB use
-  // [ ] Resolve TurretLock.java SB use
-  // [ ] Resolve AutoShoot.java SB use
 
   private GenericEntry sbTopRpm;
   private GenericEntry sbBottomRpm;
@@ -110,12 +97,12 @@ public class Turret extends SubsystemBase {
   private GenericEntry sbBoostFullErr;
   private GenericEntry sbBoostMaxVolts;
 
-  public GenericEntry sbTurretKp;
-  public GenericEntry sbTurretKd;
-  public GenericEntry sbTrenchOffset;
-  public GenericEntry sbHubMiddleOffset;
-  public GenericEntry sbHubSideOffset;
-  public GenericEntry sbAutoShoot;
+  private GenericEntry sbTurretKp;
+  private GenericEntry sbTurretKd;
+  private GenericEntry sbTrenchOffset;
+  private GenericEntry sbHubMiddleOffset;
+  private GenericEntry sbHubSideOffset;
+  private GenericEntry sbAutoShoot;
 
   private double appliedShooterKp = Double.NaN;
   private double appliedShooterKi = Double.NaN;
@@ -323,6 +310,29 @@ public class Turret extends SubsystemBase {
     return sbShooterKv != null ? sbShooterKv.getDouble(kShooterDefaultKv):kShooterDefaultKv;
   } 
 
+  public double getTurretKp () {
+    return sbTurretKp != null ? sbTurretKp.getDouble(kTurretKp):kTurretKp;
+  }
+
+  public double getTurretKd () {
+    return sbTurretKd != null ? sbTurretKd.getDouble(kTurretKd):kTurretKd;
+  }
+
+  public double getTrenchOffset() {
+    return sbTrenchOffset != null ? sbTrenchOffset.getDouble(kTrenchOffset):kTrenchOffset;
+  }
+
+  public double getHubMiddleOffset() {
+    return sbHubMiddleOffset != null ? sbHubMiddleOffset.getDouble(kHubMiddleOffset):kHubMiddleOffset;
+  }
+
+  public double getHubSideOffset() {
+    return sbHubSideOffset != null ? sbHubSideOffset.getDouble(kHubSideOffset):kHubSideOffset;
+  }
+
+  public double getAutoShoot() {
+    return sbAutoShoot != null ? sbAutoShoot.getDouble(kAutoShoot):kAutoShoot;
+  }
 
   public double getTurretRotations() {
     return rotEncoder.getPosition();

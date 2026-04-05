@@ -20,6 +20,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.math.geometry.Pose3d;
+import frc.robot.Constants;
 import frc.robot.util.LimelightHelpers;
 import java.util.function.DoubleSupplier;
 import com.ctre.phoenix6.controls.VelocityVoltage;
@@ -41,19 +42,17 @@ import edu.wpi.first.wpilibj.RobotBase;
 @SuppressWarnings({ "removal", "unused" })
 public class Turret extends SubsystemBase {
   
-
-  
   private static final String kCanBus = "FRC-3459-PT-CANivore";
-  private static int hello = 1;
   private static final int kMotorCanId = 40; //turret
-  private static final int kShooterCanId = 41;//bottom
-  private static final int kShooter2CanId = 42;//top
-  //rivate static final int kAnglerCanId = 43;
-  //private final InterpolatingDoubleTreeMap shooterRpmMap = new InterpolatingDoubleTreeMap();
+  private static final int kShooterCanId = 41; //bottom
+  private static final int kShooter2CanId = 42; //top
+
   private final InterpolatingDoubleTreeMap topRpmMap = new InterpolatingDoubleTreeMap();
   private final InterpolatingDoubleTreeMap bottomRpmMap = new InterpolatingDoubleTreeMap();
+
   private static final double kMinShotDistM = 1.35;
   private static final double kMaxShotDistM = 4.00;
+
   private static final int kAnglerCurrentLimit = 30;
   private static final boolean kAnglerInverted = false;
   private static final double kAnglerKpVoltsPerRot = 6.0;
@@ -63,67 +62,76 @@ public class Turret extends SubsystemBase {
   private static final double kDistMaxM = 4.00;
   private static final double kAnglerMinRot = 0.00;
   private static final double kAnglerMaxRot = 0.80;
-  private double anglerSetpointRot = 0.0;
-  private boolean anglerEnabled = false; 
+
   private static final double kSpinDeltaRpm = 250.0;
   private static final double kBoostStartRpmErr = 200.0;
   private static final double kBoostFullRpmErr = 900.0;
   private static final double kBoostMaxVolts = 1.0;
-  private double lastShooterPrintTime = 0.0;
+  private static final double kTopRpm = -3000.0;
+  private static final double kBottomRpm = 3000.0;
+
+  private static final double kShooterMaxVolts = 12.0;
   private static final double kShooterDefaultKp = 0.12;
   private static final double kShooterDefaultKi = 0.0;
   private static final double kShooterDefaultKd = 0.0;
   private static final double kShooterDefaultKv = 0.112;
 
 
+  private static final double kTurretKp = 0.10;
+  private static final double kTurretKd = 0.0;
+  private static final double kTrenchOffset = 5.0;
+  private static final double kHubMiddleOffset = 0.5;
+  private static final double kHubSideOffset = 1.0;
+
+  private static final double kAutoShoot = 1000;
+
+  private double anglerSetpointRot = 0.0;
+  private boolean anglerEnabled = false;
+  private double lastShooterPrintTime = 0.0;
+
   private final ShuffleboardTab shooterTab = Shuffleboard.getTab("Shooter");
 
-  private final GenericEntry sbTopRpm = shooterTab.add("Top RPM", -3000.0).getEntry();
-  private final GenericEntry sbBottomRpm = shooterTab.add("Bottom RPM", 3000.0).getEntry();
+  // TODO:
+  // [x] Replace Magic Numbers
+  // [x] Fence SB Turret variables
+  // [x] Create getter functions
+  // [ ] Resolve Shuttle.java SB use
+  // [ ] Resolve TurretLock.java SB use
+  // [ ] Resolve AutoShoot.java SB use
 
-  private final GenericEntry sbShooterKp = shooterTab.add("kP", kShooterDefaultKp).getEntry();
-  private final GenericEntry sbShooterKi = shooterTab.add("kI", kShooterDefaultKi).getEntry();
-  private final GenericEntry sbShooterKd = shooterTab.add("kD", kShooterDefaultKd).getEntry();
-  private final GenericEntry sbShooterKv = shooterTab.add("kV", kShooterDefaultKv).getEntry();
+  private GenericEntry sbTopRpm;
+  private GenericEntry sbBottomRpm;
+  private GenericEntry sbShooterKp;
+  private GenericEntry sbShooterKi;
+  private GenericEntry sbShooterKd;
+  private GenericEntry sbShooterKv;
 
-  private final GenericEntry sbBoostStartErr = shooterTab.add("Boost Start Err RPM", kBoostStartRpmErr).getEntry();
-  private final GenericEntry sbBoostFullErr = shooterTab.add("Boost Full Err RPM", kBoostFullRpmErr).getEntry();
-  private final GenericEntry sbBoostMaxVolts = shooterTab.add("Boost Max Volts", kBoostMaxVolts).getEntry();
-  public final GenericEntry sbTURRET_P = shooterTab.add("Turret_P", 0.10).getEntry();
-  public final GenericEntry sbTURRET_D = shooterTab.add("Turret_D", 0.0).getEntry();
-  public final GenericEntry trenchOffset = shooterTab.add("Trench Offset Left", 5).getEntry();
-  public final GenericEntry HubMiddleOffset = shooterTab.add("Hub Middle Tag Offset", 0.5).getEntry();
-  public final GenericEntry HubSideOffset = shooterTab.add("Hub Side Tag Offset", 1).getEntry();
-  public final GenericEntry autoShoot = shooterTab.add("AutoShoot thing", 1000).getEntry();
-  public final GenericEntry autoShoot2 = shooterTab.add("AutoShoot thing2", 92.5).getEntry();
+  private GenericEntry sbBoostStartErr;
+  private GenericEntry sbBoostFullErr;
+  private GenericEntry sbBoostMaxVolts;
 
+  public GenericEntry sbTurretKp;
+  public GenericEntry sbTurretKd;
+  public GenericEntry sbTrenchOffset;
+  public GenericEntry sbHubMiddleOffset;
+  public GenericEntry sbHubSideOffset;
+  public GenericEntry sbAutoShoot;
 
   private double appliedShooterKp = Double.NaN;
   private double appliedShooterKi = Double.NaN;
   private double appliedShooterKd = Double.NaN;
   private double appliedShooterKv = Double.NaN;
 
-  
-
-
-
   private final SparkMax rotMotor = new SparkMax(kMotorCanId, MotorType.kBrushless);
   private final RelativeEncoder rotEncoder = rotMotor.getEncoder();
   
 
-  //private final TalonFX shooterMotor = new TalonFX(kShooterCanId, kCanBus);
   private final TalonFX shooterMotor = new TalonFX(kShooterCanId, kCanBus);
-
   private final VoltageOut shooterVoltsReq = new VoltageOut(0.0);
-  private static final double kShooterMaxVolts = 12.0;
-
-  //private final TalonFX shooterMotor2 = new TalonFX(kShooter2CanId, kCanBus);
-  private final TalonFX shooterMotor2 = new TalonFX(kShooter2CanId, kCanBus);
-
-  private final VoltageOut shooter2VoltsReq = new VoltageOut(0.0);
-  private static final double kShooter2MaxVolts = 12.0;
-
   private final VelocityVoltage shooterVelReq = new VelocityVoltage(0.0);
+
+  private final TalonFX shooterMotor2 = new TalonFX(kShooter2CanId, kCanBus);
+  private final VoltageOut shooter2VoltsReq = new VoltageOut(0.0);
   private final VelocityVoltage shooter2VelReq = new VelocityVoltage(0.0);
 
   //private final SparkMax anglerMotor = new SparkMax(kAnglerCanId, MotorType.kBrushless);
@@ -144,8 +152,7 @@ public class Turret extends SubsystemBase {
 
   private final SparkClosedLoopController rotController = rotMotor.getClosedLoopController();
   private static final double kTurretGearRatio = 105.0;
-  private static final double kTurretPosP = 0.2
-  ;
+  private static final double kTurretPosP = 0.2;
   private static final double kTurretPosI = 0.0;
   private static final double kTurretPosD = 0.2;
 
@@ -220,58 +227,102 @@ public class Turret extends SubsystemBase {
     shooterMotor.getConfigurator().apply(shooterCfg);
     shooterMotor2.getConfigurator().apply(shooter2Cfg);
     initShooterRpmMap();
-    configureShooterShuffleboard();
+    tuningInitialization();
     applyShooterPid(
-        sbShooterKp.getDouble(kShooterDefaultKp),
-        sbShooterKi.getDouble(kShooterDefaultKi),
-        sbShooterKd.getDouble(kShooterDefaultKd),
-        sbShooterKv.getDouble(kShooterDefaultKv));
+        getShooterKp(),
+        getShooterKi(),
+        getShooterKd(),
+        getShooterKv());
   }
-private void configureShooterShuffleboard() {
-  shooterTab.addNumber("Top Measured RPM", this::getShooterTopMeasuredRpm);
-  shooterTab.addNumber("Bottom Measured RPM", this::getShooterBottomMeasuredRpm);
-  shooterTab.addNumber("Top RPM Error", () -> getDashboardTopRpm() - getShooterTopMeasuredRpm());
-  shooterTab.addNumber("Bottom RPM Error", () -> getDashboardBottomRpm() - getShooterBottomMeasuredRpm());
-  shooterTab.addNumber("Top Current", () -> shooterMotor2.getStatorCurrent().getValueAsDouble());
-  shooterTab.addNumber("Bottom Current", () -> shooterMotor.getStatorCurrent().getValueAsDouble());
-  shooterTab.addNumber("Top Temp C", () -> shooterMotor2.getDeviceTemp().getValueAsDouble());
-  shooterTab.addNumber("Bottom Temp C", () -> shooterMotor.getDeviceTemp().getValueAsDouble());
-}
 
-private void applyShooterPid(double kP, double kI, double kD, double kV) {
-  Slot0Configs slot0 = new Slot0Configs();
-  slot0.kP = kP;
-  slot0.kI = kI;
-  slot0.kD = kD;
-  slot0.kV = kV;
+  // tuningIntialization adds ShuffleBoard widgets used for robot tuning
+  private void tuningInitialization() {
 
-  shooterMotor.getConfigurator().apply(slot0);
-  shooterMotor2.getConfigurator().apply(slot0);
+    // Shuffleboard widget updates impact system performance as more variables are added.
+    // Constants.tuningMode needs to be false unless you are tuning.
+    if (Constants.tuningMode) {
 
-  appliedShooterKp = kP;
-  appliedShooterKi = kI;
-  appliedShooterKd = kD;
-  appliedShooterKv = kV;
-}
+      sbTopRpm = shooterTab.add("Top RPM", kTopRpm).getEntry();
+      sbBottomRpm = shooterTab.add("Bottom RPM", kBottomRpm).getEntry();
+      sbShooterKp = shooterTab.add("kP", kShooterDefaultKp).getEntry();
+      sbShooterKi = shooterTab.add("kI", kShooterDefaultKi).getEntry();
+      sbShooterKd = shooterTab.add("kD", kShooterDefaultKd).getEntry();
+      sbShooterKv = shooterTab.add("kV", kShooterDefaultKv).getEntry();
 
-private void updateShooterPidFromDashboard() {
-  double kP = sbShooterKp.getDouble(kShooterDefaultKp);
-  double kI = sbShooterKi.getDouble(kShooterDefaultKi);
-  double kD = sbShooterKd.getDouble(kShooterDefaultKd);
-  double kV = sbShooterKv.getDouble(kShooterDefaultKv);
+      sbBoostStartErr = shooterTab.add("Boost Start Err RPM", kBoostStartRpmErr).getEntry();
+      sbBoostFullErr = shooterTab.add("Boost Full Err RPM", kBoostFullRpmErr).getEntry();
+      sbBoostMaxVolts = shooterTab.add("Boost Max Volts", kBoostMaxVolts).getEntry();
 
-  if (kP != appliedShooterKp || kI != appliedShooterKi || kD != appliedShooterKd || kV != appliedShooterKv) {
-    applyShooterPid(kP, kI, kD, kV);
+      sbTurretKp = shooterTab.add("Turret_kP", kTurretKp).getEntry();
+      sbTurretKd = shooterTab.add("Turret_kD", kTurretKd).getEntry();
+      sbTrenchOffset = shooterTab.add("Trench Offset Left", kTrenchOffset).getEntry();
+      sbHubMiddleOffset = shooterTab.add("Hub Middle Tag Offset", kHubMiddleOffset).getEntry();
+      sbHubSideOffset = shooterTab.add("Hub Side Tag Offset", kHubSideOffset).getEntry();
+      sbAutoShoot = shooterTab.add("AutoShoot thing", kAutoShoot).getEntry();
+
+      shooterTab.addNumber("Top Measured RPM", this::getShooterTopMeasuredRpm);
+      shooterTab.addNumber("Bottom Measured RPM", this::getShooterBottomMeasuredRpm);
+      shooterTab.addNumber("Top RPM Error", () -> getDashboardTopRpm() - getShooterTopMeasuredRpm());
+      shooterTab.addNumber("Bottom RPM Error", () -> getDashboardBottomRpm() - getShooterBottomMeasuredRpm());
+      shooterTab.addNumber("Top Current", () -> shooterMotor2.getStatorCurrent().getValueAsDouble());
+      shooterTab.addNumber("Bottom Current", () -> shooterMotor.getStatorCurrent().getValueAsDouble());
+      shooterTab.addNumber("Top Temp C", () -> shooterMotor2.getDeviceTemp().getValueAsDouble());
+      shooterTab.addNumber("Bottom Temp C", () -> shooterMotor.getDeviceTemp().getValueAsDouble());
+    }
+
   }
-}
 
-public double getDashboardTopRpm() {
-  return sbTopRpm.getDouble(-3000.0);
-}
+  private void applyShooterPid(double kP, double kI, double kD, double kV) {
+    Slot0Configs slot0 = new Slot0Configs();
+    slot0.kP = kP;
+    slot0.kI = kI;
+    slot0.kD = kD;
+    slot0.kV = kV;
+  
+    shooterMotor.getConfigurator().apply(slot0);
+    shooterMotor2.getConfigurator().apply(slot0);
+  
+    appliedShooterKp = kP;
+    appliedShooterKi = kI;
+    appliedShooterKd = kD;
+    appliedShooterKv = kV;
+  }
+  
+  private void updateShooterPidFromDashboard() {
+    double kP = getShooterKp(); 
+    double kI = getShooterKi(); 
+    double kD = getShooterKd(); 
+    double kV = getShooterKv(); 
+  
+    if (kP != appliedShooterKp || kI != appliedShooterKi || kD != appliedShooterKd || kV != appliedShooterKv) {
+      applyShooterPid(kP, kI, kD, kV);
+    }
+  }
+  
+  public double getDashboardTopRpm() {
+    return sbTopRpm != null ? sbTopRpm.getDouble(kTopRpm):kTopRpm;
+  }
+  
+  public double getDashboardBottomRpm() {
+    return sbBottomRpm != null ? sbBottomRpm.getDouble(kBottomRpm):kBottomRpm;
+  }
+  
+  public double getShooterKp() {
+    return sbShooterKp != null ? sbShooterKp.getDouble(kShooterDefaultKp):kShooterDefaultKp;
+  } 
+  
+  public double getShooterKi() {
+    return sbShooterKi != null ? sbShooterKi.getDouble(kShooterDefaultKi):kShooterDefaultKi;
+  } 
+  
+  public double getShooterKd() {
+    return sbShooterKd != null ? sbShooterKd.getDouble(kShooterDefaultKd):kShooterDefaultKd;
+  } 
+  
+  public double getShooterKv() {
+    return sbShooterKv != null ? sbShooterKv.getDouble(kShooterDefaultKv):kShooterDefaultKv;
+  } 
 
-public double getDashboardBottomRpm() {
-  return sbBottomRpm.getDouble(3000.0);
-}
 
   public double getTurretRotations() {
     return rotEncoder.getPosition();
@@ -379,212 +430,213 @@ public double getDashboardBottomRpm() {
   return a + (b - a) * t;
   }
 
-public void setShooterVolts(double volts) {
-  double cmd = MathUtil.clamp(volts, -kShooterMaxVolts, kShooterMaxVolts);
-  shooterMotor.setControl(shooterVoltsReq.withOutput(cmd));//kraken
-  //shooterNeo.setVoltage(cmd);                               //neo
-  shooterMotor2.setControl(shooter2VoltsReq.withOutput(cmd));
-
-}
-
-public void stopShooter() {
-  shooterMotor.setControl(shooterVoltsReq.withOutput(0.0));//kraken
-  //shooterNeo.setVoltage(0.0);
-  shooterMotor2.setControl(shooter2VoltsReq.withOutput(0.0));
-
-}
-
-public Command runShooterPercent(double percent) {
-  return runEnd(() -> setShooterVolts(percent * 12.0), this::stopShooter);
-}
-/* 
-public void setShooterRPM(double topRPM, double bottomRPM) {
-  double topRps = topRPM / 60.0;
-  double bottomRps = bottomRPM / 60.0;
-
-  shooterMotor.setControl(shooterVelReq.withVelocity(bottomRps));
-  shooterMotor2.setControl(shooter2VelReq.withVelocity(topRps));
-}
-*/
-/*public void setShooterRPM(double topRPM, double bottomRPM) {
-  double topMeas = getShooterTopMeasuredRpm();
-  double botMeas = getShooterBottomMeasuredRpm();
-
-  double topErr = topRPM - topMeas;
-  double botErr = bottomRPM - botMeas;
-
-  double boostStartErr = sbBoostStartErr.getDouble(kBoostStartRpmErr);
-  double boostFullErr = sbBoostFullErr.getDouble(kBoostFullRpmErr);
-  double boostMaxVolts = sbBoostMaxVolts.getDouble(kBoostMaxVolts);
-
-  double topBoost = 0.0;
-  if (topErr > boostStartErr) {
-    double t = clamp((topErr - boostStartErr) / (boostFullErr - boostStartErr), 0.0, 1.0);
-    topBoost = lerp(0.0, boostMaxVolts, t);
+  public void setShooterVolts(double volts) {
+    double cmd = MathUtil.clamp(volts, -kShooterMaxVolts, kShooterMaxVolts);
+    shooterMotor.setControl(shooterVoltsReq.withOutput(cmd)); //kraken
+    shooterMotor2.setControl(shooter2VoltsReq.withOutput(cmd));
+  
   }
 
-  double botBoost = 0.0;
-  if (botErr > boostStartErr) {
-    double t = clamp((botErr - boostStartErr) / (boostFullErr - boostStartErr), 0.0, 1.0);
-    botBoost = lerp(0.0, boostMaxVolts, t);
+  public void stopShooter() {
+    shooterMotor.setControl(shooterVoltsReq.withOutput(0.0));//kraken
+    shooterMotor2.setControl(shooter2VoltsReq.withOutput(0.0));
+  
   }
 
-  double topRps = topRPM / 60.0;
-  double botRps = bottomRPM / 60.0;
+  public Command runShooterPercent(double percent) {
+    return runEnd(() -> setShooterVolts(percent * 12.0), this::stopShooter);
+  }
 
-  shooterMotor2.setControl(shooter2VelReq.withVelocity(topRps).withFeedForward(topBoost));
-  shooterMotor.setControl(shooterVelReq.withVelocity(botRps).withFeedForward(botBoost));
+  /* 
+  public void setShooterRPM(double topRPM, double bottomRPM) {
+    double topRps = topRPM / 60.0;
+    double bottomRps = bottomRPM / 60.0;
 
-  double now = Timer.getFPGATimestamp();
-  if (now - lastShooterPrintTime > 0.15) {
-    System.out.println(
-      "[SHOOT] " +
-      "Topset=" + String.format("%.0f", topRPM) +
-      " Topmeas=" + String.format("%.0f", topMeas) +
-      " Botset=" + String.format("%.0f", bottomRPM) +
-      " Botmeas=" + String.format("%.0f", botMeas) +
-      " Topboost=" + String.format("%.2f", topBoost) +
-      " Botboost=" + String.format("%.2f", botBoost) +
-      " Vbat=" + String.format("%.2f", edu.wpi.first.wpilibj.RobotController.getBatteryVoltage())
+    shooterMotor.setControl(shooterVelReq.withVelocity(bottomRps));
+    shooterMotor2.setControl(shooter2VelReq.withVelocity(topRps));
+  }
+  */
+  /*public void setShooterRPM(double topRPM, double bottomRPM) {
+    double topMeas = getShooterTopMeasuredRpm();
+    double botMeas = getShooterBottomMeasuredRpm();
+
+    double topErr = topRPM - topMeas;
+    double botErr = bottomRPM - botMeas;
+
+    double boostStartErr = sbBoostStartErr.getDouble(kBoostStartRpmErr);
+    double boostFullErr = sbBoostFullErr.getDouble(kBoostFullRpmErr);
+    double boostMaxVolts = sbBoostMaxVolts.getDouble(kBoostMaxVolts);
+
+    double topBoost = 0.0;
+    if (topErr > boostStartErr) {
+      double t = clamp((topErr - boostStartErr) / (boostFullErr - boostStartErr), 0.0, 1.0);
+      topBoost = lerp(0.0, boostMaxVolts, t);
+    }
+
+    double botBoost = 0.0;
+    if (botErr > boostStartErr) {
+      double t = clamp((botErr - boostStartErr) / (boostFullErr - boostStartErr), 0.0, 1.0);
+      botBoost = lerp(0.0, boostMaxVolts, t);
+    }
+
+    double topRps = topRPM / 60.0;
+    double botRps = bottomRPM / 60.0;
+
+    shooterMotor2.setControl(shooter2VelReq.withVelocity(topRps).withFeedForward(topBoost));
+    shooterMotor.setControl(shooterVelReq.withVelocity(botRps).withFeedForward(botBoost));
+
+    double now = Timer.getFPGATimestamp();
+    if (now - lastShooterPrintTime > 0.15) {
+      System.out.println(
+        "[SHOOT] " +
+        "Topset=" + String.format("%.0f", topRPM) +
+        " Topmeas=" + String.format("%.0f", topMeas) +
+        " Botset=" + String.format("%.0f", bottomRPM) +
+        " Botmeas=" + String.format("%.0f", botMeas) +
+        " Topboost=" + String.format("%.2f", topBoost) +
+        " Botboost=" + String.format("%.2f", botBoost) +
+        " Vbat=" + String.format("%.2f", edu.wpi.first.wpilibj.RobotController.getBatteryVoltage())
+      );
+      lastShooterPrintTime = now;
+    }
+  }*/
+
+  public void setShooterRPM(double topRPM, double bottomRPM) {
+    double topRps = topRPM / 60.0;
+    double botRps = bottomRPM / 60.0;
+
+    shooterMotor2.setControl(shooter2VelReq.withVelocity(topRps));
+    shooterMotor.setControl(shooterVelReq.withVelocity(botRps));
+
+    double topMeas = getShooterTopMeasuredRpm();
+    double botMeas = getShooterBottomMeasuredRpm();
+
+    double now = Timer.getFPGATimestamp();
+    if (now - lastShooterPrintTime > 0.15) {
+      System.out.println(
+        "[SHOOT] " +
+        "Topset=" + String.format("%.0f", topRPM) +
+        " Topmeas=" + String.format("%.0f", topMeas) +
+        " Botset=" + String.format("%.0f", bottomRPM) +
+        " Botmeas=" + String.format("%.0f", botMeas) +
+        " Vbat=" + String.format("%.2f", edu.wpi.first.wpilibj.RobotController.getBatteryVoltage())
+      );
+      lastShooterPrintTime = now;
+    }
+  }
+
+  public Command runShooterRPM(DoubleSupplier topRPM, DoubleSupplier bottomRPM) {
+    return runEnd(
+      () -> setShooterRPM(topRPM.getAsDouble(), bottomRPM.getAsDouble()),
+      this::stopShooter
     );
-    lastShooterPrintTime = now;
-  }
-}*/
-public void setShooterRPM(double topRPM, double bottomRPM) {
-  double topRps = topRPM / 60.0;
-  double botRps = bottomRPM / 60.0;
-
-  shooterMotor2.setControl(shooter2VelReq.withVelocity(topRps));
-  shooterMotor.setControl(shooterVelReq.withVelocity(botRps));
-
-  double topMeas = getShooterTopMeasuredRpm();
-  double botMeas = getShooterBottomMeasuredRpm();
-
-  double now = Timer.getFPGATimestamp();
-  if (now - lastShooterPrintTime > 0.15) {
-    System.out.println(
-      "[SHOOT] " +
-      "Topset=" + String.format("%.0f", topRPM) +
-      " Topmeas=" + String.format("%.0f", topMeas) +
-      " Botset=" + String.format("%.0f", bottomRPM) +
-      " Botmeas=" + String.format("%.0f", botMeas) +
-      " Vbat=" + String.format("%.2f", edu.wpi.first.wpilibj.RobotController.getBatteryVoltage())
-    );
-    lastShooterPrintTime = now;
-  }
-}
-
-public Command runShooterRPM(DoubleSupplier topRPM, DoubleSupplier bottomRPM) {
-  return runEnd(
-    () -> setShooterRPM(topRPM.getAsDouble(), bottomRPM.getAsDouble()),
-    this::stopShooter
-  );
-}
-private void initShooterRpmMap() {
-  topRpmMap.put(1.35, 5450.0);
-  topRpmMap.put(1.50, 5250.0);
-  topRpmMap.put(2.00, 5100.0);
-  topRpmMap.put(2.25, 5150.0);
-  topRpmMap.put(3.00, 5450.0);
-  topRpmMap.put(3.50, 5700.0);
-  topRpmMap.put(4.00, 5950.0);
-
-  bottomRpmMap.put(1.35, 4950.0);
-  bottomRpmMap.put(1.50, 4750.0);
-  bottomRpmMap.put(2.00, 4600.0);
-  bottomRpmMap.put(2.25, 4650.0);
-  bottomRpmMap.put(3.00, 4950.0);
-  bottomRpmMap.put(3.50, 5200.0);
-  bottomRpmMap.put(4.00, 5450.0);
-}
-
-
-public double getTopRpmForDistanceMeters(double distanceM) {
-  double d = MathUtil.clamp(distanceM, kMinShotDistM, kMaxShotDistM);
-  Double rpm = topRpmMap.get(d);
-  return (rpm != null) ? rpm : 5200.0;
-}
-
-public double getBottomRpmForDistanceMeters(double distanceM) {
-  double d = MathUtil.clamp(distanceM, kMinShotDistM, kMaxShotDistM);
-  Double rpm = bottomRpmMap.get(d);
-  return (rpm != null) ? rpm : 5200.0;
-}
-
-
-public void setShooterFromDistanceMeters(double distanceM) {
-  double topRpm = getTopRpmForDistanceMeters(distanceM);
-  double bottomRpm = getBottomRpmForDistanceMeters(distanceM);
-  setShooterRPM(topRpm, bottomRpm);
-}
-/* 
-public double getAnglerRotations() {
-  return eRelativeEncoder.getPosition();
-}
-
-public void enableAngler(boolean enabled) {
-  anglerEnabled = enabled;
-  if (!enabled) {
-    anglerMotor.setVoltage(0.0);
-  }
-}
-
-public void setAnglerDistanceMeters(double distanceM) {
-  double d = MathUtil.clamp(distanceM, kDistMinM, kDistMaxM);
-  double t = (d - kDistMinM) / (kDistMaxM - kDistMinM);
-  anglerSetpointRot = kAnglerMinRot + t * (kAnglerMaxRot - kAnglerMinRot);
-}
-
-public void updateAngler() {
-  if (!anglerEnabled) {
-    return;
   }
 
-  double err = anglerSetpointRot - getAnglerRotations();
-  if (Math.abs(err) <= kAnglerTolRot) {
-    anglerMotor.setVoltage(0.0);
-    return;
+  private void initShooterRpmMap() {
+    topRpmMap.put(1.35, 5450.0);
+    topRpmMap.put(1.50, 5250.0);
+    topRpmMap.put(2.00, 5100.0);
+    topRpmMap.put(2.25, 5150.0);
+    topRpmMap.put(3.00, 5450.0);
+    topRpmMap.put(3.50, 5700.0);
+    topRpmMap.put(4.00, 5950.0);
+
+    bottomRpmMap.put(1.35, 4950.0);
+    bottomRpmMap.put(1.50, 4750.0);
+    bottomRpmMap.put(2.00, 4600.0);
+    bottomRpmMap.put(2.25, 4650.0);
+    bottomRpmMap.put(3.00, 4950.0);
+    bottomRpmMap.put(3.50, 5200.0);
+    bottomRpmMap.put(4.00, 5450.0);
   }
 
-  double volts = MathUtil.clamp(err * kAnglerKpVoltsPerRot, -kAnglerMaxVolts, kAnglerMaxVolts);
-  anglerMotor.setVoltage(volts);
-}*/
+  public double getTopRpmForDistanceMeters(double distanceM) {
+    double d = MathUtil.clamp(distanceM, kMinShotDistM, kMaxShotDistM);
+    Double rpm = topRpmMap.get(d);
+    return (rpm != null) ? rpm : 5200.0;
+  }
 
-public double getShooterTopMeasuredRpm() {
-  //top
-  return shooterMotor2.getVelocity().getValueAsDouble() * 60.0;
-}
+  public double getBottomRpmForDistanceMeters(double distanceM) {
+    double d = MathUtil.clamp(distanceM, kMinShotDistM, kMaxShotDistM);
+    Double rpm = bottomRpmMap.get(d);
+    return (rpm != null) ? rpm : 5200.0;
+  }
 
-public double getShooterBottomMeasuredRpm() {
-  //bottom
-  return shooterMotor.getVelocity().getValueAsDouble() * 60.0;
-}
-public boolean isShooterAtSpeed(double topTolRpm, double bottomTolRpm) {
-  return Math.abs(getDashboardTopRpm() - getShooterTopMeasuredRpm()) <= topTolRpm
-      && Math.abs(getDashboardBottomRpm() - getShooterBottomMeasuredRpm()) <= bottomTolRpm;
-}
+  public void setShooterFromDistanceMeters(double distanceM) {
+    double topRpm = getTopRpmForDistanceMeters(distanceM);
+    double bottomRpm = getBottomRpmForDistanceMeters(distanceM);
+    setShooterRPM(topRpm, bottomRpm);
+  }
 
-public Command runShooterUntilReady(double topTolRpm, double bottomTolRpm) {
-  return run(() -> setShooterRPM(getDashboardTopRpm(), getDashboardBottomRpm()))
-      .until(() -> isShooterAtSpeed(topTolRpm, bottomTolRpm));
-}
+  /* 
+  public double getAnglerRotations() {
+    return eRelativeEncoder.getPosition();
+  }
 
-public Command holdDashboardShooterRpm() {
-  return runEnd(
-      () -> setShooterRPM(getDashboardTopRpm(), getDashboardBottomRpm()),
-      this::stopShooter);
-}
+  public void enableAngler(boolean enabled) {
+    anglerEnabled = enabled;
+    if (!enabled) {
+      anglerMotor.setVoltage(0.0);
+    }
+  }
 
-public double getDistanceToTagMeters(String limelightName) {
-  Pose3d cam = LimelightHelpers.getTargetPose3d_CameraSpace(limelightName);
-  double x = cam.getX();
-  double z = cam.getZ();
-  return Math.hypot(x, z);
-}
+  public void setAnglerDistanceMeters(double distanceM) {
+    double d = MathUtil.clamp(distanceM, kDistMinM, kDistMaxM);
+    double t = (d - kDistMinM) / (kDistMaxM - kDistMinM);
+    anglerSetpointRot = kAnglerMinRot + t * (kAnglerMaxRot - kAnglerMinRot);
+  }
 
-@Override
-public void periodic(){
-  updateShooterPidFromDashboard();
-  //updateAngler();
-}
+  public void updateAngler() {
+    if (!anglerEnabled) {
+      return;
+    }
+
+    double err = anglerSetpointRot - getAnglerRotations();
+    if (Math.abs(err) <= kAnglerTolRot) {
+      anglerMotor.setVoltage(0.0);
+      return;
+    }
+
+    double volts = MathUtil.clamp(err * kAnglerKpVoltsPerRot, -kAnglerMaxVolts, kAnglerMaxVolts);
+    anglerMotor.setVoltage(volts);
+  }*/
+
+  public double getShooterTopMeasuredRpm() {
+    //top
+    return shooterMotor2.getVelocity().getValueAsDouble() * 60.0;
+  }
+
+  public double getShooterBottomMeasuredRpm() {
+    //bottom
+    return shooterMotor.getVelocity().getValueAsDouble() * 60.0;
+  }
+
+  public boolean isShooterAtSpeed(double topTolRpm, double bottomTolRpm) {
+    return Math.abs(getDashboardTopRpm() - getShooterTopMeasuredRpm()) <= topTolRpm
+        && Math.abs(getDashboardBottomRpm() - getShooterBottomMeasuredRpm()) <= bottomTolRpm;
+  }
+
+  public Command runShooterUntilReady(double topTolRpm, double bottomTolRpm) {
+    return run(() -> setShooterRPM(getDashboardTopRpm(), getDashboardBottomRpm()))
+        .until(() -> isShooterAtSpeed(topTolRpm, bottomTolRpm));
+  }
+
+  public Command holdDashboardShooterRpm() {
+    return runEnd(
+        () -> setShooterRPM(getDashboardTopRpm(), getDashboardBottomRpm()),
+        this::stopShooter);
+  }
+
+  public double getDistanceToTagMeters(String limelightName) {
+    Pose3d cam = LimelightHelpers.getTargetPose3d_CameraSpace(limelightName);
+    double x = cam.getX();
+    double z = cam.getZ();
+    return Math.hypot(x, z);
+  }
+
+  @Override
+  public void periodic(){
+    updateShooterPidFromDashboard();
+    //updateAngler();
+  }
 }

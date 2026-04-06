@@ -103,7 +103,7 @@ public class Intake extends SubsystemBase {
     SparkFlexConfig rollerCfg1 = new SparkFlexConfig();
     rollerCfg1.idleMode(IdleMode.kCoast);
     rollerCfg1.inverted(false);
-    rollerCfg1.smartCurrentLimit(20);
+    rollerCfg1.smartCurrentLimit(40);
     roller1Motor.configure(
         rollerCfg1,
         SparkBase.ResetMode.kResetSafeParameters,
@@ -112,7 +112,7 @@ public class Intake extends SubsystemBase {
     SparkFlexConfig rollerCfg2 = new SparkFlexConfig();
     rollerCfg2.idleMode(IdleMode.kCoast);
     rollerCfg2.inverted(true);
-    rollerCfg2.smartCurrentLimit(20);
+    rollerCfg2.smartCurrentLimit(40);
     roller2Motor.configure(
         rollerCfg2,
         SparkBase.ResetMode.kResetSafeParameters,
@@ -243,14 +243,14 @@ public class Intake extends SubsystemBase {
 
   public Command rollersIn() {
     return runEnd(
-      () -> setRollerPercent(Math.abs(sbRollersInPercent.getDouble(0.35))),
+      () -> setRollerPercent(Math.abs(sbRollersInPercent.getDouble(0.6))),
       this::stopRollers
    );
   }
 
 public Command rollersOut() {
   return runEnd(
-      () -> setRollerPercent(-Math.abs(sbRollersOutPercent.getDouble(0.35))),
+      () -> setRollerPercent(-Math.abs(sbRollersOutPercent.getDouble(0.6))),
       this::stopRollers
    );
   }

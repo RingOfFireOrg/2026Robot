@@ -59,7 +59,7 @@ public class Indexer extends SubsystemBase {
     SparkMaxConfig config = new SparkMaxConfig();
     config.idleMode(IdleMode.kCoast);
     config.inverted(false);
-    config.smartCurrentLimit(30);
+    config.smartCurrentLimit(40);
     config.closedLoop
       .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
       .pidf(kDefaultKp, kDefaultKi, kDefaultKd, kDefaultKff);

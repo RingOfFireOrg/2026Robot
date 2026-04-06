@@ -11,7 +11,6 @@ import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
-import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathPlannerPath;
@@ -72,12 +71,8 @@ import frc.robot.commands.WakePreload;
 import frc.robot.commands.TrenchBaller;
 import frc.robot.commands.TurretFindAndLock;
 import frc.robot.commands.TurretLock;
-import frc.robot.commands.RobotDriveForTime;
 import frc.robot.commands.CenterPreloadRobotAuto;
 import frc.robot.commands.CenterPreloadDepotRobotAuto;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.networktables.GenericEntry;
 
 @SuppressWarnings("unused")
 public class RobotContainer {
@@ -133,10 +128,9 @@ public class RobotContainer {
                 // dioLed = new LedManager(new LedModeBus(0, 1, 2, 3));
                 intake = new Intake();
 
-                this.vision = new Vision(
+                /*this.vision = new Vision(
                         drive,
-                        new VisionIOLimelight("limelight-tag", drive::getRotation),
-                        new VisionIOPhotonVision(camera0Name, robotToCamera0));
+                        new VisionIOLimelight("limelight-tag", drive::getRotation));*/
 
                 // hubLock = new HubLock(turret, this.vision, 0);
                 // turret.setDefaultCommand(hubLock);
@@ -376,6 +370,8 @@ public class RobotContainer {
             // operator.y().whileTrue(transfer.runPercent(0.6)); //Transfer
             operator.y().whileTrue(Commands.parallel(indexer.runPercent(0.8),
                     transfer.runPercent(-0.8))); // indexer and spindexer up
+            operator.y().whileTrue(Commands.parallel(indexer.runVelocityRpm(indexer::getFeedRpm),
+                    transfer.runPercent(transfer::getFeedPercent))); // indexer and spindexer up
             operator.x().whileTrue(intake.rollersOut()); // Intake
             operator.a().whileTrue(new TurretLock(turret));
             //operator.a().whileTrue(Commands.parallel(transfer.runPercent(transfer::getFeedPercent), indexer.runPercent(indexer::getReversePercent))); //Transfer and indexer out
@@ -392,7 +388,7 @@ public class RobotContainer {
             // Commands.parallel(indexer.runVelocityRpm(indexer::getFeedRpm),transfer.runPercent(0.8),intake.rollersIn()));
             // intake and transfer in, indexer up
             operator.povDown().whileTrue(Commands.parallel(indexer.runPercent(-0.8),
-                    transfer.runPercent(-0.8), intake.rollersIn()));
+                    transfer.runPercent(-0.8), intake.rollersOut()));
             // intake and transfer out, indexer down
             operator.povRight().onTrue(intake.retractIn());// intake comes in
             operator.povLeft().onTrue(intake.deployOut());// intake goes out

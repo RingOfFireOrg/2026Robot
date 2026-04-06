@@ -10,9 +10,10 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-//import edu.wpi.first.networktables.GenericEntry;
-//import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-//import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import frc.robot.Constants;
+import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import java.util.function.DoubleSupplier;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.FeedbackSensor;
@@ -24,8 +25,8 @@ public class Indexer extends SubsystemBase {
   private final RelativeEncoder encoder = motor.getEncoder();
 
   private static final double kDeadband = 0.02;
-  //private static final double kMaxVolts = 8.0;
-  //private static final double kMinVoltsToMove = 1.5;
+  private static final double kMaxVolts = 8.0;
+  private static final double kMinVoltsToMove = 1.5;
 
 
   private static final double kDefaultKp = 0.0005;
@@ -33,26 +34,30 @@ public class Indexer extends SubsystemBase {
   private static final double kDefaultKd = 0.0;
   private static final double kDefaultKff = 0.0002;
 
-  //private double appliedKp = Double.NaN;
-  //private double appliedKi = Double.NaN;
-  //private double appliedKd = Double.NaN;
-  //private double appliedKff = Double.NaN;
-/* 
+  private static final double kFeedPercent = 0.90; 
+  private static final double kReverseFeedPercent = -0.90; 
+  private static final double kManualVolts = 4.0; 
+  private static final double kFeedRPM = 3000.0;
+  private static final double kReverseFeedRPM = -2000.0;
+
+  private double appliedKp = Double.NaN;
+  private double appliedKi = Double.NaN;
+  private double appliedKd = Double.NaN;
+  private double appliedKff = Double.NaN;
+
   private final ShuffleboardTab tab = Shuffleboard.getTab("Indexer");
 
-  private final GenericEntry sbFeedPercent = tab.add("Feed %", 0.90).getEntry();
-  private final GenericEntry sbReversePercent = tab.add("Reverse %", -0.90).getEntry();
-  private final GenericEntry sbManualVolts = tab.add("Manual Volts", 4.0).getEntry();
-  private final GenericEntry sbMaxVolts = tab.add("Clamp Max Volts", kMaxVolts).getEntry();
-  private final GenericEntry sbMinMoveVolts = tab.add("Min Move Volts", kMinVoltsToMove).getEntry();
+  private GenericEntry sbFeedPercent;
+  private GenericEntry sbReversePercent;
+  private GenericEntry sbManualVolts;
 
-  private final GenericEntry sbFeedRpm = tab.add("Feed RPM", 3000.0).getEntry();
-  private final GenericEntry sbReverseRpm = tab.add("Reverse RPM", -2000.0).getEntry();
+  private GenericEntry sbFeedRpm;
+  private GenericEntry sbReverseRpm;
 
-  private final GenericEntry sbKp = tab.add("Indexer kP", kDefaultKp).getEntry();
-  private final GenericEntry sbKi = tab.add("Indexer kI", kDefaultKi).getEntry();
-  private final GenericEntry sbKd = tab.add("Indexer kD", kDefaultKd).getEntry();
-  private final GenericEntry sbKff = tab.add("Indexer kFF", kDefaultKff).getEntry();*/
+  private GenericEntry sbKp;
+  private GenericEntry sbKi;
+  private GenericEntry sbKd;
+  private GenericEntry sbKff;
 
   @SuppressWarnings("removal")
   public Indexer() {
@@ -63,13 +68,8 @@ public class Indexer extends SubsystemBase {
     config.closedLoop
       .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
       .pidf(kDefaultKp, kDefaultKi, kDefaultKd, kDefaultKff);
-/* 
-    tab.addNumber("RPM", this::getMotorRpm);
-    tab.addNumber("Rotations", this::getMotorRotations);
-    tab.addNumber("Applied Volts", this::getAppliedVolts);
-    tab.addNumber("Current", motor::getOutputCurrent);
-    tab.addNumber("Motor Temp C", motor::getMotorTemperature);
-    tab.addNumber("RPM Error", () -> getFeedRpm() - getMotorRpm());*/
+
+    tuningInitialization();
 
     motor.configure(
         config,
@@ -77,14 +77,46 @@ public class Indexer extends SubsystemBase {
         SparkBase.PersistMode.kPersistParameters);
 
     encoder.setPosition(0.0);
-    //appliedKp = kDefaultKp;
-    //appliedKi = kDefaultKi;
-    //appliedKd = kDefaultKd;
-    //appliedKff = kDefaultKff;
+    appliedKp = kDefaultKp;
+    appliedKi = kDefaultKi;
+    appliedKd = kDefaultKd;
+    appliedKff = kDefaultKff;
   }
+
+  // tuningIntialization adds ShuffleBoard widgets used for robot tuning 
+  private void tuningInitialization() {
+
+    // Shuffleboard widget updates impact system performance as more variables are added.
+    // Constants.tuningMode needs to be false unless you are tuning.
+    if (Constants.tuningMode) {
+      sbFeedPercent = tab.add("Feed %", kFeedPercent).getEntry();
+      sbReversePercent = tab.add("Reverse %", kReverseFeedPercent).getEntry();
+      sbManualVolts = tab.add("Manual Volts", kManualVolts).getEntry();
+      sbFeedRpm = tab.add("Feed RPM", kFeedRPM).getEntry();
+      sbReverseRpm = tab.add("Reverse RPM", kReverseFeedRPM).getEntry();
+
+      sbKp = tab.add("Indexer kP", kDefaultKp).getEntry();
+      sbKi = tab.add("Indexer kI", kDefaultKi).getEntry();
+      sbKd = tab.add("Indexer kD", kDefaultKd).getEntry();
+      sbKff = tab.add("Indexer kFF", kDefaultKff).getEntry();
+
+      tab.addNumber("RPM", this::getMotorRpm);
+      tab.addNumber("Rotations", this::getMotorRotations);
+      tab.addNumber("Applied Volts", this::getAppliedVolts);
+      tab.addNumber("Current", motor::getOutputCurrent);
+      tab.addNumber("Motor Temp C", motor::getMotorTemperature);
+      tab.addNumber("RPM Error", () -> getFeedRpm() - getMotorRpm());
+    }
+
+  }
+
 @Override
 public void periodic() {
-  //updatePidFromDashboard();
+  if (Constants.tuningMode) {
+    updatePidFromDashboard();
+  }
+
+  // TODO: review if this works
   if (getMotorRpm() < 50 && motor.getOutputCurrent() > 25) {
     runPercent(-0.3);
   }
@@ -99,16 +131,11 @@ public void periodic() {
   }
 
   public void setVolts(double volts) {
-    double maxVolts = 12.0;
-    //Math.abs(sbMaxVolts.getDouble(kMaxVolts));
-    double minMoveVolts = 1.5;
-    //Math.abs(sbMinMoveVolts.getDouble(kMinVoltsToMove));
-
     double cmd = MathUtil.applyDeadband(volts, kDeadband);
-    cmd = MathUtil.clamp(cmd, -maxVolts, maxVolts);
+    cmd = MathUtil.clamp(cmd, -kMaxVolts, kMaxVolts);
 
     if (Math.abs(cmd) > 1e-6) {
-      cmd = Math.copySign(Math.max(Math.abs(cmd), minMoveVolts), cmd);
+      cmd = Math.copySign(Math.max(Math.abs(cmd), kMinVoltsToMove), cmd);
     }
 
     motor.setVoltage(cmd);
@@ -126,13 +153,13 @@ public void periodic() {
       SparkBase.ResetMode.kNoResetSafeParameters,
       SparkBase.PersistMode.kNoPersistParameters);
 
-    //appliedKp = kP;
-    //appliedKi = kI;
-    //appliedKd = kD;
-    //appliedKff = kFF;
+    appliedKp = kP;
+    appliedKi = kI;
+    appliedKd = kD;
+    appliedKff = kFF;
 }
-/* 
-  private void updatePidFromDashboard() {
+
+private void updatePidFromDashboard() {
     double kP = sbKp.getDouble(kDefaultKp);
     double kI = sbKi.getDouble(kDefaultKi);
     double kD = sbKd.getDouble(kDefaultKd);
@@ -141,7 +168,8 @@ public void periodic() {
     if (kP != appliedKp || kI != appliedKi || kD != appliedKd || kFF != appliedKff) {
       applyPid(kP, kI, kD, kFF);
   }
-}*/
+}
+
 @SuppressWarnings("removal")
   public void setVelocityRpm(double rpm) {
     motor.getClosedLoopController().setReference(rpm, ControlType.kVelocity);
@@ -159,16 +187,8 @@ public void periodic() {
     return runEnd(() -> setVolts(volts), this::stop);
   }
 
-  public Command runVolts(DoubleSupplier volts) {
-    return runEnd(() -> setVolts(volts.getAsDouble()), this::stop);
-  }
-
   public Command runPercent(double percent) {
     return runEnd(() -> setVolts(percent * 12.0), this::stop);
-  }
-
-  public Command runPercent(DoubleSupplier percent) {
-    return runEnd(() -> setVolts(percent.getAsDouble() * 12.0), this::stop);
   }
 
   public Command runVelocityRpm(double rpm) {
@@ -183,23 +203,26 @@ public void periodic() {
   public double getAppliedVolts() {
     return motor.getAppliedOutput() * motor.getBusVoltage();
   }
-/* 
+
   public double getFeedPercent() {
-    return sbFeedPercent.getDouble(0.80);
+    if (sbFeedPercent != null) {
+      return sbFeedPercent.getDouble(kFeedPercent);
+    }
+    return kFeedPercent; 
   }
 
   public double getReversePercent() {
-    return sbReversePercent.getDouble(-0.60);
+    return sbReversePercent != null ? sbReversePercent.getDouble(kReverseFeedPercent):kReverseFeedPercent;
   }
 
   public double getManualVolts() {
-    return sbManualVolts.getDouble(4.0);
+    return sbManualVolts != null ? sbManualVolts.getDouble(kManualVolts):kManualVolts;
   }
   public double getFeedRpm() {
-    return sbFeedRpm.getDouble(2500.0);
+    return sbFeedRpm != null ? sbFeedRpm.getDouble(kFeedRPM):kFeedRPM;
   }
 
   public double getReverseRpm() {
-    return sbReverseRpm.getDouble(-1500.0);
-  }*/
+    return sbReverseRpm != null ? sbReverseRpm.getDouble(kReverseFeedRPM):kReverseFeedRPM;
+  }
 }

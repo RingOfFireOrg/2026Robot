@@ -1,10 +1,11 @@
 package frc.robot;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 
 
 public final class Constants {
-    public static final boolean tuningMode = true;
+    public static final boolean tuningMode = DriverStation.isFMSAttached() ? false : true;
 
     public static final Mode simMode = Mode.SIM;
     public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;

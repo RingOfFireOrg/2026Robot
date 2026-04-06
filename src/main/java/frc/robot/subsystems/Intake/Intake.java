@@ -11,16 +11,14 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.networktables.GenericEntry;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.revrobotics.REVLibError;
 import com.revrobotics.ResetMode;
 import com.revrobotics.PersistMode;
+import org.littletonrobotics.junction.Logger;
+import frc.robot.Constants;
 
 
 @SuppressWarnings("removal")
@@ -39,43 +37,30 @@ public class Intake extends SubsystemBase {
   private IdleMode currentDeployIdleMode = IdleMode.kBrake;
 
   private static final double kDeadband = 0.02;
-
   private static final double kDeployMaxVolts = 8.0;
   private static final double kDeployMinVoltsToMove = 1.5;
 
   private static final double kRollerMaxVolts = 12.0;
   private static final double kRollerMinVoltsToMove = 2.0;
-
   private static final double kDeployGearRatio = 45.0;
-
   private static final double kDeployP = 0.15;
   private static final double kDeployI = 0.0;
   private static final double kDeployD = 0.0;
   private static final double kDeployFF = 0.0;
 
-  private final ShuffleboardTab tab = Shuffleboard.getTab("Intake");
+  private static final double kDeployOutVolts = 3.5;
+  private static final double kDeployInVolts = 6.0;
+  private static final double kDeployOutDeg = 83.0;
+  private static final double kShakeDeg = 50.0;
+  private static final double kDeployInDeg = 3.0;
+  private static final double kDeploySpeedDegPerSec = 500.0;
+  private static final double kRollersInPercent = 0.5;
+  private static final double kRollersOutPercent = 0.5;
+  private static final double kShakeLowDeg = 50.0;
+  private static final double kShakeHighDeg = 83.0;
+  private static final double kShakeWaitSec = 0.1;
 
-  private final GenericEntry sbDeployOutVolts = tab.add("Deploy Out Volts (manual)", 3.5).getEntry();
-  private final GenericEntry sbDeployInVolts = tab.add("Deploy In Volts (manual)", 6.0).getEntry();
 
-//private final GenericEntry sbRollersInVolts = tab.add("Rollers In Volts", 3.0).getEntry();
-//private final GenericEntry sbRollersOutVolts = tab.add("Rollers Out Volts", 3.0).getEntry();
-
-  private final GenericEntry sbDeployOutDeg = tab.add("Deploy Out (deg)", 83.0).getEntry();
-  private final GenericEntry sbShakeDeg = tab.add("Shake Deg", 50.0).getEntry();
-  private final GenericEntry sbDeployInDeg = tab.add("Deploy In (deg)", 3.0).getEntry();
-
-  private final GenericEntry sbDeployPosDeg = tab.add("Deploy Pos (deg)", 0.0).getEntry();
-  private final GenericEntry sbDeployPosMotorRot = tab.add("Deploy Pos (motor rot)", 0.0).getEntry();
-
-  private final GenericEntry sbDeploySpeedDegPerSec = tab.add("Deploy Speed Deg Per Sec", 500.0).getEntry();
-
-  private final GenericEntry sbRollersInPercent = tab.add("Rollers In %", 0.5).getEntry();
-  private final GenericEntry sbRollersOutPercent = tab.add("Rollers Out %", 0.5).getEntry();
-
-  private final GenericEntry sbShakeLowDeg =  tab.add("Shake Low Deg", 50.0).getEntry();
-  private final GenericEntry sbShakeHighDeg = tab.add("Shake High Deg", 83.0).getEntry();
-  private final GenericEntry sbShakeWaitSec = tab.add("Shake Wait Sec", 0.1).getEntry();
 
   private double goalMotorRot = 0.0;
   private boolean goalActive = false;
@@ -98,7 +83,7 @@ public class Intake extends SubsystemBase {
 
     deployEncoder.setPosition(0.0);
 
-    tab.add("Zero Deploy Encoder", new InstantCommand(this::zeroDeployEncoder, this));
+    //tab.add("Zero Deploy Encoder", new InstantCommand(this::zeroDeployEncoder, this));
 
     SparkFlexConfig rollerCfg1 = new SparkFlexConfig();
     rollerCfg1.idleMode(IdleMode.kCoast);
@@ -121,6 +106,7 @@ public class Intake extends SubsystemBase {
     stopAll();
   }
 
+  @SuppressWarnings("unused")
   private void zeroDeployEncoder() {
     deployEncoder.setPosition(0.0);
     goalMotorRot = 0.0;
@@ -178,11 +164,6 @@ public class Intake extends SubsystemBase {
     deployMotor.setVoltage(0.0);
   }
 
-  //blic void stopRollers() {
- // roller1Motor.setVoltage(0.0);
-//  roller2Motor.setVoltage(0.0);
-//}
-
   public void stopRollers() {
     roller1Motor.set(0.0);
     roller2Motor.set(0.0);
@@ -210,47 +191,47 @@ public class Intake extends SubsystemBase {
   public Command deployOut() {
     return runOnce(() -> {
     setDeployIdleMode(IdleMode.kCoast);
-    setDeployPositionDeg(sbDeployOutDeg.getDouble(83.0));
+    setDeployPositionDeg(kDeployOutDeg);
   });
   }
 
   public Command Shake() {
     return runOnce(() -> {
-    setDeployPositionDeg(sbShakeDeg.getDouble(50.0));
+    setDeployPositionDeg(kShakeDeg);
   });
   }
 
   public Command retractIn() {
     return runOnce(() -> {
     setDeployIdleMode(IdleMode.kBrake);
-    setDeployPositionDeg(sbDeployInDeg.getDouble(3.0));
+    setDeployPositionDeg(kDeployInDeg);
   });
   }
 
   public Command deployOutManual() {
     return runEnd(
-        () -> setDeployVolts(Math.abs(sbDeployOutVolts.getDouble(3.5))),
+        () -> setDeployVolts(kDeployOutVolts),
         this::stopDeploy
     );
   }
 
   public Command retractInManual() {
     return runEnd(
-        () -> setDeployVolts(-Math.abs(sbDeployInVolts.getDouble(6.0))),
+        () -> setDeployVolts(-kDeployInVolts),
         this::stopDeploy
     );
   }
 
   public Command rollersIn() {
     return runEnd(
-      () -> setRollerPercent(Math.abs(sbRollersInPercent.getDouble(0.6))),
+      () -> setRollerPercent(kRollersInPercent),
       this::stopRollers
    );
   }
 
 public Command rollersOut() {
   return runEnd(
-      () -> setRollerPercent(-Math.abs(sbRollersOutPercent.getDouble(0.6))),
+      () -> setRollerPercent(-Math.abs(sbRollersOutPercent.getDouble(0.35))),
       this::stopRollers
    );
   }
@@ -260,10 +241,10 @@ public double getDeployPositionDeg() {
 
 public Command shakeBalls() {
   return Commands.sequence(
-      Commands.runOnce(() -> setDeployPositionDeg(sbShakeLowDeg.getDouble(50.0)), this),
-      Commands.waitSeconds(sbShakeWaitSec.getDouble(0.1)),
-      Commands.runOnce(() -> setDeployPositionDeg(sbShakeHighDeg.getDouble(83.0)), this),
-      Commands.waitSeconds(sbShakeWaitSec.getDouble(0.1))
+      Commands.runOnce(() -> setDeployPositionDeg(kShakeLowDeg), this),
+      Commands.waitSeconds(kShakeWaitSec),
+      Commands.runOnce(() -> setDeployPositionDeg(kShakeHighDeg), this),
+      Commands.waitSeconds(kShakeWaitSec)
   );
 }
 
@@ -277,12 +258,15 @@ public Command shakeBalls() {
     if (dt <= 0.0) dt = 0.02;
 
     double motorRot = deployEncoder.getPosition();
-    sbDeployPosMotorRot.setDouble(motorRot);
-    sbDeployPosDeg.setDouble(motorRotToDeg(motorRot));
+
+    if (Constants.tuningMode) {
+        Logger.recordOutput("Intake/DeployDeg", motorRotToDeg(motorRot));
+        Logger.recordOutput("Intake/DeployMotorRot", motorRot);
+    }
 
     if (!goalActive) return;
 
-    double speedDegPerSec = MathUtil.clamp(sbDeploySpeedDegPerSec.getDouble(360.0), 1.0, 720.0);
+    double speedDegPerSec = MathUtil.clamp(kDeploySpeedDegPerSec, 1.0, 720.0);
     double maxMotorRotPerSec = degPerSecToMotorRotPerSec(speedDegPerSec);
     double maxStep = maxMotorRotPerSec * dt;
 

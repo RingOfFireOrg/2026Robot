@@ -6,28 +6,20 @@ package frc.robot.commands;
 
 import static frc.robot.subsystems.vision.VisionConstants.LimelightFrontName;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Turret.Turret;
 import frc.robot.util.LimelightHelpers;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.math.MathUtil;
-@SuppressWarnings("unused")
+
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class TurretLock extends Command {
   private Turret turret;
   private PIDController turretPID;
  
-  //private final double TURRET_P = 0.1;//change ts
-  //private final double TURRET_D = 0;//change ts
- 
   public TurretLock(Turret turret) {
     this.turret = turret;
-    turretPID = new PIDController(turret.sbTURRET_P.getDouble(0.1), 0, turret.sbTURRET_D.getDouble(0));
+    turretPID = new PIDController(turret.getTurretKp(), 0, turret.getTurretKd());
     turretPID.setTolerance(1.0);
     addRequirements(turret);
   }
@@ -56,11 +48,11 @@ public class TurretLock extends Command {
     switch (id) {
       case 24:
       case 8:
-        return turret.HubSideOffset.getDouble(1);
+        return turret.getHubSideOffset();
 
       case 25:
       case 9:
-        return turret.HubMiddleOffset.getDouble(0.5);
+        return turret.getHubMiddleOffset();
 
       case 26:
       case 10:
@@ -68,15 +60,15 @@ public class TurretLock extends Command {
 
       case 27:
       case 11:
-        return -turret.HubSideOffset.getDouble(1);
+        return -turret.getHubSideOffset();
 
       case 23:
       case 7:
-        return turret.trenchOffset.getDouble(5);
+        return turret.getTrenchOffset();
 
       case 28:
       case 12:
-        return -turret.trenchOffset.getDouble(5);
+        return -turret.getTrenchOffset();
 
       default:
         return 0.0;
@@ -86,45 +78,46 @@ public class TurretLock extends Command {
   @Override
   public void initialize() {
     //turretPID.reset();
-    turretPID.setP(turret.sbTURRET_P.getDouble(0.1));
-    turretPID.setD(turret.sbTURRET_D.getDouble(0.0));
+    turretPID.setP(turret.getTurretKp());
+    turretPID.setD(turret.getTurretKd());
     turretPID.reset();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    /*double offset = 0;
+  /*
+    double offset = 0;
     switch ((int)LimelightHelpers.getFiducialID(LimelightFrontName)) {
       case 24:
-        offset = turret.HubSideOffset.getDouble(1);//change ts
+        offset = turret.getHubSideOffset(); // change ts
         break;
       case 25:
-        offset = turret.HubMiddleOffset.getDouble(0.5);//change ts
+        offset = turret.getHubMiddleOffset(); // change ts
         break;
       case 27:
-        offset = -turret.HubSideOffset.getDouble(1);//change ts
+        offset = -turret.getHubSideOffset(); // change ts
         break;
       case 23: 
-        offset = turret.trenchOffset.getDouble(5);//change ts
+        offset = turret.getTrenchOffset(); // change ts
         break;
       case 28: 
-        offset = -turret.trenchOffset.getDouble(5);//change ts;
+        offset = -turret.getTrenchOffset(); // change ts
         break;
       case 8:
-        offset = turret.HubSideOffset.getDouble(1);//change ts
+        offset = turret.getHubSideOffset(); // change ts
         break;
       case 9:
-        offset = turret.HubMiddleOffset.getDouble(0.5);//change ts
+        offset = turret.getHubMiddleOffset(); // change ts
         break;
       case 11:
-        offset = -turret.HubSideOffset.getDouble(1);//change ts
+        offset = -turret.getHubSideOffset(); // change ts
         break;
       case 7: 
-        offset = turret.trenchOffset.getDouble(5);//change ts
+        offset = turret.getTrenchOffset(); // change ts
         break;
       case 12: 
-        offset = -turret.trenchOffset.getDouble(5);//change ts;
+        offset = -turret.getTrenchOffset(); // change ts;
         break;
       default:
         break;
@@ -148,7 +141,8 @@ public class TurretLock extends Command {
     } else {
       turret.stopTurret();
     }
-  }*/
+  } */
+
   if (!LimelightHelpers.getTV(LimelightFrontName)) {
     turretPID.reset();
     turret.stopTurret();

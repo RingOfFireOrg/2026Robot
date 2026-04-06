@@ -37,14 +37,14 @@ public class Shuttle extends Command {
   @Override
   public void initialize() {
     turretPid.reset();
-    turretPid.setP(turret.sbTURRET_P.getDouble(0.10));
-    turretPid.setD(turret.sbTURRET_D.getDouble(0.0));
+    turretPid.setP(turret.getTurretKp());
+    turretPid.setD(turret.getTurretKd());
   }
 
   @Override
   public void execute() {
-    turretPid.setP(turret.sbTURRET_P.getDouble(0.10));
-    turretPid.setD(turret.sbTURRET_D.getDouble(0.0));
+    turretPid.setP(turret.getTurretKp());
+    turretPid.setD(turret.getTurretKd());
 
     turret.setShooterRPM(kTopRpm, kBottomRpm);
 
@@ -60,7 +60,7 @@ public class Shuttle extends Command {
 
     double turretOutput = turretPid.calculate(tx, desiredTx);
     turretOutput = MathUtil.clamp(turretOutput , -kMaxTurretDuty, kMaxTurretDuty);
-    turret.setDutyCycle(turretOutput);//might need a -
+    turret.setDutyCycle(turretOutput); //might need a -
 
     boolean aimed = Math.abs(tx - desiredTx) <= kTurretToleranceDeg;
     boolean shooterReady =

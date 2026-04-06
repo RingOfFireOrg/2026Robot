@@ -65,8 +65,8 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
     private final Module[] modules = new Module[4]; // FL, FR, BL, BR
     private final SysIdRoutine sysId;
-    private final Alert gyroDisconnectedAlert =
-            new Alert("Disconnected gyro, using kinematics as fallback.", AlertType.kError);
+    private final Alert gyroDisconnectedAlert = new Alert("Disconnected gyro, using kinematics as fallback.", AlertType.kError);
+
     private final ShuffleboardTab driveTab = Shuffleboard.getTab("Drive");
 
     private final SwerveDriveKinematics kinematics = new SwerveDriveKinematics(moduleTranslations);
@@ -145,13 +145,20 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
                         null, null, null, (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
                 new SysIdRoutine.Mechanism((voltage) -> runCharacterization(voltage.in(Volts)), null, this));
 
+        tuningInitialization();
+    }
 
-  
+    // tuningIntialization adds ShuffleBoard widgets used for robot tuning 
+    private void tuningInitialization() {
+      // Shuffleboard widget updates impact system performance as more variables are added.
+      // Constants.tuningMode needs to be false unless you are tuning.
+      if (Constants.tuningMode) {
+
         driveTab.addBoolean("Gyro Connected", () -> gyroInputs.connected);
         driveTab.addNumber("Gyro Yaw Live", () -> gyroInputs.yawPosition.getDegrees());
         driveTab.addNumber("Raw Gyro", () -> rawGyroRotation.getDegrees());
         driveTab.addNumber("Heading", () -> getRotation().getDegrees());
-
+      }
     }
 
     @Override

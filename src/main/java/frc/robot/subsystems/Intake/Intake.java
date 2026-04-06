@@ -55,7 +55,7 @@ public class Intake extends SubsystemBase {
   private static final double kDeployInDeg = 3.0;
   private static final double kDeploySpeedDegPerSec = 500.0;
   private static final double kRollersInPercent = 0.5;
-  private static final double kRollersOutPercent = 0.5;
+  //private static final double kRollersOutPercent = 0.5;
   private static final double kShakeLowDeg = 50.0;
   private static final double kShakeHighDeg = 83.0;
   private static final double kShakeWaitSec = 0.1;
@@ -231,7 +231,8 @@ public class Intake extends SubsystemBase {
 
 public Command rollersOut() {
   return runEnd(
-      () -> setRollerPercent(-Math.abs(sbRollersOutPercent.getDouble(0.35))),
+      () -> setRollerPercent(0.6),
+        //-Math.abs(sbRollersOutPercent.getDouble(0.35))),
       this::stopRollers
    );
   }

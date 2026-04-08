@@ -267,7 +267,7 @@ public class RobotContainer {
         double standardSpeed = 0.8;
         double turnSpeed = 0.5;
 
-        // turret.setDefaultCommand(new TurretLock(turret));
+        turret.setDefaultCommand(new TurretFindAndLock(turret));
 
         drive.setDefaultCommand(DriveCommands.joystickDrive(
                 drive,
@@ -315,10 +315,10 @@ public class RobotContainer {
                     return new Rotation2d(Math.toRadians(isFlipped ? 125 + 180 : 125));
                 }));
         // Takes over drive completely and ranges into hub
-        driver.a().whileTrue(new AlignToHub(drive, vision, 0));
+        //driver.a().whileTrue(new AlignToHub(drive, vision, 0));
         driver.x().whileTrue(drive.stopX());
         // Only takes over rotation allows driver to continue to move while aligning
-        driver.b().whileTrue(new AlignWhileMoving(drive, vision, 0, driver));
+        //driver.b().whileTrue(new AlignWhileMoving(drive, vision, 0, driver));
 
         // Reset gyro / odometry
         final Runnable resetGyro = Constants.currentMode == Constants.Mode.SIM

@@ -37,7 +37,7 @@ public class Indexer extends SubsystemBase {
   private static final double kFeedPercent = 0.90; 
   private static final double kReverseFeedPercent = -0.90; 
   private static final double kManualVolts = 4.0; 
-  private static final double kFeedRPM = 3000.0;
+  private static final double kFeedRPM = 4000.0;
   private static final double kReverseFeedRPM = -2000.0;
 
   private double appliedKp = Double.NaN;
@@ -116,10 +116,9 @@ public void periodic() {
     updatePidFromDashboard();
   }
 
-  // TODO: review if this works
-  if (getMotorRpm() < 50 && motor.getOutputCurrent() > 25) {
-    runPercent(-0.3);
-  }
+  //if (getMotorRpm() < 50 && motor.getOutputCurrent() > 25) {
+    //runPercent(-0.3);
+  //}
 }
 
   public double getMotorRotations() {
@@ -141,7 +140,7 @@ public void periodic() {
     motor.setVoltage(cmd);
   }
 
-  @SuppressWarnings({ "removal", "unused" })
+  @SuppressWarnings({ "removal" })
   private void applyPid(double kP, double kI, double kD, double kFF) {
     SparkMaxConfig config = new SparkMaxConfig();
     config.closedLoop

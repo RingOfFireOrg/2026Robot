@@ -40,7 +40,7 @@ public class Transfer extends SubsystemBase {
   public Transfer() {
     SparkMaxConfig config = new SparkMaxConfig();
     config.idleMode(IdleMode.kCoast);
-    config.smartCurrentLimit(30);
+    config.smartCurrentLimit(40);
 
     motor.configure(
         config,

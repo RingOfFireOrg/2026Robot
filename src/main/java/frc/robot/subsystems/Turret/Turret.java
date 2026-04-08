@@ -66,7 +66,7 @@ public class Turret extends SubsystemBase {
   private static final double kBottomRpm = 3000.0;
 
   private static final double kShooterMaxVolts = 12.0;
-  private static final double kShooterDefaultKp = 0.12;
+  private static final double kShooterDefaultKp = 0.127;
   private static final double kShooterDefaultKi = 0.0;
   private static final double kShooterDefaultKd = 0.0;
   private static final double kShooterDefaultKv = 0.112;
@@ -138,114 +138,116 @@ public class Turret extends SubsystemBase {
   private double lastCmdDuty = 0.0;
 
   private final SparkClosedLoopController rotController = rotMotor.getClosedLoopController();
-  private static final double kTurretGearRatio = 105.0;
-  private static final double kTurretPosP = 0.2;
-  private static final double kTurretPosI = 0.0;
-  private static final double kTurretPosD = 0.2;
-
-  public Turret() {
-    //rotation motor config
-    SparkMaxConfig rotConfig = new SparkMaxConfig();
-      rotConfig.idleMode(IdleMode.kBrake);
-      rotConfig.inverted(false);
-      rotConfig.smartCurrentLimit(30);
-
-    rotConfig.closedLoop
-      .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-      .pid(kTurretPosP, kTurretPosI, kTurretPosD);
-
-    rotMotor.configure(
-      rotConfig,
-      SparkBase.ResetMode.kResetSafeParameters,
-      SparkBase.PersistMode.kPersistParameters);
-    
-    rotEncoder.setPosition(0.0);
-
-    // shooter motor configs
-    TalonFXConfiguration shooterCfg = new TalonFXConfiguration();
-    TalonFXConfiguration shooter2Cfg = new TalonFXConfiguration();
-
-    Slot0Configs slot0 = new Slot0Configs();
-    slot0.kP = kShooterDefaultKp;
-    slot0.kI = kShooterDefaultKi;
-    slot0.kD = kShooterDefaultKd;
-    slot0.kV = kShooterDefaultKv;
-
-    shooterCfg.Slot0 = slot0;
-    shooter2Cfg.Slot0 = slot0;
-
-    //Angler motor rotConfig
-    SparkMaxConfig anglerCfg = new SparkMaxConfig();
-    anglerCfg.idleMode(IdleMode.kBrake);
-    anglerCfg.inverted(false);
-    anglerCfg.smartCurrentLimit(kAnglerCurrentLimit);
-
-    /*anglerMotor.configure(
-      anglerCfg,
-      SparkBase.ResetMode.kResetSafeParameters,
-      SparkBase.PersistMode.kPersistParameters);
-    
-    eRelativeEncoder.setPosition(0.0);*/
-   
-    //Shooter motor 1 output configs
-    MotorOutputConfigs shooterOut = new MotorOutputConfigs();
-    shooterOut.NeutralMode = NeutralModeValue.Coast;
-    shooterOut.Inverted = InvertedValue.CounterClockwise_Positive;
-    shooterCfg.MotorOutput = shooterOut;
-
-    //Shooter motor 2 output configs
-    MotorOutputConfigs shooterOut2 = new MotorOutputConfigs();
-    shooterOut2.NeutralMode = NeutralModeValue.Coast;
-    shooterOut2.Inverted = InvertedValue.Clockwise_Positive;
-    shooter2Cfg.MotorOutput = shooterOut2;
-
-    //limits for both shooter motors
-    CurrentLimitsConfigs shooterLimits = new CurrentLimitsConfigs();
-    shooterLimits.SupplyCurrentLimitEnable = true;
-    shooterLimits.SupplyCurrentLimit = 30.0;
-    shooterCfg.CurrentLimits = shooterLimits;
-    shooter2Cfg.CurrentLimits = shooterLimits;
-
-    OpenLoopRampsConfigs shooterRamps = new OpenLoopRampsConfigs();
-    shooterRamps.VoltageOpenLoopRampPeriod = 0.10;
-    shooterCfg.OpenLoopRamps = shooterRamps;
-    shooter2Cfg.OpenLoopRamps = shooterRamps;
-
-    shooterMotor.getConfigurator().apply(shooterCfg);
-    shooterMotor2.getConfigurator().apply(shooter2Cfg);
-    initShooterRpmMap();
-    tuningInitialization();
-    applyShooterPid(
-        getShooterKp(),
-        getShooterKi(),
-        getShooterKd(),
-        getShooterKv());
-  }
-
-  // tuningIntialization adds ShuffleBoard widgets used for robot tuning
-  private void tuningInitialization() {
-
-    // Shuffleboard widget updates impact system performance as more variables are added.
-    // Constants.tuningMode needs to be false unless you are tuning.
-    if (Constants.tuningMode) {
-
-      sbTopRpm = shooterTab.add("Top RPM", kTopRpm).getEntry();
-      sbBottomRpm = shooterTab.add("Bottom RPM", kBottomRpm).getEntry();
-      sbShooterKp = shooterTab.add("kP", kShooterDefaultKp).getEntry();
-      sbShooterKi = shooterTab.add("kI", kShooterDefaultKi).getEntry();
-      sbShooterKd = shooterTab.add("kD", kShooterDefaultKd).getEntry();
-      sbShooterKv = shooterTab.add("kV", kShooterDefaultKv).getEntry();
-
-      sbBoostStartErr = shooterTab.add("Boost Start Err RPM", kBoostStartRpmErr).getEntry();
-      sbBoostFullErr = shooterTab.add("Boost Full Err RPM", kBoostFullRpmErr).getEntry();
-      sbBoostMaxVolts = shooterTab.add("Boost Max Volts", kBoostMaxVolts).getEntry();
-
-      sbTurretKp = shooterTab.add("Turret_kP", kTurretKp).getEntry();
-      sbTurretKd = shooterTab.add("Turret_kD", kTurretKd).getEntry();
-      sbTrenchOffset = shooterTab.add("Trench Offset Left", kTrenchOffset).getEntry();
-      sbHubMiddleOffset = shooterTab.add("Hub Middle Tag Offset", kHubMiddleOffset).getEntry();
-      sbHubSideOffset = shooterTab.add("Hub Side Tag Offset", kHubSideOffset).getEntry();
-      sbAutoShoot = shooterTab.add("AutoShoot thing", kAutoShoot).getEntry();
+    private GenericEntry kSbAutoShoot;
+    private static final double kTurretGearRatio = 105.0;
+    private static final double kTurretPosP = 0.2;
+    private static final double kTurretPosI = 0.0;
+    private static final double kTurretPosD = 0.2;
+  
+    public Turret() {
+      //rotation motor config
+      SparkMaxConfig rotConfig = new SparkMaxConfig();
+        rotConfig.idleMode(IdleMode.kBrake);
+        rotConfig.inverted(false);
+        rotConfig.smartCurrentLimit(30);
+  
+      rotConfig.closedLoop
+        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+        .pid(kTurretPosP, kTurretPosI, kTurretPosD);
+  
+      rotMotor.configure(
+        rotConfig,
+        SparkBase.ResetMode.kResetSafeParameters,
+        SparkBase.PersistMode.kPersistParameters);
+      
+      rotEncoder.setPosition(0.0);
+  
+      // shooter motor configs
+      TalonFXConfiguration shooterCfg = new TalonFXConfiguration();
+      TalonFXConfiguration shooter2Cfg = new TalonFXConfiguration();
+  
+      Slot0Configs slot0 = new Slot0Configs();
+      slot0.kP = kShooterDefaultKp;
+      slot0.kI = kShooterDefaultKi;
+      slot0.kD = kShooterDefaultKd;
+      slot0.kV = kShooterDefaultKv;
+  
+      shooterCfg.Slot0 = slot0;
+      shooter2Cfg.Slot0 = slot0;
+  
+      //Angler motor rotConfig
+      SparkMaxConfig anglerCfg = new SparkMaxConfig();
+      anglerCfg.idleMode(IdleMode.kBrake);
+      anglerCfg.inverted(false);
+      anglerCfg.smartCurrentLimit(kAnglerCurrentLimit);
+  
+      /*anglerMotor.configure(
+        anglerCfg,
+        SparkBase.ResetMode.kResetSafeParameters,
+        SparkBase.PersistMode.kPersistParameters);
+      
+      eRelativeEncoder.setPosition(0.0);*/
+     
+      //Shooter motor 1 output configs
+      MotorOutputConfigs shooterOut = new MotorOutputConfigs();
+      shooterOut.NeutralMode = NeutralModeValue.Coast;
+      shooterOut.Inverted = InvertedValue.CounterClockwise_Positive;
+      shooterCfg.MotorOutput = shooterOut;
+  
+      //Shooter motor 2 output configs
+      MotorOutputConfigs shooterOut2 = new MotorOutputConfigs();
+      shooterOut2.NeutralMode = NeutralModeValue.Coast;
+      shooterOut2.Inverted = InvertedValue.Clockwise_Positive;
+      shooter2Cfg.MotorOutput = shooterOut2;
+  
+      //limits for both shooter motors
+      CurrentLimitsConfigs shooterLimits = new CurrentLimitsConfigs();
+      shooterLimits.SupplyCurrentLimitEnable = true;
+      shooterLimits.SupplyCurrentLimit = 30.0;
+      shooterCfg.CurrentLimits = shooterLimits;
+      shooter2Cfg.CurrentLimits = shooterLimits;
+  
+      OpenLoopRampsConfigs shooterRamps = new OpenLoopRampsConfigs();
+      shooterRamps.VoltageOpenLoopRampPeriod = 0.10;
+      shooterCfg.OpenLoopRamps = shooterRamps;
+      shooter2Cfg.OpenLoopRamps = shooterRamps;
+  
+      shooterMotor.getConfigurator().apply(shooterCfg);
+      shooterMotor2.getConfigurator().apply(shooter2Cfg);
+      initShooterRpmMap();
+      tuningInitialization();
+      applyShooterPid(
+          getShooterKp(),
+          getShooterKi(),
+          getShooterKd(),
+          getShooterKv());
+    }
+  
+    // tuningIntialization adds ShuffleBoard widgets used for robot tuning
+    private void tuningInitialization() {
+  
+      // Shuffleboard widget updates impact system performance as more variables are added.
+      // Constants.tuningMode needs to be false unless you are tuning.
+      if (Constants.tuningMode) {
+  
+        sbTopRpm = shooterTab.add("Top RPM", kTopRpm).getEntry();
+        sbBottomRpm = shooterTab.add("Bottom RPM", kBottomRpm).getEntry();
+        sbShooterKp = shooterTab.add("kP", kShooterDefaultKp).getEntry();
+        sbShooterKi = shooterTab.add("kI", kShooterDefaultKi).getEntry();
+        sbShooterKd = shooterTab.add("kD", kShooterDefaultKd).getEntry();
+        sbShooterKv = shooterTab.add("kV", kShooterDefaultKv).getEntry();
+  
+        sbBoostStartErr = shooterTab.add("Boost Start Err RPM", kBoostStartRpmErr).getEntry();
+        sbBoostFullErr = shooterTab.add("Boost Full Err RPM", kBoostFullRpmErr).getEntry();
+        sbBoostMaxVolts = shooterTab.add("Boost Max Volts", kBoostMaxVolts).getEntry();
+  
+        sbTurretKp = shooterTab.add("Turret_kP", kTurretKp).getEntry();
+        sbTurretKd = shooterTab.add("Turret_kD", kTurretKd).getEntry();
+        sbTrenchOffset = shooterTab.add("Trench Offset Left", kTrenchOffset).getEntry();
+        sbHubMiddleOffset = shooterTab.add("Hub Middle Tag Offset", kHubMiddleOffset).getEntry();
+        sbHubSideOffset = shooterTab.add("Hub Side Tag Offset", kHubSideOffset).getEntry();
+        sbAutoShoot = shooterTab.add("AutoShoot thing", 42.75).getEntry();
+        kSbAutoShoot = shooterTab.add("AutoShoot constant", 1990).getEntry();
 
       shooterTab.addNumber("Top Measured RPM", this::getShooterTopMeasuredRpm);
       shooterTab.addNumber("Bottom Measured RPM", this::getShooterBottomMeasuredRpm);

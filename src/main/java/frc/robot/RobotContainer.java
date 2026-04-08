@@ -368,19 +368,16 @@ public class RobotContainer {
             // }
 
             // operator.y().whileTrue(transfer.runPercent(0.6)); //Transfer
-            operator.y().whileTrue(Commands.parallel(indexer.runVelocityRpm(indexer::getFeedRpm),
-                    transfer.runPercent(transfer::getFeedPercent))); // indexer and spindexer up
+            operator.y().whileTrue(Commands.parallel(indexer.runPercent(0.9),
+                    transfer.runPercent(-0.8))); // indexer and spindexer up
+            //operator.y().whileTrue(Commands.parallel(indexer.runVelocityRpm(indexer::getFeedRpm),
+                    //transfer.runPercent(transfer::getFeedPercent))); // indexer and spindexer up
             operator.x().whileTrue(intake.rollersOut()); // Intake
             operator.a().whileTrue(new TurretLock(turret));
             //operator.a().whileTrue(Commands.parallel(transfer.runPercent(transfer::getFeedPercent), indexer.runPercent(indexer::getReversePercent))); //Transfer and indexer out
             //operator.b().whileTrue(intake.rollersIn()); //outtake 
             //operator.b().whileTrue(Commands.parallel(intake.shakeBalls(), intake.rollersOut()));
-            operator.b().whileTrue(
-                Commands.repeatingSequence(
-                    intake.Shake(),
-                    Commands.waitSeconds(0.1),
-                    intake.deployOut(),
-                    Commands.waitSeconds(0.1)));
+            operator.b().toggleOnTrue(turret.runShooterRPM(() -> 1500.0, () -> 1500.0));
 
 
             // operator.povUp().onTrue(hubLock); // reapplys hublock if switched off
@@ -390,7 +387,7 @@ public class RobotContainer {
             operator.povUp().whileTrue(new TurretFindAndLock(turret));
             // Commands.parallel(indexer.runVelocityRpm(indexer::getFeedRpm),transfer.runPercent(0.8),intake.rollersIn()));
             // intake and transfer in, indexer up
-            operator.povDown().whileTrue(Commands.parallel(indexer.runVelocityRpm(indexer::getReverseRpm),
+            operator.povDown().whileTrue(Commands.parallel(indexer.runPercent(-0.8),
                     transfer.runPercent(-0.8), intake.rollersOut()));
             // intake and transfer out, indexer down
             operator.povRight().onTrue(intake.retractIn());// intake comes in
@@ -435,9 +432,11 @@ public class RobotContainer {
 
             climberController.back().whileTrue(turret.goToTurretAngle(0.0));
             climberController.x().whileTrue(turret.goToTurretAngle(-30.0));
-            climberController.b().whileTrue(turret.goToTurretAngle(30.0));
+            //climberController.b().toggleOnTrue(turret.runShooterRPM(1500.0, 1500.0));
+            climberController.b().whileTrue(indexer.runVelocityRpm(indexer::getFeedRpm));
             climberController.rightBumper().whileTrue(Commands.runOnce(() -> turret.zeroTurret(), turret));
             climberController.rightTrigger().toggleOnTrue(turret.runShooterRPM(turret::getDashboardTopRpm, turret::getDashboardBottomRpm));
+            
 
             /*
              * EXAMPLE FROM 2025 ^

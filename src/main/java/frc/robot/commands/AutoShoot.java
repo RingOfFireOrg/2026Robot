@@ -16,7 +16,7 @@ public class AutoShoot extends Command {
   private Turret turret;
 
   private final double limelightMountAngle = 15;//change ts
-  private final double limelightLensHeight = 20;
+  private final double limelightLensHeight = 21;
   private final double hubTagHeight = 44.5;
 
   public AutoShoot(Turret turret) {
@@ -42,8 +42,8 @@ public class AutoShoot extends Command {
       return;
     }
     double distance = (hubTagHeight - limelightLensHeight) / Math.tan(angleToGoal);
-    //double shooterRPM = (distance*92.5)+1990;//change ts
-    double shooterRPM = (distance*turret.getAutoShoot())+turret.getAutoShoot();
+    double shooterRPM = (distance*92.5)+1990;//change ts
+    //double shooterRPM = (distance*turret.getAutoShoot())+turret.getAutoShoot();
     System.out.println("ty=" + verticalOffset + " distance=" + distance + " shooterRPM=" + shooterRPM);
     turret.setShooterRPM(-shooterRPM, shooterRPM);
     System.out.println(

@@ -231,7 +231,7 @@ public class Intake extends SubsystemBase {
 
 public Command rollersOut() {
   return runEnd(
-      () -> setRollerPercent(0.6),
+      () -> setRollerPercent(-0.6),
         //-Math.abs(sbRollersOutPercent.getDouble(0.35))),
       this::stopRollers
    );

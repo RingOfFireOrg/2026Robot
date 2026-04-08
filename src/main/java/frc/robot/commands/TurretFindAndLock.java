@@ -39,10 +39,7 @@ public class TurretFindAndLock extends Command {
   @Override
   public void execute() {
     if (!locked) {
-      if (hasValidHubTag()) {
-        locked = true;
-        turretLock.initialize();
-      } else {
+      if(!LimelightHelpers.getTV(LimelightFrontName)) {
         double angle = turret.getTurretAngleDeg();
 
         if (angle >= kSearchMaxAngleDeg) {
@@ -55,13 +52,6 @@ public class TurretFindAndLock extends Command {
         return;
       }
     }
-
-    if (!hasValidHubTag()) {
-      locked = false;
-      turret.stopTurret();
-      return;
-    }
-
     turretLock.execute();
   }
 

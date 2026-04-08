@@ -368,10 +368,10 @@ public class RobotContainer {
             // }
 
             // operator.y().whileTrue(transfer.runPercent(0.6)); //Transfer
-            operator.y().whileTrue(Commands.parallel(indexer.runPercent(0.8),
+            operator.y().whileTrue(Commands.parallel(indexer.runPercent(0.9),
                     transfer.runPercent(-0.8))); // indexer and spindexer up
-            operator.y().whileTrue(Commands.parallel(indexer.runVelocityRpm(indexer::getFeedRpm),
-                    transfer.runPercent(transfer::getFeedPercent))); // indexer and spindexer up
+            //operator.y().whileTrue(Commands.parallel(indexer.runVelocityRpm(indexer::getFeedRpm),
+                    //transfer.runPercent(transfer::getFeedPercent))); // indexer and spindexer up
             operator.x().whileTrue(intake.rollersOut()); // Intake
             operator.a().whileTrue(new TurretLock(turret));
             //operator.a().whileTrue(Commands.parallel(transfer.runPercent(transfer::getFeedPercent), indexer.runPercent(indexer::getReversePercent))); //Transfer and indexer out
@@ -433,6 +433,7 @@ public class RobotContainer {
             climberController.back().whileTrue(turret.goToTurretAngle(0.0));
             climberController.x().whileTrue(turret.goToTurretAngle(-30.0));
             //climberController.b().toggleOnTrue(turret.runShooterRPM(1500.0, 1500.0));
+            climberController.b().whileTrue(indexer.runVelocityRpm(indexer::getFeedRpm));
             climberController.rightBumper().whileTrue(Commands.runOnce(() -> turret.zeroTurret(), turret));
             climberController.rightTrigger().toggleOnTrue(turret.runShooterRPM(turret::getDashboardTopRpm, turret::getDashboardBottomRpm));
             

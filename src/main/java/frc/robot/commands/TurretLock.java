@@ -125,7 +125,7 @@ public class TurretLock extends Command {
     double output = turretPID.calculate(desiredTx);
     output = MathUtil.clamp(output, -0.20, 0.20);
 
-    System.out.println("desiredTx=" + desiredTx + " output=" + output);
+    //System.out.println("desiredTx=" + desiredTx + " output=" + output);
 
     if (Math.abs(desiredTx) < 5.0) {
       turretPID.reset();

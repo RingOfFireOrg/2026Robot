@@ -11,8 +11,8 @@ public class Ballin {
 
   public static Command create(Turret turret, Indexer indexer, Transfer transfer, Intake intake) {
 
-    double topRPM = -2775;
-    double bottomRPM = 2775;
+    double topRPM = -3500;
+    double bottomRPM = 3500;
     return Commands.sequence(
 
         Commands.runOnce(() -> turret.setShooterRPM(topRPM, bottomRPM), turret),

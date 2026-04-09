@@ -267,7 +267,7 @@ public class RobotContainer {
         double standardSpeed = 0.8;
         double turnSpeed = 0.5;
 
-        turret.setDefaultCommand(new TurretFindAndLock(turret));
+        turret.setDefaultCommand(new TurretLock(turret));
 
         drive.setDefaultCommand(DriveCommands.joystickDrive(
                 drive,

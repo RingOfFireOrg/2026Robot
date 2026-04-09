@@ -6,7 +6,6 @@ package frc.robot.commands;
 
 import static frc.robot.subsystems.vision.VisionConstants.LimelightFrontName;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Turret.Turret;
 import frc.robot.util.LimelightHelpers;
@@ -87,6 +86,63 @@ public class TurretLock extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+  /*
+    double offset = 0;
+    switch ((int)LimelightHelpers.getFiducialID(LimelightFrontName)) {
+      case 24:
+        offset = turret.getHubSideOffset(); // change ts
+        break;
+      case 25:
+        offset = turret.getHubMiddleOffset(); // change ts
+        break;
+      case 27:
+        offset = -turret.getHubSideOffset(); // change ts
+        break;
+      case 23: 
+        offset = turret.getTrenchOffset(); // change ts
+        break;
+      case 28: 
+        offset = -turret.getTrenchOffset(); // change ts
+        break;
+      case 8:
+        offset = turret.getHubSideOffset(); // change ts
+        break;
+      case 9:
+        offset = turret.getHubMiddleOffset(); // change ts
+        break;
+      case 11:
+        offset = -turret.getHubSideOffset(); // change ts
+        break;
+      case 7: 
+        offset = turret.getTrenchOffset(); // change ts
+        break;
+      case 12: 
+        offset = -turret.getTrenchOffset(); // change ts;
+        break;
+      default:
+        break;
+    }
+    double tx = LimelightHelpers.getTX(LimelightFrontName);
+
+    if (LimelightHelpers.getTV(LimelightFrontName)
+    && (int) LimelightHelpers.getFiducialID(LimelightFrontName) == 26) {
+      //double output = turretPID.calculate(
+          //LimelightHelpers.getTX(LimelightFrontName));
+      double output = turretPID.calculate(tx - offset, 0.0);
+      System.out.println("tx" + tx + "Turret PID output: " + output);
+      //if (output > 1) output = 1;
+      //if (output < -1) output = -1;
+      output = MathUtil.clamp(output, -0.20, 0.20);
+      if (Math.abs(tx - offset) < 1.0) {
+        turret.stopTurret();
+        return;
+      }
+      turret.setDutyCycle(output); 
+    } else {
+      turret.stopTurret();
+    }
+  } */
+
   if (!LimelightHelpers.getTV(LimelightFrontName)) {
     turretPID.reset();
     turret.stopTurret();
@@ -119,20 +175,20 @@ public class TurretLock extends Command {
       int id = (int) LimelightHelpers.getFiducialID(LimelightFrontName);
       double tx = LimelightHelpers.getTX(LimelightFrontName);
       double offset = getSingleTagOffset(id);
-      desiredTx = (tx - offset);
+      desiredTx = (tx - offset)+12;
     }
 
     double output = turretPID.calculate(desiredTx);
     output = MathUtil.clamp(output, -0.20, 0.20);
 
-    //System.out.println("desiredTx=" + desiredTx + " output=" + output);
+    System.out.println("desiredTx=" + desiredTx + " output=" + output);
 
-    if (Math.abs(desiredTx) < 5.0) {
+    if (Math.abs(desiredTx) < 8.0) {
       turretPID.reset();
       turret.stopTurret();
       return;
     }
-    if (Math.abs(output) < 0.1) {
+    if (Math.abs(output) < 0.2) {
       turretPID.reset();
       turret.stopTurret();
       return;

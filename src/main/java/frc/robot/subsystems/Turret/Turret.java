@@ -66,7 +66,7 @@ public class Turret extends SubsystemBase {
   private static final double kBottomRpm = 3000.0;
 
   private static final double kShooterMaxVolts = 12.0;
-  private static final double kShooterDefaultKp = 0.127;
+  private static final double kShooterDefaultKp = 0.15;
   private static final double kShooterDefaultKi = 0.0;
   private static final double kShooterDefaultKd = 0.0;
   private static final double kShooterDefaultKv = 0.112;
@@ -126,8 +126,8 @@ public class Turret extends SubsystemBase {
   
 
   private static final boolean kEnableSoftLimits = true;
-  private static final double kMinTurretDeg = -80.0;
-  private static final double kMaxTurretDeg = 80.0;
+  private static final double kMinTurretDeg = -90.0;
+  private static final double kMaxTurretDeg = 90.0;
   private static final double kTurretToleranceDeg = 2.0;
 
   private static final double kDeadband = 0.02;
